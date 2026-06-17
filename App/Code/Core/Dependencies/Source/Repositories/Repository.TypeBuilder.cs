@@ -39,7 +39,83 @@ public static partial class Repository
 
     private static void CreateRepositoryProperties(TypeBuilder typeBuilder, Type repositoryType)
     {
-        // TODO: Build
+        const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public;
+
+        foreach (var property in repositoryType.GetProperties(flags))
+        {
+            var propertyType = property.PropertyType;
+
+            // backing field: _<PropertyName>
+            var fieldBuilder = typeBuilder.DefineField(
+                $"_{property.Name}",
+                propertyType,
+                FieldAttributes.Private
+            );
+
+            // define property
+            var propertyBuilder = typeBuilder.DefineProperty(
+                property.Name,
+                PropertyAttributes.None,
+                propertyType,
+                Type.EmptyTypes
+            );
+
+            // GETTER
+            if (property.CanRead)
+            {
+                var getMethod = typeBuilder.DefineMethod(
+                    $"get_{property.Name}",
+                    MethodAttributes.Public |
+                    MethodAttributes.Virtual |
+                    MethodAttributes.SpecialName |
+                    MethodAttributes.HideBySig,
+                    propertyType,
+                    Type.EmptyTypes
+                );
+
+                var il = getMethod.GetILGenerator();
+
+                il.Emit(OpCodes.Ldarg_0);
+                il.Emit(OpCodes.Ldfld, fieldBuilder);
+                il.Emit(OpCodes.Ret);
+
+                propertyBuilder.SetGetMethod(getMethod);
+
+                // ensure interface mapping
+                typeBuilder.DefineMethodOverride(
+                    getMethod,
+                    property.GetGetMethod()!
+                );
+            }
+
+            // SETTER
+            if (property.CanWrite)
+            {
+                var setMethod = typeBuilder.DefineMethod(
+                    $"set_{property.Name}",
+                    MethodAttributes.Public |
+                    MethodAttributes.Virtual |
+                    MethodAttributes.SpecialName |
+                    MethodAttributes.HideBySig,
+                    null,
+                    new[] { propertyType }
+                );
+
+                var il = setMethod.GetILGenerator();
+
+                il.Emit(OpCodes.Ldarg_0);
+                il.Emit(OpCodes.Ldarg_1);
+                il.Emit(OpCodes.Stfld, fieldBuilder);
+                il.Emit(OpCodes.Ret);
+
+                propertyBuilder.SetSetMethod(setMethod);
+
+                typeBuilder.DefineMethodOverride(
+                    setMethod,
+                    property.GetSetMethod()!
+                );
+            }
+        }
     }
 
     private static void CreateRepositoryMethods(TypeBuilder typeBuilder, Type repositoryType)
