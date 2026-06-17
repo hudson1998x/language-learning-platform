@@ -1,5 +1,7 @@
 using System.Collections.Concurrent;
 using System.Reflection;
+using LLE.Dependencies.Events;
+using LLE.Dependencies.Utils;
 
 namespace LLE.Dependencies.Providers
 {
@@ -56,6 +58,10 @@ namespace LLE.Dependencies.Providers
             {
                 throw new InvalidOperationException("No empty constructor found");
             }
+
+            AsyncUtils.Await(
+                Eventing.Eventing.Of<DiscoveryEvents>().Provider.DispatchAsync(type)
+            );
 
             var instanced = constructor.Invoke(Array.Empty<object>());
             Providers.TryAdd(type, instanced);
