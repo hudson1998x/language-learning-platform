@@ -12,5 +12,5 @@ public class DiscoveryEvents : EventTable
     
     public readonly EventCollection<Type> Provider = new();
     
-    public readonly EventCollection<Type> Repository = new();
+    public readonly EventCollection<(Type, object)> Repository = new();
 }
