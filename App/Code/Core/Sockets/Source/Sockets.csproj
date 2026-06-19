@@ -4,12 +4,15 @@
         <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <RootNamespace>LLE.ModelGateway</RootNamespace>
-        <AssemblyName>LLE.ModelGateway</AssemblyName>
+        <RootNamespace>LLE.Sockets</RootNamespace>
     </PropertyGroup>
-
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
     <ItemGroup>
       <ProjectReference Include="..\..\Dependencies\Source\Dependencies.csproj" />
+      <ProjectReference Include="..\..\Eventing\Source\Eventing.csproj" />
+      <ProjectReference Include="..\..\SharedUtils\Source\SharedUtils.csproj" />
     </ItemGroup>
 
 </Project>

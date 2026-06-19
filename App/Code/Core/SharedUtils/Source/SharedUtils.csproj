@@ -4,12 +4,7 @@
         <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <RootNamespace>LLE.Dependencies</RootNamespace>
-        <AssemblyName>LLE.Dependencies</AssemblyName>
+        <RootNamespace>LLE.SharedUtils</RootNamespace>
     </PropertyGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\..\Eventing\Source\Eventing.csproj" />
-    </ItemGroup>
 
 </Project>

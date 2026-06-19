@@ -1,3 +1,18 @@
-﻿// See https://aka.ms/new-console-template for more information
+﻿
+using LLE.Sockets;
 
-Console.WriteLine("Hello, World!");
+namespace LLE.Application
+{
+    public static class Program
+    {
+        public static async Task Main(string[] args)
+        {
+
+
+            var webServer = new HttpSocket(8080);
+            await webServer.StartAsync();
+            
+            await webServer.ListenAsync();
+        }
+    }
+}

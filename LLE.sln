@@ -18,6 +18,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "App\Code\Core\Conf
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Frontend", "App\Code\Core\Frontend\Source\Frontend.csproj", "{F9641876-4CA2-421C-909B-3875DEF35CE3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sockets", "App\Code\Core\Sockets\Source\Sockets.csproj", "{359FAF34-2050-4313-BB27-8DDF0D4596E3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedUtils", "App\Code\Core\SharedUtils\Source\SharedUtils.csproj", "{FB391216-EE86-4A36-9590-4C08387E57B3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -60,5 +64,13 @@ Global
 		{F9641876-4CA2-421C-909B-3875DEF35CE3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F9641876-4CA2-421C-909B-3875DEF35CE3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F9641876-4CA2-421C-909B-3875DEF35CE3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{359FAF34-2050-4313-BB27-8DDF0D4596E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{359FAF34-2050-4313-BB27-8DDF0D4596E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{359FAF34-2050-4313-BB27-8DDF0D4596E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{359FAF34-2050-4313-BB27-8DDF0D4596E3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FB391216-EE86-4A36-9590-4C08387E57B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB391216-EE86-4A36-9590-4C08387E57B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB391216-EE86-4A36-9590-4C08387E57B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB391216-EE86-4A36-9590-4C08387E57B3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
