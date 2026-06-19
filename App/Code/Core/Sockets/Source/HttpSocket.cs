@@ -18,7 +18,7 @@ namespace LLE.Sockets
     /// and call <c>listen.UseHttps(...)</c> on the dispatched <see cref="Microsoft.AspNetCore.Server.Kestrel.Core.ListenOptions"/>.
     /// </remarks>
     /// <param name="httpPort">The port to listen on.</param>
-    public sealed class HttpSocket(
+    public sealed partial class HttpSocket(
         int httpPort)
         : IAsyncDisposable
     {
@@ -76,6 +76,8 @@ namespace LLE.Sockets
             await app.StartAsync(cancellationToken);
 
             _application = app;
+
+            await Eventing.Eventing.Of<HttpSocketEvents>().Ready.DispatchAsync(this);
         }
 
         public async Task ListenAsync(CancellationToken cancellationToken = default)

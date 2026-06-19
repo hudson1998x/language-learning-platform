@@ -12,6 +12,7 @@
     <ItemGroup>
       <ProjectReference Include="..\..\Dependencies\Source\Dependencies.csproj" />
       <ProjectReference Include="..\..\Eventing\Source\Eventing.csproj" />
+      <ProjectReference Include="..\..\Kernel\Source\Kernel.csproj" />
       <ProjectReference Include="..\..\SharedUtils\Source\SharedUtils.csproj" />
     </ItemGroup>
 

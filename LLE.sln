@@ -6,21 +6,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eventing", "App\Code\Core\E
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "App\Code\Core\Eventing\Tests\Tests.csproj", "{26DB4F90-83D3-4E0A-9C72-771FFCD954FE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModelGateway", "App\Code\Core\ModelGateway\Source\ModelGateway.csproj", "{01C6A653-A9D0-4BA6-AD8E-E2C570DBF0FE}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dependencies", "App\Code\Core\Dependencies\Source\Dependencies.csproj", "{AAB315CE-3482-430E-A8E9-CFFBB8F5095F}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "App\Code\Core\ModelGateway\Tests\Tests.csproj", "{0B80290D-05CA-416C-AA84-0A4FADF279DE}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Configuration", "App\Code\Core\Configuration\Source\Configuration.csproj", "{80C1AA49-1247-4355-BFA8-8D17425D7FB5}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "App\Code\Core\Configuration\Tests\Tests.csproj", "{21BEADCC-9084-49B7-BB30-1F4150DCA2C4}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Frontend", "App\Code\Core\Frontend\Source\Frontend.csproj", "{F9641876-4CA2-421C-909B-3875DEF35CE3}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sockets", "App\Code\Core\Sockets\Source\Sockets.csproj", "{359FAF34-2050-4313-BB27-8DDF0D4596E3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedUtils", "App\Code\Core\SharedUtils\Source\SharedUtils.csproj", "{FB391216-EE86-4A36-9590-4C08387E57B3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kernel", "App\Code\Core\Kernel\Source\Kernel.csproj", "{655C75B8-CEF1-4827-901B-F47A73073203}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -72,5 +62,9 @@ Global
 		{FB391216-EE86-4A36-9590-4C08387E57B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FB391216-EE86-4A36-9590-4C08387E57B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FB391216-EE86-4A36-9590-4C08387E57B3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{655C75B8-CEF1-4827-901B-F47A73073203}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{655C75B8-CEF1-4827-901B-F47A73073203}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{655C75B8-CEF1-4827-901B-F47A73073203}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{655C75B8-CEF1-4827-901B-F47A73073203}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
