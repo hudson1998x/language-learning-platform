@@ -10,7 +10,7 @@ namespace LLE.Dependencies.Utils;
 /// Prefer asynchronous code paths where possible. Blocking on tasks can reduce
 /// scalability and may introduce deadlock risks if used incorrectly.
 /// </summary>
-internal static class AsyncUtils
+public static class AsyncUtils
 {
     /// <summary>
     /// Blocks the current thread until the specified task completes and returns
@@ -28,7 +28,7 @@ internal static class AsyncUtils
     /// <returns>
     /// The completed task result.
     /// </returns>
-    internal static T Await<T>(Task<T> t)
+    public static T Await<T>(Task<T> t)
     {
         t.Wait();
         return t.Result;

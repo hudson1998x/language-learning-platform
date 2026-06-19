@@ -7,4 +7,14 @@
         <RootNamespace>LLE.Frontend</RootNamespace>
     </PropertyGroup>
 
+    <ItemGroup>
+      <Folder Include="Services\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\Configuration\Source\Configuration.csproj" />
+      <ProjectReference Include="..\..\Dependencies\Source\Dependencies.csproj" />
+      <ProjectReference Include="..\..\Eventing\Source\Eventing.csproj" />
+    </ItemGroup>
+
 </Project>

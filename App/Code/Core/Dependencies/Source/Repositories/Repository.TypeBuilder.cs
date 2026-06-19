@@ -28,7 +28,7 @@ public static partial class Repository
 
         // now to build out methods, props etc...
         CreateRepositoryProperties(typeBuilder, repositoryType);
-        CreateRepositoryMethods(typeBuilder, repositoryType);
+        CreateRepositoryMethods(typeBuilder, repositoryType, entityType);
         
         // will throw if missing interface implementations.
         var createdType = typeBuilder.CreateType() ?? throw new InvalidOperationException($"Failed to create proxy class for {repositoryType.Name}");
@@ -118,8 +118,21 @@ public static partial class Repository
         }
     }
 
-    private static void CreateRepositoryMethods(TypeBuilder typeBuilder, Type repositoryType)
+    private static void CreateRepositoryMethods(TypeBuilder typeBuilder, Type repositoryType, Type entityType)
     {
+        CreateRepositoryBasicCrudMethods(typeBuilder, entityType);
+        
         // TODO: Build
+        foreach (var method in repositoryType.GetMethods())
+        {
+            
+        }
+    }
+
+    private static void CreateRepositoryBasicCrudMethods(TypeBuilder typeBuilder, Type entityType)
+    {
+        // create, update, delete, list, find. 
+        
+        
     }
 }
