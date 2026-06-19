@@ -15,6 +15,7 @@ namespace LLE.Application
                 async (controllers) =>
                 {
                     await StartServer(controllers);
+                    return controllers;
                 }
             );
             
