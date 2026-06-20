@@ -171,6 +171,8 @@ namespace LLE.Kernel.DataQL.Tokeniser
                             ? TokenKind.Not
                         : span.Equals("in".AsSpan(), StringComparison.OrdinalIgnoreCase)
                             ? TokenKind.In
+                        : span.Equals("like".AsSpan(), StringComparison.OrdinalIgnoreCase)
+                            ? TokenKind.Like
                         : TokenKind.Identifier;
 
                     tokens.Add(new Token(kind, start)

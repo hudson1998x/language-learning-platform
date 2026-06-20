@@ -70,12 +70,47 @@ internal sealed class SqliteQueryBuilder : IAstVisitor<SqlQueryResult>
         return new SqlQueryResult(sql, [.. _parameters]);
     }
 
+    public SqlQueryResult Visit(LogicalNode node)
+    {
+        _paramIndex = 0;
+        _parameters.Clear();
+
+        var sql = BuildLogicalClause(node);
+        return new SqlQueryResult(sql, [.. _parameters]);
+    }
+
+    public SqlQueryResult Visit(UnaryNode node)
+    {
+        _paramIndex = 0;
+        _parameters.Clear();
+
+        var sql = BuildUnaryClause(node);
+        return new SqlQueryResult(sql, [.. _parameters]);
+    }
+
     private string BuildWhereClause(AstNode node)
     {
-        if (node is FilterNode filter)
-            return BuildFilterClause(filter);
+        return node switch
+        {
+            FilterNode filter => BuildFilterClause(filter),
+            LogicalNode logical => BuildLogicalClause(logical),
+            UnaryNode unary => BuildUnaryClause(unary),
+            _ => node.Accept(this).Sql
+        };
+    }
 
-        return node.Accept(this).Sql;
+    private string BuildLogicalClause(LogicalNode node)
+    {
+        var left = BuildWhereClause(node.Left);
+        var op = node.Operator == LogicalOperator.And ? "AND" : "OR";
+        var right = BuildWhereClause(node.Right);
+        return $"({left} {op} {right})";
+    }
+
+    private string BuildUnaryClause(UnaryNode node)
+    {
+        var operand = BuildWhereClause(node.Operand);
+        return $"NOT ({operand})";
     }
 
     private string BuildFilterClause(FilterNode node)

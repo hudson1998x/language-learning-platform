@@ -2168,9 +2168,9 @@
                   if ("string" === typeof entry.name) {
                     var JSCompiler_temp_const = info;
                     a: {
-                      var name = entry.name, env = entry.env, location = entry.debugLocation;
-                      if (null != location) {
-                        var childStack = formatOwnerStack(location), idx = childStack.lastIndexOf("\n"), lastLine = -1 === idx ? childStack : childStack.slice(idx + 1);
+                      var name = entry.name, env = entry.env, location2 = entry.debugLocation;
+                      if (null != location2) {
+                        var childStack = formatOwnerStack(location2), idx = childStack.lastIndexOf("\n"), lastLine = -1 === idx ? childStack : childStack.slice(idx + 1);
                         if (-1 !== lastLine.indexOf(name)) {
                           var JSCompiler_inline_result = "\n" + lastLine;
                           break a;
@@ -21763,6 +21763,20 @@
   var import_react4 = __toESM(require_react(), 1);
 
   // App/Api/auth.ts
+  var userLogin = (payload) => {
+    return fetch("/api/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    }).then((response) => {
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+      return response.json();
+    });
+  };
   var userState = () => {
     return fetch("/api/auth/state", {
       method: "GET"
@@ -21820,9 +21834,100 @@
   };
 
   // App/Design/React/Themes/Frontend/Local/Default/DefaultPages/SignIn/index.tsx
+  var import_react5 = __toESM(require_react(), 1);
   var import_jsx_runtime4 = __toESM(require_jsx_runtime(), 1);
   var AppSignin = () => {
-    return /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "lle-signin-page" });
+    const [email, setEmail] = (0, import_react5.useState)("");
+    const [password, setPassword] = (0, import_react5.useState)("");
+    const [showPassword, setShowPassword] = (0, import_react5.useState)(false);
+    const [isSubmitting, setIsSubmitting] = (0, import_react5.useState)(false);
+    const [error, setError] = (0, import_react5.useState)("");
+    const handleSubmit = (e) => {
+      e.preventDefault();
+      setError("");
+      if (!email || !password) {
+        setError("Enter your email and password to continue.");
+        return;
+      }
+      setIsSubmitting(true);
+      userLogin({ email, password }).then((response) => {
+        if (response.success) {
+          location.reload();
+        } else {
+          setError(response.message);
+        }
+        setIsSubmitting(false);
+      }).catch((error2) => {
+        setIsSubmitting(false);
+        setError(error2.message);
+      });
+    };
+    return /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "lle-signin-page", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "lle-signin-page__card", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("h1", { className: "lle-signin-page__title", children: "Sign in" }),
+      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("p", { className: "lle-signin-page__subtitle", children: "Enter your details to continue" }),
+      error && /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(import_jsx_runtime4.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "lle-signin-page__form-error", role: "alert", children: error }),
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("br", {})
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("form", { className: "lle-signin-page__form", onSubmit: handleSubmit, noValidate: true, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "lle-signin-page__form-field", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("label", { className: "lle-signin-page__form-label", htmlFor: "email", children: "Email" }),
+          /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+            "input",
+            {
+              id: "email",
+              name: "email",
+              type: "email",
+              className: "lle-signin-page__form-input",
+              placeholder: "you@example.com",
+              autoComplete: "email",
+              value: email,
+              onChange: (e) => setEmail(e.target.value)
+            }
+          )
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "lle-signin-page__form-field", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "lle-signin-page__form-label-row", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("label", { className: "lle-signin-page__form-label", htmlFor: "password", children: "Password" }),
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("a", { className: "lle-signin-page__form-link", href: "#forgot-password", children: "Forgot password?" })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "lle-signin-page__form-input-wrap", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+              "input",
+              {
+                id: "password",
+                name: "password",
+                type: showPassword ? "text" : "password",
+                className: "lle-signin-page__form-input",
+                placeholder: "Enter your password",
+                autoComplete: "current-password",
+                value: password,
+                onChange: (e) => setPassword(e.target.value)
+              }
+            ),
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+              "button",
+              {
+                type: "button",
+                className: "lle-signin-page__form-toggle",
+                onClick: () => setShowPassword((v) => !v),
+                "aria-label": showPassword ? "Hide password" : "Show password",
+                children: showPassword ? "Hide" : "Show"
+              }
+            )
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+          "button",
+          {
+            type: "submit",
+            className: "lle-signin-page__form-submit",
+            disabled: isSubmitting,
+            children: isSubmitting ? "Signing in\u2026" : "Sign in"
+          }
+        )
+      ] })
+    ] }) });
   };
 
   // App/Design/React/Themes/Frontend/Local/Default/index.tsx

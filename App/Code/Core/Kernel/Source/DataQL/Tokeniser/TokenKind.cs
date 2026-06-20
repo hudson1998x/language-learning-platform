@@ -16,6 +16,7 @@ namespace LLE.Kernel.DataQL.Tokeniser
         Not,            // not
 
         In,             // in
+        Like,           // like
 
         OpenParen,      // (
         CloseParen,     // )

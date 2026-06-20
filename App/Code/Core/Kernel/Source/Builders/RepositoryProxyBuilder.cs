@@ -1,8 +1,10 @@
+using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 using LLE.Kernel.Contracts;
 using LLE.Kernel.DataQL.Ast;
 using LLE.Kernel.DataQL.Attributes;
+using LLE.Kernel.DataQL.Tokeniser;
 
 namespace LLE.Kernel.Builders;
 
@@ -642,11 +644,42 @@ public static class RepositoryProxyBuilder
         // Push adapter onto stack first
         il.Emit(OpCodes.Ldloc, adapterLocal);
 
-        // node = AstParser.Parse(entityType, query)
-        il.Emit(OpCodes.Ldtoken, entityType);
-        il.Emit(OpCodes.Call, GetTypeFromHandleMethod);
-        il.Emit(OpCodes.Ldstr, query);
-        il.Emit(OpCodes.Call, AstParserParseMethod);
+        // Determine which method parameters map to :paramName tokens in the query
+        var paramBindings = FindQueryParameterBindings(query, method);
+
+        if (paramBindings.Count > 0)
+        {
+            // var dict = new Dictionary<string, object?>();
+            var dictLocal = il.DeclareLocal(typeof(Dictionary<string, object?>));
+            il.Emit(OpCodes.Newobj, DictionaryStringObjectCtor);
+            il.Emit(OpCodes.Stloc, dictLocal);
+
+            foreach (var (paramName, argIndex, paramType) in paramBindings)
+            {
+                // dict.Add(paramName, arg)
+                il.Emit(OpCodes.Ldloc, dictLocal);
+                il.Emit(OpCodes.Ldstr, paramName);
+                EmitLoadArg(il, argIndex);
+                if (paramType.IsValueType)
+                    il.Emit(OpCodes.Box, paramType);
+                il.Emit(OpCodes.Callvirt, DictionaryStringObjectAdd);
+            }
+
+            // node = AstParser.Parse(entityType, query, dict)
+            il.Emit(OpCodes.Ldtoken, entityType);
+            il.Emit(OpCodes.Call, GetTypeFromHandleMethod);
+            il.Emit(OpCodes.Ldstr, query);
+            il.Emit(OpCodes.Ldloc, dictLocal);
+            il.Emit(OpCodes.Call, AstParserParseWithParamsMethod);
+        }
+        else
+        {
+            // node = AstParser.Parse(entityType, query)
+            il.Emit(OpCodes.Ldtoken, entityType);
+            il.Emit(OpCodes.Call, GetTypeFromHandleMethod);
+            il.Emit(OpCodes.Ldstr, query);
+            il.Emit(OpCodes.Call, AstParserParseMethod);
+        }
 
         // node.OperationKind = OperationKind.Read
         il.Emit(OpCodes.Dup);
@@ -666,6 +699,58 @@ public static class RepositoryProxyBuilder
 
         il.Emit(OpCodes.Call, ExecuteAsyncMethod.MakeGenericMethod(resultType));
         il.Emit(OpCodes.Ret);
+    }
+
+    /// <summary>
+    /// Finds all <c>:paramName</c> tokens in <paramref name="query"/> and matches them to
+    /// method parameters on <paramref name="method"/> by name. Returns the binding info needed
+    /// to emit IL that builds a parameter dictionary at runtime.
+    /// </summary>
+    private static List<(string paramName, int argIndex, Type paramType)> FindQueryParameterBindings(
+        string query, MethodInfo method)
+    {
+        var tokens = TokenArrayBuilder.Parse(query);
+        var methodParams = method.GetParameters();
+        var bindings = new List<(string, int, Type)>();
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var token in tokens)
+        {
+            if (token.Kind != TokenKind.Parameter)
+                continue;
+
+            var name = query.Substring(token.StartPosition, token.Length);
+
+            if (!seen.Add(name))
+                continue;
+
+            for (var i = 0; i < methodParams.Length; i++)
+            {
+                if (methodParams[i].Name is { } paramName &&
+                    paramName.Equals(name, StringComparison.OrdinalIgnoreCase))
+                {
+                    bindings.Add((name, i + 1, methodParams[i].ParameterType));
+                    break;
+                }
+            }
+        }
+
+        return bindings;
+    }
+
+    /// <summary>
+    /// Emits the appropriate <c>ldarg</c> opcode for the given argument index.
+    /// </summary>
+    private static void EmitLoadArg(ILGenerator il, int index)
+    {
+        switch (index)
+        {
+            case 0: il.Emit(OpCodes.Ldarg_0); break;
+            case 1: il.Emit(OpCodes.Ldarg_1); break;
+            case 2: il.Emit(OpCodes.Ldarg_2); break;
+            case 3: il.Emit(OpCodes.Ldarg_3); break;
+            default: il.Emit(OpCodes.Ldarg_S, (byte)index); break;
+        }
     }
 
     // --- Cached reflection handles used during IL emission ---
@@ -692,7 +777,25 @@ public static class RepositoryProxyBuilder
     private static readonly MethodInfo AstParserParseMethod =
         typeof(AstParser).GetMethod(
             nameof(AstParser.Parse),
-            BindingFlags.Public | BindingFlags.Static)!;
+            BindingFlags.Public | BindingFlags.Static,
+            null,
+            [typeof(Type), typeof(string)],
+            null)!;
+
+    private static readonly MethodInfo AstParserParseWithParamsMethod =
+        typeof(AstParser).GetMethod(
+            nameof(AstParser.Parse),
+            BindingFlags.Public | BindingFlags.Static,
+            null,
+            [typeof(Type), typeof(string), typeof(IReadOnlyDictionary<string, object?>)],
+            null)!;
+
+    // --- Dictionary<string, object?> ---
+    private static readonly ConstructorInfo DictionaryStringObjectCtor =
+        typeof(Dictionary<string, object?>).GetConstructor(Type.EmptyTypes)!;
+
+    private static readonly MethodInfo DictionaryStringObjectAdd =
+        typeof(Dictionary<string, object?>).GetMethod("Add", [typeof(string), typeof(object)])!;
 
     // --- AstNode ---
     private static readonly MethodInfo AstNodeSetOperationKind =

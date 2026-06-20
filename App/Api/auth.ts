@@ -33,8 +33,18 @@ export const userLogin = (payload: LoginBody): Promise<LoginResponse> => {
     });
 };
 
+export interface Role {
+    key: string;
+    name: string;
+    description: string;
+    id: string;
+    createTime: string;
+    updateTime: string;
+}
+
 export interface UserAuthStateResponse {
     user?: User | null;
+    role?: Role | null;
     success: boolean;
     message: string;
 }
