@@ -33,28 +33,28 @@ public class ReactFrontendModule : IModuleLoader
                 tsconfig.CompilerOptions.Jsx = JsxMode.ReactJsx;
                 tsconfig.CompilerOptions.Paths.TryAdd(
                     "@component/*", [
-                        "./App/Design/React/Components/Community/*",
+                        "./App/Design/React/Local/Community/*",
                         "./App/Design/React/Components/Community/*",
                         "./App/Design/React/Components/Core/*",
                     ]
                 );
                 tsconfig.CompilerOptions.Paths.TryAdd(
                     "@hook/*", [
-                        "./Design/React/Hooks/Community/*",
+                        "./Design/React/Hooks/Local/*",
                         "./Design/React/Hooks/Community/*",
                         "./Design/React/Hooks/Core/*",
                     ]
                 );
                 tsconfig.CompilerOptions.Paths.TryAdd(
                     "@theme:admin/*", [
-                        "./App/Design/React/Themes/Admin/Community/*",
+                        "./App/Design/React/Themes/Admin/Local/*",
                         "./App/Design/React/Themes/Admin/Community/*",
                         "./App/Design/React/Themes/Admin/Core/*",
                     ]
                 );
                 tsconfig.CompilerOptions.Paths.TryAdd(
                     "@theme:frontend/*", [
-                        "./App/Design/React/Themes/Frontend/Community/*",
+                        "./App/Design/React/Themes/Frontend/Local/*",
                         "./App/Design/React/Themes/Frontend/Community/*",
                         "./App/Design/React/Themes/Frontend/Core/*",
                     ]

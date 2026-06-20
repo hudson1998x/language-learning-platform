@@ -21759,12 +21759,12 @@
     return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(import_jsx_runtime2.Fragment, { children: renderNode(children) });
   };
 
-  // App/Design/React/Themes/Frontend/Core/Default/index.tsx
+  // App/Design/React/Themes/Frontend/Local/Default/index.tsx
   var import_jsx_runtime3 = __toESM(require_jsx_runtime(), 1);
-  var DefaultTheme = (props) => {
-    return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "frontend-default-theme", children: props.children });
+  var LLETheme = (props) => {
+    return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("p", { children: "Loads with precedence!" });
   };
-  var Default_default = DefaultTheme;
+  var Default_default = LLETheme;
 
   // App/Design/React/Themes/Admin/Core/Default/index.tsx
   var import_jsx_runtime4 = __toESM(require_jsx_runtime(), 1);
