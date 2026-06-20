@@ -1,5 +1,6 @@
 using LLE.Frontend;
 using LLE.Kernel;
+using LLE.TypeScript;
 
 namespace LLE.Application;
 
@@ -12,6 +13,7 @@ public static class ModuleRegistry
         // here
         // ============================
         ApplicationLoader.AddModule(new FrontendModule());
+        ApplicationLoader.AddModule(new TypeScriptModule());
         
         // ============================
         // Add Local Modules here

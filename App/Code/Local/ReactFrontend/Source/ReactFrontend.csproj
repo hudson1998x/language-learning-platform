@@ -10,6 +10,7 @@
     <ItemGroup>
       <ProjectReference Include="..\..\..\Core\Frontend\Source\Frontend.csproj" />
       <ProjectReference Include="..\..\..\Core\Kernel\Source\Kernel.csproj" />
+      <ProjectReference Include="..\..\..\Core\TypeScript\Source\TypeScript.csproj" />
     </ItemGroup>
 
 </Project>

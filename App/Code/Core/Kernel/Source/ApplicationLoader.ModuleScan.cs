@@ -1,6 +1,6 @@
 using LLE.Kernel.Attributes;
+using LLE.Kernel.Contracts;
 using LLE.Kernel.Registry;
-using Source.Contracts;
 
 namespace LLE.Kernel;
 

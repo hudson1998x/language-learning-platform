@@ -1,4 +1,4 @@
-namespace Source.Contracts;
+namespace LLE.Kernel.Contracts;
 
 /// <summary>
 /// Defines a lifecycle contract for a modular plugin/module system.

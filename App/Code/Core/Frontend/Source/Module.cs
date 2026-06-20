@@ -1,9 +1,9 @@
 using LLE.Frontend.Builders;
+using LLE.Kernel.Contracts;
 using LLE.Sockets.Events;
 using LLE.UiIR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using Source.Contracts;
 
 namespace LLE.Frontend;
 
@@ -50,7 +50,7 @@ public class FrontendModule : IModuleLoader
                 if (is404)
                 {
                     rootVNode.AddChild(
-                        VNode.Create("UI/Text", new Dictionary<string, object>
+                        VNode.Create("@component/Text", new Dictionary<string, object>
                         {
                             ["Text"] = "Page not found: " + context.Request.Path
                         })
@@ -59,7 +59,7 @@ public class FrontendModule : IModuleLoader
                 else
                 {
                     rootVNode.AddChild(
-                        VNode.Create("UI/Text", new Dictionary<string, object>
+                        VNode.Create("@component/Text", new Dictionary<string, object>
                         {
                             ["Text"] = "Homepage"
                         })

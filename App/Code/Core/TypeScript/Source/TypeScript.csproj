@@ -7,4 +7,9 @@
         <RootNamespace>LLE.TypeScript</RootNamespace>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\..\Eventing\Source\Eventing.csproj" />
+      <ProjectReference Include="..\..\Kernel\Source\Kernel.csproj" />
+    </ItemGroup>
+
 </Project>

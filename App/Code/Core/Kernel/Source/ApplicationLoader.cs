@@ -1,8 +1,8 @@
 using System.Collections.Concurrent;
 using System.Text.Json;
+using LLE.Kernel.Contracts;
 using LLE.Kernel.Events;
 using LLE.Kernel.Registry;
-using Source.Contracts;
 
 namespace LLE.Kernel;
 

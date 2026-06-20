@@ -6,5 +6,9 @@
   "LLE.Frontend.FrontendModule": {
     "IsEnabled": true,
     "IsInstalled": true
+  },
+  "LLE.TypeScript.TypeScriptModule": {
+    "IsEnabled": true,
+    "IsInstalled": true
   }
 }

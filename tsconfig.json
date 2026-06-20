@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "allowJs": true,
+    "paths": {
+      "@component/*": [
+        "./Design/React/Components/Local/*",
+        "./Design/React/Components/Community/*",
+        "./Design/React/Components/Core/*"
+      ],
+      "@hook/*": [
+        "./Design/React/Hooks/Local/*",
+        "./Design/React/Hooks/Community/*",
+        "./Design/React/Hooks/Core/*"
+      ],
+      "@theme:admin/*": [
+        "./Design/React/Themes/Admin/Local/*",
+        "./Design/React/Themes/Admin/Community/*",
+        "./Design/React/Themes/Admin/Core/*"
+      ],
+      "@theme:frontend/*": [
+        "./Design/React/Themes/Frontend/Local/*",
+        "./Design/React/Themes/Frontend/Community/*",
+        "./Design/React/Themes/Frontend/Core/*"
+      ]
+    }
+  },
+  "include": [],
+  "exclude": []
+}
