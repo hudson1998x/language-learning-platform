@@ -24,15 +24,8 @@ public static partial class ApplicationLoader
             {
                 switch (attribute)
                 {
-                    case ControllerAttribute:
-                        ControllerCatalog.GetController(type);
-                        break;
                     case RepositoryAttribute:
                         RepositoryCatalog.GetRepository(type);
-                        break;
-                    case ManagerAttribute:
-                        // load it into the manager catalog.
-                        ManagerCatalog.GetManager(type);
                         break;
                     case ServiceAttribute:
                         ServiceCatalog.GetService(type);

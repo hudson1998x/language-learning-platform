@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Reflection;
 using LLE.Kernel.Attributes;
+using LLE.Kernel.Builders;
 
 namespace LLE.Kernel.Registry;
 
@@ -75,7 +76,6 @@ internal static class RepositoryCatalog
     /// </summary>
     private static object CreateRepositoryProxy(Type repositoryType)
     {
-        throw new NotImplementedException(
-            $"Repository proxy generation not implemented for '{repositoryType.FullName}'.");
+        return RepositoryProxyBuilder.BuildProxyRepository(repositoryType);
     }
 }

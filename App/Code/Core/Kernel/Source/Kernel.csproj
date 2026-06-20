@@ -6,7 +6,10 @@
         <Nullable>enable</Nullable>
         <RootNamespace>LLE.Kernel</RootNamespace>
     </PropertyGroup>
-
+    
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
     <ItemGroup>
       <ProjectReference Include="..\..\Eventing\Source\Eventing.csproj" />
     </ItemGroup>

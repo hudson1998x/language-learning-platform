@@ -58,7 +58,6 @@ public static partial class ApplicationLoader
             enabledModules.Select(m => m.AppStart()));
         
         // at this point, all modules are loaded.
-        await Eventing.Eventing.Of<ControllerEventTable>().ControllersMounted.DispatchAsync(ControllerCatalog.GetInstances());
     }
 
     public static async Task StopLifecycle()

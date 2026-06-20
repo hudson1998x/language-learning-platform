@@ -24,7 +24,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TypeScript", "App\Code\Core
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommunityModuleRegistry", "App\Code\Community\CommunityModuleRegistry\Source\CommunityModuleRegistry.csproj", "{16D3BE6F-0E98-4E59-AED6-7E63C62A5F80}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Auth", "App\Code\Core\Auth\Source\Auth.csproj", "{BB92B302-12BA-472A-A5D9-BBBA68DD86EA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Auth", "App\Code\Core\Auth\Source\Auth.csproj", "{56899090-3624-4F7F-BBF0-D6E64E77DE4B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -108,5 +108,9 @@ Global
 		{BB92B302-12BA-472A-A5D9-BBBA68DD86EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BB92B302-12BA-472A-A5D9-BBBA68DD86EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BB92B302-12BA-472A-A5D9-BBBA68DD86EA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{56899090-3624-4F7F-BBF0-D6E64E77DE4B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{56899090-3624-4F7F-BBF0-D6E64E77DE4B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{56899090-3624-4F7F-BBF0-D6E64E77DE4B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{56899090-3624-4F7F-BBF0-D6E64E77DE4B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

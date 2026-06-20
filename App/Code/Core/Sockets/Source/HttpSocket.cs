@@ -43,6 +43,8 @@ namespace LLE.Sockets
                 throw new InvalidOperationException(
                     "Server already started.");
             }
+            
+            SubscribeToFeatures();
 
             var builder = WebApplication.CreateBuilder();
 
@@ -76,6 +78,8 @@ namespace LLE.Sockets
             await app.StartAsync(cancellationToken);
 
             _application = app;
+            
+            FlushPendingFeatures(app);
 
             await Eventing.Eventing.Of<HttpSocketEvents>().Ready.DispatchAsync(this);
         }

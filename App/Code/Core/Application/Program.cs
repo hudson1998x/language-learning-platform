@@ -10,23 +10,16 @@ namespace LLE.Application
         {
             // load all core modules
             ModuleRegistry.AddModules();
-
-            Eventing.Eventing.Of<ControllerEventTable>().ControllersMounted.Concurrent(
-                async (controllers) =>
-                {
-                    await StartServer(controllers);
-                    return controllers;
-                }
-            );
             
             // start the module lifecycle.
             await ApplicationLoader.StartLifecycle();
+
+            await StartServer();
         }
-        private static async Task StartServer(object[] controllers)
+        private static async Task StartServer()
         {
             var webServer = new HttpSocket(8080);
             await webServer.StartAsync();
-            webServer.LoadControllers(controllers);
             
             await webServer.ListenAsync();
         }

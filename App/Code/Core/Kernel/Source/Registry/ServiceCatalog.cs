@@ -10,7 +10,7 @@ namespace LLE.Kernel.Registry;
 /// Services represent business logic units and may depend on repositories only.
 /// They must NOT depend on other services.
 /// </summary>
-internal static class ServiceCatalog
+public static class ServiceCatalog
 {
     private static readonly ConcurrentDictionary<Type, object> Services = [];
 
@@ -85,4 +85,6 @@ internal static class ServiceCatalog
 
         return instance;
     }
+    
+    public static T GetService<T>() => (T)GetService(typeof(T));
 }

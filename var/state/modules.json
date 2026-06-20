@@ -7,6 +7,10 @@
     "IsEnabled": true,
     "IsInstalled": true
   },
+  "LLE.Auth.AuthModule": {
+    "IsEnabled": true,
+    "IsInstalled": true
+  },
   "LLE.TypeScript.TypeScriptModule": {
     "IsEnabled": true,
     "IsInstalled": true

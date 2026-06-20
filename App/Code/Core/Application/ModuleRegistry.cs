@@ -1,3 +1,4 @@
+using LLE.Auth;
 using LLE.Frontend;
 using LLE.Kernel;
 using LLE.LocalAppRegistry;
@@ -15,6 +16,7 @@ public static class ModuleRegistry
         // ============================
         ApplicationLoader.AddModule(new FrontendModule());
         ApplicationLoader.AddModule(new TypeScriptModule());
+        ApplicationLoader.AddModule(new AuthModule());
         
         // ============================
         // Community Modules
