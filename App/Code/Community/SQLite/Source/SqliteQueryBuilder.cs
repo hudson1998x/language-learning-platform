@@ -162,6 +162,6 @@ internal sealed class SqliteQueryBuilder : IAstVisitor<SqlQueryResult>
 
         var props = payload.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);
         return (props.Select(static p => p.Name).ToList(),
-                props.Select(static p => p.GetValue(p)).ToList());
+                props.Select(p => p.GetValue(payload)).ToList());
     }
 }

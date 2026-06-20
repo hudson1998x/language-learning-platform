@@ -1,9 +1,10 @@
-import {FC, PropsWithChildren} from "react";
+import {FC, PropsWithChildren, useState} from "react";
 import { SessionProvider, useSession } from '@hook/session-provider'
 import { AppSignin } from './DefaultPages/SignIn'
+import { AppRegister } from './DefaultPages/SignUp'
 
 const LLEThemeWrapper: FC<PropsWithChildren> = (props) => {
-    
+
     return (
         <SessionProvider>
             <LLETheme {...props}/>
@@ -11,18 +12,34 @@ const LLEThemeWrapper: FC<PropsWithChildren> = (props) => {
     )
 }
 
+enum AuthPage
+{
+    SignIn,
+    Register,
+    Recovery
+}
+
 const LLETheme: FC<PropsWithChildren> = (props) => {
+
+    const { session } = useSession();
+    const [page, setPage] = useState<AuthPage>(AuthPage.SignIn)
     
-    const { user, role } = useSession();
-    
-    if (!user)
+    if (!session?.user)
     {
         // show a login UI.
-        return (
-            <AppSignin />
-        )
+        if (page == AuthPage.SignIn) {
+            return (
+                <AppSignin onSwitchToRegister={() => setPage(AuthPage.Register)} />
+            )
+        }
+
+        if (page == AuthPage.Register) {
+            return (
+                <AppRegister onSwitchToSignIn={() => setPage(AuthPage.SignIn)} />
+            )
+        }
     }
-    
+
     return (
         <div className={'lle-default-theme'}>
             

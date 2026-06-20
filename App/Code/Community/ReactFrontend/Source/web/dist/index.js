@@ -21759,6 +21759,9 @@
     return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(import_jsx_runtime2.Fragment, { children: renderNode(children) });
   };
 
+  // App/Design/React/Themes/Frontend/Local/Default/index.tsx
+  var import_react7 = __toESM(require_react(), 1);
+
   // App/Design/React/Hooks/Core/session-provider.tsx
   var import_react4 = __toESM(require_react(), 1);
 
@@ -21780,6 +21783,20 @@
   var userState = () => {
     return fetch("/api/auth/state", {
       method: "GET"
+    }).then((response) => {
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+      return response.json();
+    });
+  };
+  var register2 = (payload) => {
+    return fetch("/api/auth/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
     }).then((response) => {
       if (!response.ok) {
         throw new Error(`Request failed with status ${response.status}`);
@@ -21836,7 +21853,7 @@
   // App/Design/React/Themes/Frontend/Local/Default/DefaultPages/SignIn/index.tsx
   var import_react5 = __toESM(require_react(), 1);
   var import_jsx_runtime4 = __toESM(require_jsx_runtime(), 1);
-  var AppSignin = () => {
+  var AppSignin = ({ onSwitchToRegister }) => {
     const [email, setEmail] = (0, import_react5.useState)("");
     const [password, setPassword] = (0, import_react5.useState)("");
     const [showPassword, setShowPassword] = (0, import_react5.useState)(false);
@@ -21926,41 +21943,201 @@
             children: isSubmitting ? "Signing in\u2026" : "Sign in"
           }
         )
+      ] }),
+      onSwitchToRegister && /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("p", { className: "lle-signin-page__footer", children: [
+        "Don't have an account?",
+        " ",
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+          "button",
+          {
+            type: "button",
+            className: "lle-signin-page__footer-link",
+            onClick: onSwitchToRegister,
+            children: "Create one"
+          }
+        )
+      ] })
+    ] }) });
+  };
+
+  // App/Design/React/Themes/Frontend/Local/Default/DefaultPages/SignUp/index.tsx
+  var import_react6 = __toESM(require_react(), 1);
+  var import_jsx_runtime5 = __toESM(require_jsx_runtime(), 1);
+  var AppRegister = ({ onSwitchToSignIn }) => {
+    const [email, setEmail] = (0, import_react6.useState)("");
+    const [password, setPassword] = (0, import_react6.useState)("");
+    const [confirmPassword, setConfirmPassword] = (0, import_react6.useState)("");
+    const [showPassword, setShowPassword] = (0, import_react6.useState)(false);
+    const [isSubmitting, setIsSubmitting] = (0, import_react6.useState)(false);
+    const [error, setError] = (0, import_react6.useState)("");
+    const [success, setSuccess] = (0, import_react6.useState)(false);
+    const handleSubmit = (e) => {
+      e.preventDefault();
+      setError("");
+      if (!email || !password || !confirmPassword) {
+        setError("Fill in every field to create an account.");
+        return;
+      }
+      if (password !== confirmPassword) {
+        setError("Passwords do not match.");
+        return;
+      }
+      setIsSubmitting(true);
+      register2({ email, password, confirmPassword }).then((response) => {
+        if (!response.success) {
+          setError(response.message || "Could not create your account.");
+          return;
+        }
+        setSuccess(true);
+      }).catch(() => {
+        setError("Something went wrong. Check your connection and try again.");
+      }).finally(() => {
+        setIsSubmitting(false);
+      });
+    };
+    if (success) {
+      return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "lle-register-page", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "lle-register-page__card", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("h1", { className: "lle-register-page__title", children: "Account created" }),
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("p", { className: "lle-register-page__subtitle", children: "You can now sign in with your new account." }),
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+          "button",
+          {
+            type: "button",
+            className: "lle-register-page__form-submit",
+            onClick: onSwitchToSignIn,
+            children: "Go to sign in"
+          }
+        )
+      ] }) });
+    }
+    return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "lle-register-page", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "lle-register-page__card", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("h1", { className: "lle-register-page__title", children: "Create account" }),
+      /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("p", { className: "lle-register-page__subtitle", children: "Enter your details to get started" }),
+      /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("form", { className: "lle-register-page__form", onSubmit: handleSubmit, noValidate: true, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "lle-register-page__form-field", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("label", { className: "lle-register-page__form-label", htmlFor: "email", children: "Email" }),
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+            "input",
+            {
+              id: "email",
+              name: "email",
+              type: "email",
+              className: "lle-register-page__form-input",
+              placeholder: "you@example.com",
+              autoComplete: "email",
+              value: email,
+              onChange: (e) => setEmail(e.target.value)
+            }
+          )
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "lle-register-page__form-field", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("label", { className: "lle-register-page__form-label", htmlFor: "password", children: "Password" }),
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "lle-register-page__form-input-wrap", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+              "input",
+              {
+                id: "password",
+                name: "password",
+                type: showPassword ? "text" : "password",
+                className: "lle-register-page__form-input",
+                placeholder: "Create a password",
+                autoComplete: "new-password",
+                value: password,
+                onChange: (e) => setPassword(e.target.value)
+              }
+            ),
+            /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+              "button",
+              {
+                type: "button",
+                className: "lle-register-page__form-toggle",
+                onClick: () => setShowPassword((v) => !v),
+                "aria-label": showPassword ? "Hide password" : "Show password",
+                children: showPassword ? "Hide" : "Show"
+              }
+            )
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "lle-register-page__form-field", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("label", { className: "lle-register-page__form-label", htmlFor: "confirmPassword", children: "Confirm password" }),
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+            "input",
+            {
+              id: "confirmPassword",
+              name: "confirmPassword",
+              type: showPassword ? "text" : "password",
+              className: "lle-register-page__form-input",
+              placeholder: "Re-enter your password",
+              autoComplete: "new-password",
+              value: confirmPassword,
+              onChange: (e) => setConfirmPassword(e.target.value)
+            }
+          )
+        ] }),
+        error && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "lle-register-page__form-error", role: "alert", children: error }),
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+          "button",
+          {
+            type: "submit",
+            className: "lle-register-page__form-submit",
+            disabled: isSubmitting,
+            children: isSubmitting ? "Creating account\u2026" : "Create account"
+          }
+        )
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("p", { className: "lle-register-page__footer", children: [
+        "Already have an account?",
+        " ",
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+          "button",
+          {
+            type: "button",
+            className: "lle-register-page__footer-link",
+            onClick: onSwitchToSignIn,
+            children: "Sign in"
+          }
+        )
       ] })
     ] }) });
   };
 
   // App/Design/React/Themes/Frontend/Local/Default/index.tsx
-  var import_jsx_runtime5 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime6 = __toESM(require_jsx_runtime(), 1);
   var LLEThemeWrapper = (props) => {
-    return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(SessionProvider, { children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(LLETheme, { ...props }) });
+    return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(SessionProvider, { children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(LLETheme, { ...props }) });
   };
   var LLETheme = (props) => {
-    const { user, role } = useSession();
-    if (!user) {
-      return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(AppSignin, {});
+    const { session } = useSession();
+    const [page, setPage] = (0, import_react7.useState)(0 /* SignIn */);
+    if (!session?.user) {
+      if (page == 0 /* SignIn */) {
+        return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(AppSignin, { onSwitchToRegister: () => setPage(1 /* Register */) });
+      }
+      if (page == 1 /* Register */) {
+        return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(AppRegister, { onSwitchToSignIn: () => setPage(0 /* SignIn */) });
+      }
     }
-    return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "lle-default-theme" });
+    return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "lle-default-theme" });
   };
   var Default_default = LLEThemeWrapper;
 
   // App/Design/React/Themes/Admin/Core/Default/index.tsx
-  var import_jsx_runtime6 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime7 = __toESM(require_jsx_runtime(), 1);
 
   // App/Design/React/Components/Core/Text/index.tsx
-  var import_jsx_runtime7 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime8 = __toESM(require_jsx_runtime(), 1);
   var Text = (props) => {
-    return /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("p", { children: props.text });
+    return /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("p", { children: props.text });
   };
 
   // App/Code/Community/ReactFrontend/Source/web/generated.registry.tsx
   register("@component/Text", Text);
 
   // App/Code/Community/ReactFrontend/Source/web/index.tsx
-  var import_jsx_runtime8 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime9 = __toESM(require_jsx_runtime(), 1);
   var root = (0, import_client.createRoot)(document.getElementById("app"));
   root.render(
-    /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Default_default, { children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Canvas, { children: window.canvasState }) })
+    /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Default_default, { children: /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Canvas, { children: window.canvasState }) })
   );
 })();
 /*! Bundled license information:

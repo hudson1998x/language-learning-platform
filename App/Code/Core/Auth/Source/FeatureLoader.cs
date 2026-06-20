@@ -40,6 +40,25 @@ namespace LLE.Auth
                     
                 }
             });
+            FeatureRegistry.Add(new Feature<RegisterBody, RegisterResponse>()
+            {
+                FeatureName = "register",
+                FeatureGroup = "auth",
+                Route = "/api/auth/register",
+                Method = HttpMethod.Post,
+                Handler = UserFeatures.Register,
+                Catch = new Dictionary<Type, FeatureExceptionRule<RegisterResponse>>()
+                {
+                    [typeof(RegistrationException)] = new FeatureExceptionRule<RegisterResponse>()
+                    {
+                        Map = (exception) => new RegisterResponse()
+                        {
+                            Success = false,
+                            Message = exception.Message
+                        }
+                    }
+                }
+            });
         }
     }
 }

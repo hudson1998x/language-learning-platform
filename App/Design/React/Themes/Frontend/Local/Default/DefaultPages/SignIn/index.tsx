@@ -2,7 +2,11 @@ import { useState, FormEvent } from 'react'
 import './style.scss'
 import { userLogin } from '@api/auth'
 
-export const AppSignin = () => {
+export interface AppSigninProps {
+    onSwitchToRegister?: () => void
+}
+
+export const AppSignin = ({ onSwitchToRegister }: AppSigninProps) => {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [showPassword, setShowPassword] = useState(false)
@@ -28,13 +32,13 @@ export const AppSignin = () => {
             else {
                 setError(response.message)
             }
-            
+
             setIsSubmitting(false)
         })
-        .catch(error => {
-            setIsSubmitting(false)
-            setError(error.message)
-        })
+            .catch(error => {
+                setIsSubmitting(false)
+                setError(error.message)
+            })
     }
 
     return (
@@ -111,6 +115,19 @@ export const AppSignin = () => {
                         {isSubmitting ? 'Signing in…' : 'Sign in'}
                     </button>
                 </form>
+
+                {onSwitchToRegister && (
+                    <p className={'lle-signin-page__footer'}>
+                        Don't have an account?{' '}
+                        <button
+                            type={'button'}
+                            className={'lle-signin-page__footer-link'}
+                            onClick={onSwitchToRegister}
+                        >
+                            Create one
+                        </button>
+                    </p>
+                )}
             </div>
         </div>
     )

@@ -17,10 +17,12 @@ public class SQLiteAdapter : IDatabaseAdapter
             return;
 
         var tableName = entityType.Name;
-        var columns = new List<string>
-        {
-            "[Id] TEXT NOT NULL PRIMARY KEY"
-        };
+
+        using var conn = GetConnection();
+        conn.Open();
+
+        // Step 1: create the table with the full current schema (no-op if already exists)
+        var columns = new List<string> { "[Id] TEXT NOT NULL PRIMARY KEY" };
 
         foreach (var prop in entityType.GetProperties(BindingFlags.Public | BindingFlags.Instance))
         {
@@ -31,12 +33,70 @@ public class SQLiteAdapter : IDatabaseAdapter
             columns.Add($"[{prop.Name}] {colType}{(notNull ? " NOT NULL" : " NULL")}");
         }
 
-        var sql = $"CREATE TABLE IF NOT EXISTS [{tableName}] (\n  {string.Join(",\n  ", columns)}\n);";
+        using (var cmd = new SqliteCommand(
+            $"CREATE TABLE IF NOT EXISTS [{tableName}] (\n  {string.Join(",\n  ", columns)}\n);", conn))
+        {
+            cmd.ExecuteNonQuery();
+        }
 
-        using var conn = GetConnection();
-        conn.Open();
-        using var cmd = new SqliteCommand(sql, conn);
-        cmd.ExecuteNonQuery();
+        // Step 2: sync — add any columns that exist on the entity but not yet in the table.
+        // This handles the case where the table was created by an earlier version of the entity class.
+        var existingColumns = GetExistingColumnNames(conn, tableName);
+
+        foreach (var prop in entityType.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+        {
+            if (existingColumns.Contains(prop.Name))
+                continue;
+
+            var (colType, notNull) = ResolveColumnType(prop.PropertyType);
+            var colDef = $"[{prop.Name}] {colType}";
+
+            if (notNull)
+            {
+                colDef += " NOT NULL";
+                colDef += $" DEFAULT {GetDefaultValue(prop.PropertyType)}";
+            }
+            else
+            {
+                colDef += " NULL";
+            }
+
+            using var alterCmd = new SqliteCommand(
+                $"ALTER TABLE [{tableName}] ADD COLUMN {colDef};", conn);
+            alterCmd.ExecuteNonQuery();
+        }
+    }
+
+    private static HashSet<string> GetExistingColumnNames(SqliteConnection conn, string tableName)
+    {
+        var columns = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        using var cmd = new SqliteCommand($"PRAGMA table_info([{tableName}]);", conn);
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+            columns.Add(reader.GetString(1));
+        return columns;
+    }
+
+    private static string GetDefaultValue(Type type)
+    {
+        var underlying = Nullable.GetUnderlyingType(type);
+        if (underlying is not null)
+            return "NULL";
+
+        if (type.IsEnum)
+            return "0";
+
+        return Type.GetTypeCode(type) switch
+        {
+            TypeCode.Boolean => "0",
+            TypeCode.Byte or TypeCode.Int16 or TypeCode.UInt16
+                or TypeCode.Int32 or TypeCode.UInt32
+                or TypeCode.Int64 or TypeCode.UInt64 or TypeCode.SByte => "0",
+            TypeCode.Single or TypeCode.Double or TypeCode.Decimal => "0",
+            TypeCode.String or TypeCode.Char => "''",
+            TypeCode.DateTime => "'0001-01-01T00:00:00'",
+            _ => type == typeof(Guid) ? $"'{Guid.Empty}'" : "''"
+        };
     }
 
     public async Task<object> ExecuteQuery(AstNode node)

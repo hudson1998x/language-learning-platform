@@ -1,5 +1,7 @@
 using LLE.Auth.Dto;
+using LLE.Auth.Exceptions;
 using LLE.Auth.Features.Users;
+using LLE.Auth.Utilities;
 using LLE.Kernel.Registry;
 using Microsoft.AspNetCore.Http;
 
@@ -34,13 +36,38 @@ public static class UserFeatures
     {
         var userService = ServiceCatalog.GetService<UserService>();
         
-        
+        var currentUser = await userService.GetCurrentUser(context);
         
         return new()
         {
             Success = true,
             Message = "Endpoint okay",
-            User = await userService.GetCurrentUser(context)
+            User = currentUser
+        };
+    }
+
+    public static async ValueTask<RegisterResponse> Register(RegisterBody body, HttpContext context)
+    {
+        var userService = ServiceCatalog.GetService<UserService>();
+
+        if (body.Password != body.ConfirmPassword)
+        {
+            throw new RegistrationException("The passwords do not match");
+        }
+
+        var user = new User()
+        {
+            Email = body.Email,
+            Password = PasswordHasher.Hash(body.Password),
+        };
+
+        user = await userService.RegisterUser(context, user);
+
+        return new RegisterResponse()
+        {
+            Success = true,
+            Message = "Endpoint okay",
+            User = user
         };
     }
 }
