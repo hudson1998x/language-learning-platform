@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../global.scss"],
+  "sourcesContent": ["html, body\n{\n  min-width: 100vw;\n  min-height: 100vh;\n  padding: 0;\n}"],
+  "mappings": ";AAAA;AAAA;AAEE,aAAA;AACA,cAAA;AACA,WAAA;;",
+  "names": []
+}
