@@ -10,6 +10,7 @@ public class HtmlBuilder
     private string _pageTitle = string.Empty;
     private readonly List<string> _scripts = [];
     private readonly List<string> _css = [];
+    private readonly List<string> _htmlSnippets = [];
 
     private HtmlBuilder()
     {
@@ -21,6 +22,11 @@ public class HtmlBuilder
         var builder = new HtmlBuilder();
         await builder.Initialize();
         return builder;
+    }
+
+    public void AddSnippet(string snippet)
+    {
+        _htmlSnippets.Add(snippet);
     }
 
     public async Task Initialize()
@@ -76,6 +82,11 @@ public class HtmlBuilder
         stringBuilder.Append("<body>");
         
         await Eventing.Eventing.Of<HtmlBuilderEvents>().Body.DispatchAsync(stringBuilder);
+        
+        foreach (var htmlSnippet in _htmlSnippets)
+        {
+            stringBuilder.Append(htmlSnippet);
+        }
         
         foreach (var script in _scripts)
         {

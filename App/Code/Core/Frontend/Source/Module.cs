@@ -1,5 +1,6 @@
 using LLE.Frontend.Builders;
 using LLE.Sockets.Events;
+using LLE.UiIR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Source.Contracts;
@@ -41,8 +42,35 @@ public class FrontendModule : IModuleLoader
     {
         context.Response.StatusCode = 200;
         context.Response.ContentType = "text/html";
-
-        var builder = await HtmlBuilder.Create();
+        
+        // creates a canvas.
+        var builder = await CanvasBuilder.CreateHtmlBuilder(
+            async (rootVNode) =>
+            {
+                if (is404)
+                {
+                    rootVNode.AddChild(
+                        VNode.Create("UI/Text", new Dictionary<string, object>
+                        {
+                            ["Text"] = "Page not found: " + context.Request.Path
+                        })
+                    );   
+                }
+                else
+                {
+                    rootVNode.AddChild(
+                        VNode.Create("UI/Text", new Dictionary<string, object>
+                        {
+                            ["Text"] = "Homepage"
+                        })
+                    );   
+                }
+                
+                return rootVNode;
+            }    
+        );
+        
+        
 
         // TODO: Instead of Untitled, put something more useful, potentially
         //  a configuration thing.

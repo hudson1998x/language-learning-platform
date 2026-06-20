@@ -11,5 +11,6 @@
       <ProjectReference Include="..\..\Eventing\Source\Eventing.csproj" />
       <ProjectReference Include="..\..\Kernel\Source\Kernel.csproj" />
       <ProjectReference Include="..\..\Sockets\Source\Sockets.csproj" />
+      <ProjectReference Include="..\..\UiIR\Source\UiIR.csproj" />
     </ItemGroup>
 </Project>

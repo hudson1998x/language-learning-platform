@@ -18,6 +18,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LocalAppRegistry", "App\Cod
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReactFrontend", "App\Code\Local\ReactFrontend\Source\ReactFrontend.csproj", "{D0BA3DE6-9A43-42FA-82B4-AEAF4C6C9973}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UiIR", "App\Code\Core\UiIR\Source\UiIR.csproj", "{E6222DFD-E5B4-4FEC-B786-9BD1AB8076AA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TypeScript", "App\Code\Core\TypeScript\Source\TypeScript.csproj", "{FBD4F8FB-955C-47A0-8FAD-0DB17AA42A34}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -84,5 +88,13 @@ Global
 		{D0BA3DE6-9A43-42FA-82B4-AEAF4C6C9973}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D0BA3DE6-9A43-42FA-82B4-AEAF4C6C9973}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D0BA3DE6-9A43-42FA-82B4-AEAF4C6C9973}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E6222DFD-E5B4-4FEC-B786-9BD1AB8076AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E6222DFD-E5B4-4FEC-B786-9BD1AB8076AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E6222DFD-E5B4-4FEC-B786-9BD1AB8076AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E6222DFD-E5B4-4FEC-B786-9BD1AB8076AA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FBD4F8FB-955C-47A0-8FAD-0DB17AA42A34}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FBD4F8FB-955C-47A0-8FAD-0DB17AA42A34}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FBD4F8FB-955C-47A0-8FAD-0DB17AA42A34}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FBD4F8FB-955C-47A0-8FAD-0DB17AA42A34}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
