@@ -1,14 +1,16 @@
 import { createRoot } from 'react-dom/client'
 import {Canvas, CanvasNode} from "./canvas";
 import './global.scss'
-import './generated.registry'
+import { FrontendTheme, AdminTheme } from './generated.registry'
 
 const root = createRoot(document.getElementById('app'));
 
 root.render(
-    <Canvas>
-        {window.canvasState}   
-    </Canvas>
+    <FrontendTheme>
+        <Canvas>
+            {window.canvasState}   
+        </Canvas>
+    </FrontendTheme>
 )
 
 declare global {

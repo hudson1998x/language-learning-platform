@@ -1,4 +1,6 @@
 using System.Text;
+using LLE.Kernel.Registry;
+using LLE.ReactFrontend.Configurations;
 
 namespace LLE.ReactFrontend.Generators
 {
@@ -76,6 +78,14 @@ namespace LLE.ReactFrontend.Generators
             sb.AppendLine("// Run the component registry generator to regenerate.");
             sb.AppendLine();
             sb.AppendLine("import { register } from './registry'");
+            
+            // import the theme.
+            var theme = ConfigurationCatalog.GetConfiguration<ThemeConfiguration>();
+
+            sb.AppendLine($"import FrontendTheme from '@theme:frontend/{theme.FrontendTheme}'");
+            sb.AppendLine($"import AdminTheme from '@theme:admin/{theme.BackendTheme}'");
+            sb.AppendLine("export { FrontendTheme, AdminTheme } ");
+            
             sb.AppendLine();
 
             foreach (var component in components)
