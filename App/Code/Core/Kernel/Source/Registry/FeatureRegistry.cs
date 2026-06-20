@@ -41,6 +41,16 @@ public static class FeatureRegistry
 public class Feature<TInput, TOutput>
 {
     /// <summary>
+    /// A unique name to identify the feature, this can be used for source generators and documentation
+    /// </summary>
+    public required string FeatureName { get; init; }
+    
+    /// <summary>
+    /// A group this feature belongs to, this can be used for source generators and documentation
+    /// </summary>
+    public required string FeatureGroup { get; init; }
+    
+    /// <summary>
     /// The route at which this feature is invoked (e.g. an endpoint path or command name).
     /// </summary>
     public required string Route { get; init; }
@@ -98,7 +108,9 @@ public record FeatureDefinition(
     Type InputType,
     Type OutputType,
     Func<object, HttpContext, ValueTask<object>> Executor,
-    Dictionary<Type, FeatureExceptionRule<object>> ExceptionRules
+    Dictionary<Type, FeatureExceptionRule<object>> ExceptionRules,
+    string FeatureName,
+    string FeatureGroup
 );
 
 /// <summary>
@@ -123,7 +135,9 @@ internal static class FeatureCompiler
             InputType: typeof(TInput),
             OutputType: typeof(TOutput),
             Executor: BuildExecutor(feature.Handler),
-            ExceptionRules: BuildRules(feature.Catch)
+            ExceptionRules: BuildRules(feature.Catch),
+            FeatureName: feature.FeatureName,
+            FeatureGroup: feature.FeatureGroup
         );
     }
 

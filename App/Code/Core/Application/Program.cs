@@ -1,5 +1,6 @@
 ﻿using LLE.Kernel.Events;
 using LLE.Sockets;
+using LLE.TypeScript.Builders;
 using ApplicationLoader = LLE.Kernel.ApplicationLoader;
 
 namespace LLE.Application
@@ -8,6 +9,10 @@ namespace LLE.Application
     {
         public static async Task Main(string[] args)
         {
+            var apiBuilder = new ApiBuilder();
+            
+            Eventing.Eventing.Of<FeatureEvents>().Features.Concurrent(apiBuilder.AddFeature);
+            
             ModuleRegistry.AddModules();
 
             var webServer = new HttpSocket(8080);
@@ -15,6 +20,8 @@ namespace LLE.Application
             await ApplicationLoader.StartLifecycle();
 
             await webServer.StartAsync();
+            apiBuilder.WriteToDisk("App/Api");
+            apiBuilder.Dispose();
             await webServer.ListenAsync();
         }
     }

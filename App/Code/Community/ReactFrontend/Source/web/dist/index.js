@@ -21759,30 +21759,103 @@
     return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(import_jsx_runtime2.Fragment, { children: renderNode(children) });
   };
 
-  // App/Design/React/Themes/Frontend/Local/Default/index.tsx
-  var import_jsx_runtime3 = __toESM(require_jsx_runtime(), 1);
-  var LLETheme = (props) => {
-    return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("p", { children: "Loads with precedence!" });
+  // App/Design/React/Hooks/Core/session-provider.tsx
+  var import_react4 = __toESM(require_react(), 1);
+
+  // App/Api/auth.ts
+  var userState = () => {
+    return fetch("/api/auth/state", {
+      method: "GET"
+    }).then((response) => {
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+      return response.json();
+    });
   };
-  var Default_default = LLETheme;
+
+  // App/Design/React/Hooks/Core/usePromise.tsx
+  var import_react3 = __toESM(require_react(), 1);
+  var usePromise = (promiseFactory, deps) => {
+    const [result, setResult] = (0, import_react3.useState)(null);
+    const [isLoading, setIsLoading] = (0, import_react3.useState)(true);
+    const [error, setError] = (0, import_react3.useState)(null);
+    const callId = (0, import_react3.useRef)(0);
+    (0, import_react3.useEffect)(() => {
+      let cancelled = false;
+      const id = ++callId.current;
+      setIsLoading(true);
+      setError(null);
+      Promise.resolve().then(() => promiseFactory()).then((value) => {
+        if (cancelled || id !== callId.current) return;
+        setResult(value);
+        setIsLoading(false);
+      }).catch((err) => {
+        if (cancelled || id !== callId.current) return;
+        setError(err);
+        setIsLoading(false);
+      });
+      return () => {
+        cancelled = true;
+      };
+    }, deps);
+    return [result, isLoading, error];
+  };
+
+  // App/Design/React/Hooks/Core/session-provider.tsx
+  var import_jsx_runtime3 = __toESM(require_jsx_runtime(), 1);
+  var SessionContext = (0, import_react4.createContext)(
+    void 0
+  );
+  var SessionProvider = ({ children }) => {
+    const [session, isLoading, error] = usePromise(userState, []);
+    return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(SessionContext.Provider, { value: { session, isLoading, error }, children });
+  };
+  var useSession = () => {
+    const ctx = (0, import_react4.useContext)(SessionContext);
+    if (ctx === void 0) {
+      throw new Error("useSession must be used within a SessionProvider");
+    }
+    return ctx;
+  };
+
+  // App/Design/React/Themes/Frontend/Local/Default/DefaultPages/SignIn/index.tsx
+  var import_jsx_runtime4 = __toESM(require_jsx_runtime(), 1);
+  var AppSignin = () => {
+    return /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "lle-signin-page" });
+  };
+
+  // App/Design/React/Themes/Frontend/Local/Default/index.tsx
+  var import_jsx_runtime5 = __toESM(require_jsx_runtime(), 1);
+  var LLEThemeWrapper = (props) => {
+    return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(SessionProvider, { children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(LLETheme, { ...props }) });
+  };
+  var LLETheme = (props) => {
+    const { user, role } = useSession();
+    if (!user) {
+      return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(AppSignin, {});
+    }
+    return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "lle-default-theme" });
+  };
+  var Default_default = LLEThemeWrapper;
 
   // App/Design/React/Themes/Admin/Core/Default/index.tsx
-  var import_jsx_runtime4 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime6 = __toESM(require_jsx_runtime(), 1);
 
   // App/Design/React/Components/Core/Text/index.tsx
-  var import_jsx_runtime5 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime7 = __toESM(require_jsx_runtime(), 1);
   var Text = (props) => {
-    return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("p", { children: props.text });
+    return /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("p", { children: props.text });
   };
 
   // App/Code/Community/ReactFrontend/Source/web/generated.registry.tsx
   register("@component/Text", Text);
 
   // App/Code/Community/ReactFrontend/Source/web/index.tsx
-  var import_jsx_runtime6 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime8 = __toESM(require_jsx_runtime(), 1);
   var root = (0, import_client.createRoot)(document.getElementById("app"));
   root.render(
-    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Default_default, { children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Canvas, { children: window.canvasState }) })
+    /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Default_default, { children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Canvas, { children: window.canvasState }) })
   );
 })();
 /*! Bundled license information:

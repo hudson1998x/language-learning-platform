@@ -9,9 +9,9 @@
         "./App/Design/React/Components/Core/*"
       ],
       "@hook/*": [
-        "./Design/React/Hooks/Local/*",
-        "./Design/React/Hooks/Community/*",
-        "./Design/React/Hooks/Core/*"
+        "./App/Design/React/Hooks/Local/*",
+        "./App/Design/React/Hooks/Community/*",
+        "./App/Design/React/Hooks/Core/*"
       ],
       "@theme:admin/*": [
         "./App/Design/React/Themes/Admin/Local/*",
@@ -22,6 +22,9 @@
         "./App/Design/React/Themes/Frontend/Local/*",
         "./App/Design/React/Themes/Frontend/Community/*",
         "./App/Design/React/Themes/Frontend/Core/*"
+      ],
+      "@api/*": [
+        "./App/Api/*"
       ]
     }
   },

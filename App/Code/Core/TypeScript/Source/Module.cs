@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using LLE.Kernel.Contracts;
+using LLE.Kernel.Events;
 using LLE.TypeScript.Builders;
 using LLE.TypeScript.Events;
 
@@ -14,9 +15,12 @@ public class TypeScriptModule : IModuleLoader
 
         await Eventing.Eventing.Of<TypeScriptEvents>().TsConfig.DispatchAsync(tsconfig);
         await Eventing.Eventing.Of<NodeEvents>().PackageJson.DispatchAsync(packageJson);
-
+        
+        tsconfig.CompilerOptions.Paths.TryAdd("@api/*", ["./App/Api/*"]);
+        
         await File.WriteAllTextAsync("tsconfig.json", tsconfig.ToString());
         await File.WriteAllTextAsync("package.json", packageJson.ToString());
+
 
         await RunNpmInstallAsync();
     }

@@ -40,9 +40,9 @@ public class ReactFrontendModule : IModuleLoader
                 );
                 tsconfig.CompilerOptions.Paths.TryAdd(
                     "@hook/*", [
-                        "./Design/React/Hooks/Local/*",
-                        "./Design/React/Hooks/Community/*",
-                        "./Design/React/Hooks/Core/*",
+                        "./App/Design/React/Hooks/Local/*",
+                        "./App/Design/React/Hooks/Community/*",
+                        "./App/Design/React/Hooks/Core/*",
                     ]
                 );
                 tsconfig.CompilerOptions.Paths.TryAdd(

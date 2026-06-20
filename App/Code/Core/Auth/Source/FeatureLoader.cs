@@ -1,6 +1,5 @@
 using LLE.Auth.Dto;
 using LLE.Auth.Exceptions;
-using LLE.Auth.Features.Users;
 using LLE.Auth.Handlers;
 using LLE.Kernel.Registry;
 
@@ -12,6 +11,8 @@ namespace LLE.Auth
         {
             FeatureRegistry.Add(new Feature<LoginBody, LoginResponse>
             {
+                FeatureName = "userLogin",
+                FeatureGroup = "auth",
                 Route = "/api/auth/login",
                 Method = HttpMethod.Post,
                 Handler = UserFeatures.Login,
@@ -29,6 +30,8 @@ namespace LLE.Auth
             });
             FeatureRegistry.Add(new Feature<object, UserAuthStateResponse>
             {
+                FeatureName = "userState",
+                FeatureGroup = "auth",
                 Route = "/api/auth/state",
                 Method = HttpMethod.Get,
                 Handler = UserFeatures.UserAuthState,
