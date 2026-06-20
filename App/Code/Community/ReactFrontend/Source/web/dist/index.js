@@ -21722,13 +21722,13 @@
     }
   });
 
-  // App/Code/Local/ReactFrontend/Source/web/index.tsx
+  // App/Code/Community/ReactFrontend/Source/web/index.tsx
   var import_client = __toESM(require_client(), 1);
 
-  // App/Code/Local/ReactFrontend/Source/web/canvas.tsx
+  // App/Code/Community/ReactFrontend/Source/web/canvas.tsx
   var import_react = __toESM(require_react(), 1);
 
-  // App/Code/Local/ReactFrontend/Source/web/registry.tsx
+  // App/Code/Community/ReactFrontend/Source/web/registry.tsx
   var import_jsx_runtime = __toESM(require_jsx_runtime(), 1);
   window.__canvas_components = {};
   var register = (name, node) => {
@@ -21741,7 +21741,7 @@
     return () => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "error", children: `Unknown component ${name}` });
   };
 
-  // App/Code/Local/ReactFrontend/Source/web/canvas.tsx
+  // App/Code/Community/ReactFrontend/Source/web/canvas.tsx
   var import_jsx_runtime2 = __toESM(require_jsx_runtime(), 1);
   var import_react2 = __toESM(require_react(), 1);
   var renderNode = (node, key) => {
@@ -21765,10 +21765,10 @@
     return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("p", { children: props.text });
   };
 
-  // App/Code/Local/ReactFrontend/Source/web/generated.registry.tsx
+  // App/Code/Community/ReactFrontend/Source/web/generated.registry.tsx
   register("@component/Text", Text);
 
-  // App/Code/Local/ReactFrontend/Source/web/index.tsx
+  // App/Code/Community/ReactFrontend/Source/web/index.tsx
   var import_jsx_runtime4 = __toESM(require_jsx_runtime(), 1);
   var root = (0, import_client.createRoot)(document.getElementById("app"));
   root.render(

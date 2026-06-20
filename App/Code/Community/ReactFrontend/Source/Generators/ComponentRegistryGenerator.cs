@@ -31,7 +31,7 @@ namespace LLE.ReactFrontend.Generators
                 CollectComponents(fullPath, fullPath, components);
             }
 
-            WriteRegistry(components, "App/Code/Local/ReactFrontend/Source/web/generated.registry.tsx");
+            WriteRegistry(components, "App/Code/Community/ReactFrontend/Source/web/generated.registry.tsx");
         }
 
         /// <summary>

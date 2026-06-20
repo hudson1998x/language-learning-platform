@@ -22,6 +22,7 @@ public class ReactFrontendModule : IModuleLoader
         Eventing.Eventing.Of<HtmlBuilderEvents>().Created.Concurrent(builder =>
         {
             builder.WithScript("/app.js");
+            builder.WithCss("/app.css");
         });
 
         // make sure the tsconfig is properly configured to use React.
@@ -32,37 +33,37 @@ public class ReactFrontendModule : IModuleLoader
                 tsconfig.CompilerOptions.Jsx = JsxMode.ReactJsx;
                 tsconfig.CompilerOptions.Paths.TryAdd(
                     "@component/*", [
-                        "./App/Design/React/Components/Local/*",
+                        "./App/Design/React/Components/Community/*",
                         "./App/Design/React/Components/Community/*",
                         "./App/Design/React/Components/Core/*",
                     ]
                 );
                 tsconfig.CompilerOptions.Paths.TryAdd(
                     "@hook/*", [
-                        "./Design/React/Hooks/Local/*",
+                        "./Design/React/Hooks/Community/*",
                         "./Design/React/Hooks/Community/*",
                         "./Design/React/Hooks/Core/*",
                     ]
                 );
                 tsconfig.CompilerOptions.Paths.TryAdd(
                     "@theme:admin/*", [
-                        "./App/Design/React/Themes/Admin/Local/*",
+                        "./App/Design/React/Themes/Admin/Community/*",
                         "./App/Design/React/Themes/Admin/Community/*",
                         "./App/Design/React/Themes/Admin/Core/*",
                     ]
                 );
                 tsconfig.CompilerOptions.Paths.TryAdd(
                     "@theme:frontend/*", [
-                        "./App/Design/React/Themes/Frontend/Local/*",
+                        "./App/Design/React/Themes/Frontend/Community/*",
                         "./App/Design/React/Themes/Frontend/Community/*",
                         "./App/Design/React/Themes/Frontend/Core/*",
                     ]
                 );
                 tsconfig.Include.Add(
-                    "./App/Code/Local/ReactFrontend/Source/web/index.tsx"
+                    "./App/Code/Community/ReactFrontend/Source/web/index.tsx"
                 );
                 tsconfig.Exclude.Add(
-                    "./App/Code/Local/ReactFrontend/Source/web/dist/*"
+                    "./App/Code/Community/ReactFrontend/Source/web/dist/*"
                 );
             }
         );
@@ -82,8 +83,8 @@ public class ReactFrontendModule : IModuleLoader
                 packageJson.AddDependency("esbuild", Dependencies.Dev);
                 packageJson.AddDependency("esbuild-sass-plugin", Dependencies.Dev);
 
-                packageJson.AddScript("esbuild:watch", "node App/Code/Local/ReactFrontend/Source/scripts/esbuild.js --index=App/Code/Local/ReactFrontend/Source/web/index.tsx --watch");
-                packageJson.AddScript("esbuild:build", "node App/Code/Local/ReactFrontend/Source/scripts/esbuild.js --index=App/Code/Local/ReactFrontend/Source/web/index.tsx");
+                packageJson.AddScript("esbuild:watch", "node App/Code/Community/ReactFrontend/Source/scripts/esbuild.js --index=App/Code/Community/ReactFrontend/Source/web/index.tsx --watch");
+                packageJson.AddScript("esbuild:build", "node App/Code/Community/ReactFrontend/Source/scripts/esbuild.js --index=App/Code/Community/ReactFrontend/Source/web/index.tsx");
             }
         );
 
@@ -94,13 +95,13 @@ public class ReactFrontendModule : IModuleLoader
                 {
                     httpContext.Response.ContentType = "text/javascript";
                     httpContext.Response.StatusCode = 200;
-                    await httpContext.Response.WriteAsync(await File.ReadAllTextAsync("App/Code/Local/ReactFrontend/Source/web/dist/index.js"));
+                    await httpContext.Response.WriteAsync(await File.ReadAllTextAsync("App/Code/Community/ReactFrontend/Source/web/dist/index.js"));
                 });
                 httpServer.MapGet("/app.css", async httpContext =>
                 {
                     httpContext.Response.ContentType = "text/css";
                     httpContext.Response.StatusCode = 200;
-                    await httpContext.Response.WriteAsync(await File.ReadAllTextAsync("App/Code/Local/ReactFrontend/Source/web/dist/index.css"));
+                    await httpContext.Response.WriteAsync(await File.ReadAllTextAsync("App/Code/Community/ReactFrontend/Source/web/dist/index.css"));
                 });
             }
         );

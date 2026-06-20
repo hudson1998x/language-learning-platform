@@ -1,8 +1,9 @@
-/* App/Code/Local/ReactFrontend/Source/web/global.scss */
+/* App/Code/Community/ReactFrontend/Source/web/global.scss */
 html,
 body {
   min-width: 100vw;
   min-height: 100vh;
   padding: 0;
+  margin: 0;
 }
 /*# sourceMappingURL=index.css.map */

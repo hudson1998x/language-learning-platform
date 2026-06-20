@@ -1,8 +1,8 @@
 {
   "type": "module",
   "scripts": {
-    "esbuild:watch": "node App/Code/Local/ReactFrontend/Source/scripts/esbuild.js --index=App/Code/Local/ReactFrontend/Source/web/index.tsx --watch",
-    "esbuild:build": "node App/Code/Local/ReactFrontend/Source/scripts/esbuild.js --index=App/Code/Local/ReactFrontend/Source/web/index.tsx"
+    "esbuild:watch": "node App/Code/Community/ReactFrontend/Source/scripts/esbuild.js --index=App/Code/Community/ReactFrontend/Source/web/index.tsx --watch",
+    "esbuild:build": "node App/Code/Community/ReactFrontend/Source/scripts/esbuild.js --index=App/Code/Community/ReactFrontend/Source/web/index.tsx"
   },
   "dependencies": {
     "react": "*",

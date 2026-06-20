@@ -10,11 +10,13 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\Community\CommunityModuleRegistry\Source\CommunityModuleRegistry.csproj" />
       <ProjectReference Include="..\..\Local\AppRegistry\Source\LocalAppRegistry.csproj" />
       <ProjectReference Include="..\Dependencies\Source\Dependencies.csproj" />
       <ProjectReference Include="..\Frontend\Source\Frontend.csproj" />
       <ProjectReference Include="..\Kernel\Source\Kernel.csproj" />
       <ProjectReference Include="..\Sockets\Source\Sockets.csproj" />
+      <ProjectReference Include="..\TypeScript\Source\TypeScript.csproj" />
     </ItemGroup>
 
 </Project>
