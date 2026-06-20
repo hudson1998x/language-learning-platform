@@ -1,4 +1,8 @@
 {
+  "LLE.ReactFrontend.ReactFrontendModule": {
+    "IsEnabled": true,
+    "IsInstalled": true
+  },
   "LLE.Frontend.FrontendModule": {
     "IsEnabled": true,
     "IsInstalled": true
