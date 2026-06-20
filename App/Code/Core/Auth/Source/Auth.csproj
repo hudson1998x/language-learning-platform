@@ -12,6 +12,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\Frontend\Source\Frontend.csproj" />
       <ProjectReference Include="..\..\Kernel\Source\Kernel.csproj" />
     </ItemGroup>
 

@@ -175,7 +175,7 @@ public static class RepositoryProxyBuilder
                 continue;
             }
 
-            CreateMethodOnProxy(typeBuilder, method, adapterField, repositoryTypeField, entityTypeField);
+            CreateMethodOnProxy(typeBuilder, method, adapterField, repositoryTypeField, entityTypeField, entityType);
         }
 
         // Step 8: Finalize the type. This is where the CLR validates that every interface member has a
@@ -329,7 +329,8 @@ public static class RepositoryProxyBuilder
     /// <see cref="IEntityRepository{T}"/>, and is not decorated with <see cref="QueryAttribute"/>.
     /// </exception>
     private static void CreateMethodOnProxy(TypeBuilder typeBuilder, MethodInfo method,
-        FieldBuilder adapterField, FieldBuilder repositoryTypeField, FieldBuilder entityTypeField)
+        FieldBuilder adapterField, FieldBuilder repositoryTypeField, FieldBuilder entityTypeField,
+        Type entityType)
     {
         // Case 1: IDatabaseAdapter.ExecuteQuery itself — forward the caller-supplied AstNode directly
         // to the adapter, with no synthesized node. This is the one method where the proxy is purely a
@@ -343,18 +344,19 @@ public static class RepositoryProxyBuilder
         // Case 2: a CRUD method inherited from IEntityRepository<T> (CreateAsync, UpdateAsync,
         // DeleteAsync, FindByIdAsync, FindAllAsync). DeclaringType here is the *closed* generic type
         // (e.g. IEntityRepository<User>), so we compare against the open generic definition.
-        if (method.DeclaringType.IsGenericType &&
+        if (method.DeclaringType!.IsGenericType &&
             method.DeclaringType.GetGenericTypeDefinition() == typeof(IEntityRepository<>))
         {
-            CreateDelegateMethod(typeBuilder, method, adapterField, repositoryTypeField, entityTypeField);
+            CreateCrudMethod(typeBuilder, method, adapterField, repositoryTypeField, entityTypeField, entityType);
             return;
         }
 
         // Case 3: a custom method declared directly on the repository interface (e.g.
         // IUserRepository.GetByEmailAsync), explicitly opted in via [Query].
-        if (method.GetCustomAttribute<QueryAttribute>() != null)
+        var queryAttr = method.GetCustomAttribute<QueryAttribute>();
+        if (queryAttr != null)
         {
-            CreateDelegateMethod(typeBuilder, method, adapterField, repositoryTypeField, entityTypeField);
+            CreateQueryMethod(typeBuilder, method, adapterField, repositoryTypeField, entityTypeField, entityType, queryAttr.Query);
             return;
         }
 
@@ -401,49 +403,193 @@ public static class RepositoryProxyBuilder
     }
 
     /// <summary>
-    /// Emits a method body for a CRUD or custom <see cref="QueryAttribute"/> method that lazily resolves
-    /// the adapter, synthesizes a fresh, empty <see cref="AstNode"/>, and forwards both to
-    /// <see cref="RepositoryProxyHelper.ExecuteAsync{T}"/> for dispatch and result-type coercion.
+    /// Emits a method body for a CRUD method from <see cref="IEntityRepository{T}"/> (CreateAsync,
+    /// UpdateAsync, DeleteAsync, FindByIdAsync, FindAllAsync) that lazily resolves the adapter,
+    /// constructs the appropriate concrete <see cref="AstNode"/> subclass, and forwards both to
+    /// <see cref="RepositoryProxyHelper.ExecuteAsync{T}"/>.
     /// </summary>
-    /// <remarks>
-    /// Equivalent to:
-    /// <code>
-    /// var adapter = RepositoryProxyHelper.GetOrInitializeAdapter(ref this._adapter, this._repositoryType, this._entityType);
-    /// return RepositoryProxyHelper.ExecuteAsync&lt;TResult&gt;(adapter, new AstNode());
-    /// </code>
-    /// where <c>TResult</c> is the unwrapped generic argument of the method's <see cref="Task{T}"/> return
-    /// type (or <see cref="object"/> if the return type isn't generic).
-    /// </remarks>
-    private static void CreateDelegateMethod(TypeBuilder typeBuilder, MethodInfo method,
-        FieldBuilder adapterField, FieldBuilder repositoryTypeField, FieldBuilder entityTypeField)
+    private static void CreateCrudMethod(TypeBuilder typeBuilder, MethodInfo method,
+        FieldBuilder adapterField, FieldBuilder repositoryTypeField, FieldBuilder entityTypeField,
+        Type entityType)
     {
         var paramTypes = method.GetParameters().Select(p => p.ParameterType).ToArray();
         var methodBuilder = typeBuilder.DefineMethod(method.Name, ImplAttributes, method.ReturnType, paramTypes);
-
         var il = methodBuilder.GetILGenerator();
 
-        // Resolve (and, on first call, cache) the adapter the same way as CreateExecuteQueryMethod above.
-        il.Emit(OpCodes.Ldarg_0);
-        il.Emit(OpCodes.Ldflda, adapterField);       // ref this._adapter
-        il.Emit(OpCodes.Ldarg_0);
-        il.Emit(OpCodes.Ldfld, repositoryTypeField);  // this._repositoryType
-        il.Emit(OpCodes.Ldarg_0);
-        il.Emit(OpCodes.Ldfld, entityTypeField);      // this._entityType
-        il.Emit(OpCodes.Call, GetOrInitializeAdapterMethod); // -> IDatabaseAdapter (resolved + cached)
+        var adapterLocal = il.DeclareLocal(typeof(IDatabaseAdapter));
 
-        // new AstNode() — every CRUD/query method currently builds an empty placeholder node rather than
-        // encoding its actual arguments. The interpretation of *what* to query is left entirely to the
-        // subscribing database adapter.
-        il.Emit(OpCodes.Newobj, AstNodeConstructor);
+        // adapter = GetOrInitializeAdapter(ref _adapter, _repositoryType, _entityType)
+        il.Emit(OpCodes.Ldarg_0);
+        il.Emit(OpCodes.Ldflda, adapterField);
+        il.Emit(OpCodes.Ldarg_0);
+        il.Emit(OpCodes.Ldfld, repositoryTypeField);
+        il.Emit(OpCodes.Ldarg_0);
+        il.Emit(OpCodes.Ldfld, entityTypeField);
+        il.Emit(OpCodes.Call, GetOrInitializeAdapterMethod);
+        il.Emit(OpCodes.Stloc, adapterLocal);
 
-        // Unwrap Task<TResult> to get TResult for the generic ExecuteAsync<T> call below. Methods whose
-        // return type isn't generic (shouldn't normally occur for these methods, but guarded here) fall
-        // back to object.
+        // Push adapter onto stack first, then emit the node on top
+        il.Emit(OpCodes.Ldloc, adapterLocal);
+
+        switch (method.Name)
+        {
+            case "CreateAsync":
+            case "UpdateAsync":
+                EmitWriteQueryNode(il, entityType);
+                break;
+
+            case "DeleteAsync":
+                EmitDeleteQueryNode(il, entityType);
+                break;
+
+            case "FindByIdAsync":
+                EmitReadQueryNodeWithFilter(il, entityType);
+                break;
+
+            case "FindAllAsync":
+                EmitReadQueryNode(il, entityType);
+                break;
+
+            default:
+                throw new NotSupportedException(
+                    $"Unknown CRUD method '{method.Name}' on IEntityRepository<{entityType.Name}>.");
+        }
+
+        // stack: [adapter, node] → ExecuteAsync<TResult>(adapter, node)
         var resultType = method.ReturnType.IsGenericType
             ? method.ReturnType.GetGenericArguments()[0]
             : typeof(object);
 
-        // RepositoryProxyHelper.ExecuteAsync<TResult>(adapter, node)
+        il.Emit(OpCodes.Call, ExecuteAsyncMethod.MakeGenericMethod(resultType));
+        il.Emit(OpCodes.Ret);
+    }
+
+    private static void EmitWriteQueryNode(ILGenerator il, Type entityType)
+    {
+        // new WriteQueryNode { TableName = entityType.Name, Payload = arg_1 }
+        il.Emit(OpCodes.Newobj, WriteQueryNodeConstructor);
+        il.Emit(OpCodes.Dup);
+        il.Emit(OpCodes.Ldstr, entityType.Name);
+        il.Emit(OpCodes.Callvirt, WriteQueryNodeSetTableName);
+        il.Emit(OpCodes.Dup);
+        il.Emit(OpCodes.Ldarg_1);
+        il.Emit(OpCodes.Callvirt, WriteQueryNodeSetPayload);
+    }
+
+    private static void EmitDeleteQueryNode(ILGenerator il, Type entityType)
+    {
+        var idGetter = entityType.GetProperty("Id", BindingFlags.Public | BindingFlags.Instance)?.GetGetMethod()
+            ?? throw new InvalidOperationException(
+                $"Entity type '{entityType.Name}' must have a public 'Id' property.");
+
+        var filterLocal = il.DeclareLocal(typeof(FilterNode));
+
+        // var filter = new FilterNode { ColumnName = "Id", Operator = Equals, Value = item.Id }
+        il.Emit(OpCodes.Newobj, FilterNodeConstructor);
+        il.Emit(OpCodes.Stloc, filterLocal);
+        il.Emit(OpCodes.Ldloc, filterLocal);
+        il.Emit(OpCodes.Ldstr, "Id");
+        il.Emit(OpCodes.Callvirt, FilterNodeSetColumnName);
+        il.Emit(OpCodes.Ldloc, filterLocal);
+        il.Emit(OpCodes.Ldc_I4_0);
+        il.Emit(OpCodes.Callvirt, FilterNodeSetOperator);
+        il.Emit(OpCodes.Ldloc, filterLocal);
+        il.Emit(OpCodes.Ldarg_1);
+        il.Emit(OpCodes.Callvirt, idGetter);
+        il.Emit(OpCodes.Box, typeof(Guid));
+        il.Emit(OpCodes.Callvirt, FilterNodeSetValue);
+
+        // new DeleteQueryNode { TableName = entityType.Name, Where = filter }
+        il.Emit(OpCodes.Newobj, DeleteQueryNodeConstructor);
+        il.Emit(OpCodes.Dup);
+        il.Emit(OpCodes.Ldstr, entityType.Name);
+        il.Emit(OpCodes.Callvirt, DeleteQueryNodeSetTableName);
+        il.Emit(OpCodes.Dup);
+        il.Emit(OpCodes.Ldloc, filterLocal);
+        il.Emit(OpCodes.Stfld, DeleteQueryNodeWhereField);
+    }
+
+    private static void EmitReadQueryNodeWithFilter(ILGenerator il, Type entityType)
+    {
+        var filterLocal = il.DeclareLocal(typeof(FilterNode));
+
+        // var filter = new FilterNode { ColumnName = "Id", Operator = Equals, Value = id }
+        il.Emit(OpCodes.Newobj, FilterNodeConstructor);
+        il.Emit(OpCodes.Stloc, filterLocal);
+        il.Emit(OpCodes.Ldloc, filterLocal);
+        il.Emit(OpCodes.Ldstr, "Id");
+        il.Emit(OpCodes.Callvirt, FilterNodeSetColumnName);
+        il.Emit(OpCodes.Ldloc, filterLocal);
+        il.Emit(OpCodes.Ldc_I4_0);
+        il.Emit(OpCodes.Callvirt, FilterNodeSetOperator);
+        il.Emit(OpCodes.Ldloc, filterLocal);
+        il.Emit(OpCodes.Ldarg_1);
+        il.Emit(OpCodes.Box, typeof(Guid));
+        il.Emit(OpCodes.Callvirt, FilterNodeSetValue);
+
+        // new ReadQueryNode { TableName = entityType.Name, Where = filter }
+        il.Emit(OpCodes.Newobj, ReadQueryNodeConstructor);
+        il.Emit(OpCodes.Dup);
+        il.Emit(OpCodes.Ldstr, entityType.Name);
+        il.Emit(OpCodes.Callvirt, ReadQueryNodeSetTableName);
+        il.Emit(OpCodes.Dup);
+        il.Emit(OpCodes.Ldloc, filterLocal);
+        il.Emit(OpCodes.Stfld, ReadQueryNodeWhereField);
+    }
+
+    private static void EmitReadQueryNode(ILGenerator il, Type entityType)
+    {
+        // new ReadQueryNode { TableName = entityType.Name }
+        il.Emit(OpCodes.Newobj, ReadQueryNodeConstructor);
+        il.Emit(OpCodes.Dup);
+        il.Emit(OpCodes.Ldstr, entityType.Name);
+        il.Emit(OpCodes.Callvirt, ReadQueryNodeSetTableName);
+    }
+
+    /// <summary>
+    /// Emits a method body for a custom <see cref="QueryAttribute"/> method that lazily resolves
+    /// the adapter, calls <see cref="AstParser.Parse"/> to build the AST from the query string,
+    /// and forwards to <see cref="RepositoryProxyHelper.ExecuteAsync{T}"/>.
+    /// </summary>
+    private static void CreateQueryMethod(TypeBuilder typeBuilder, MethodInfo method,
+        FieldBuilder adapterField, FieldBuilder repositoryTypeField, FieldBuilder entityTypeField,
+        Type entityType, string query)
+    {
+        var paramTypes = method.GetParameters().Select(p => p.ParameterType).ToArray();
+        var methodBuilder = typeBuilder.DefineMethod(method.Name, ImplAttributes, method.ReturnType, paramTypes);
+        var il = methodBuilder.GetILGenerator();
+
+        var adapterLocal = il.DeclareLocal(typeof(IDatabaseAdapter));
+
+        // adapter = GetOrInitializeAdapter(ref _adapter, _repositoryType, _entityType)
+        il.Emit(OpCodes.Ldarg_0);
+        il.Emit(OpCodes.Ldflda, adapterField);
+        il.Emit(OpCodes.Ldarg_0);
+        il.Emit(OpCodes.Ldfld, repositoryTypeField);
+        il.Emit(OpCodes.Ldarg_0);
+        il.Emit(OpCodes.Ldfld, entityTypeField);
+        il.Emit(OpCodes.Call, GetOrInitializeAdapterMethod);
+        il.Emit(OpCodes.Stloc, adapterLocal);
+
+        // Push adapter onto stack first
+        il.Emit(OpCodes.Ldloc, adapterLocal);
+
+        // node = AstParser.Parse(entityType, query)
+        il.Emit(OpCodes.Ldtoken, entityType);
+        il.Emit(OpCodes.Call, GetTypeFromHandleMethod);
+        il.Emit(OpCodes.Ldstr, query);
+        il.Emit(OpCodes.Call, AstParserParseMethod);
+
+        // node.OperationKind = OperationKind.Read
+        il.Emit(OpCodes.Dup);
+        il.Emit(OpCodes.Ldc_I4_0);
+        il.Emit(OpCodes.Callvirt, AstNodeSetOperationKind);
+
+        // stack: [adapter, node] → ExecuteAsync<TResult>(adapter, node)
+        var resultType = method.ReturnType.IsGenericType
+            ? method.ReturnType.GetGenericArguments()[0]
+            : typeof(object);
+
         il.Emit(OpCodes.Call, ExecuteAsyncMethod.MakeGenericMethod(resultType));
         il.Emit(OpCodes.Ret);
     }
@@ -460,9 +606,6 @@ public static class RepositoryProxyBuilder
             nameof(RepositoryProxyHelper.GetOrInitializeAdapter),
             BindingFlags.Public | BindingFlags.Static)!;
 
-    private static readonly ConstructorInfo AstNodeConstructor =
-        typeof(AstNode).GetConstructor(Type.EmptyTypes)!;
-
     private static readonly MethodInfo DatabaseAdapterExecuteQuery =
         typeof(IDatabaseAdapter).GetMethod(nameof(IDatabaseAdapter.ExecuteQuery))!;
 
@@ -470,4 +613,57 @@ public static class RepositoryProxyBuilder
         typeof(RepositoryProxyHelper).GetMethod(
             nameof(RepositoryProxyHelper.ExecuteAsync),
             BindingFlags.Public | BindingFlags.Static)!;
+
+    // --- AstParser ---
+    private static readonly MethodInfo AstParserParseMethod =
+        typeof(AstParser).GetMethod(
+            nameof(AstParser.Parse),
+            BindingFlags.Public | BindingFlags.Static)!;
+
+    // --- AstNode ---
+    private static readonly MethodInfo AstNodeSetOperationKind =
+        typeof(AstNode).GetMethod("set_OperationKind")!;
+
+    // --- ReadQueryNode ---
+    private static readonly ConstructorInfo ReadQueryNodeConstructor =
+        typeof(ReadQueryNode).GetConstructor(Type.EmptyTypes)!;
+
+    private static readonly MethodInfo ReadQueryNodeSetTableName =
+        typeof(ReadQueryNode).GetMethod("set_TableName")!;
+
+    private static readonly FieldInfo ReadQueryNodeWhereField =
+        typeof(ReadQueryNode).GetField("Where")!;
+
+    // --- WriteQueryNode ---
+    private static readonly ConstructorInfo WriteQueryNodeConstructor =
+        typeof(WriteQueryNode).GetConstructor(Type.EmptyTypes)!;
+
+    private static readonly MethodInfo WriteQueryNodeSetTableName =
+        typeof(WriteQueryNode).GetMethod("set_TableName")!;
+
+    private static readonly MethodInfo WriteQueryNodeSetPayload =
+        typeof(WriteQueryNode).GetMethod("set_Payload")!;
+
+    // --- DeleteQueryNode ---
+    private static readonly ConstructorInfo DeleteQueryNodeConstructor =
+        typeof(DeleteQueryNode).GetConstructor(Type.EmptyTypes)!;
+
+    private static readonly MethodInfo DeleteQueryNodeSetTableName =
+        typeof(DeleteQueryNode).GetMethod("set_TableName")!;
+
+    private static readonly FieldInfo DeleteQueryNodeWhereField =
+        typeof(DeleteQueryNode).GetField("Where")!;
+
+    // --- FilterNode ---
+    private static readonly ConstructorInfo FilterNodeConstructor =
+        typeof(FilterNode).GetConstructor(Type.EmptyTypes)!;
+
+    private static readonly MethodInfo FilterNodeSetColumnName =
+        typeof(FilterNode).GetMethod("set_ColumnName")!;
+
+    private static readonly MethodInfo FilterNodeSetOperator =
+        typeof(FilterNode).GetMethod("set_Operator")!;
+
+    private static readonly MethodInfo FilterNodeSetValue =
+        typeof(FilterNode).GetMethod("set_Value")!;
 }

@@ -1,4 +1,3 @@
-using LLE.Auth.Features;
 using LLE.Kernel.Contracts;
 
 namespace LLE.Auth;
@@ -8,8 +7,6 @@ public class AuthModule : IModuleLoader
     public async Task AppStart()
     {
         FeatureLoader.LoadFeatures();
-        
-        
     }
 
     public Task AppStop() => Noop();
