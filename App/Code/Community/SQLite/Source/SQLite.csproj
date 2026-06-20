@@ -11,4 +11,8 @@
       <ProjectReference Include="..\..\..\Core\Kernel\Source\Kernel.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.9" />
+    </ItemGroup>
+
 </Project>

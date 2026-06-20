@@ -29,4 +29,18 @@ public static class UserFeatures
             User = user
         };
     }
+
+    public static async ValueTask<UserAuthStateResponse> UserAuthState(object body, HttpContext context)
+    {
+        var userService = ServiceCatalog.GetService<UserService>();
+        
+        
+        
+        return new()
+        {
+            Success = true,
+            Message = "Endpoint okay",
+            User = await userService.GetCurrentUser(context)
+        };
+    }
 }

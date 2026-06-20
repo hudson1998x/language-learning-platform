@@ -1,5 +1,6 @@
 using LLE.Auth.Dto;
 using LLE.Auth.Exceptions;
+using LLE.Auth.Features.Users;
 using LLE.Auth.Handlers;
 using LLE.Kernel.Registry;
 
@@ -24,6 +25,16 @@ namespace LLE.Auth
                             Message = exception.Message
                         }
                     }
+                }
+            });
+            FeatureRegistry.Add(new Feature<object, UserAuthStateResponse>
+            {
+                Route = "/api/auth/state",
+                Method = HttpMethod.Get,
+                Handler = UserFeatures.UserAuthState,
+                Catch = new Dictionary<Type, FeatureExceptionRule<UserAuthStateResponse>>()
+                {
+                    
                 }
             });
         }

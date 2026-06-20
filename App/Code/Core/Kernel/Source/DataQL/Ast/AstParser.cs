@@ -8,6 +8,6 @@ public static class AstParser
     {
         var tokens = TokenArrayBuilder.Parse(query);
 
-        return new AstNode();
+        throw new NotImplementedException("AstParser not yet implemented.");
     }
 }

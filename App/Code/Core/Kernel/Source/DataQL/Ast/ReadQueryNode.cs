@@ -7,5 +7,8 @@ namespace LLE.Kernel.DataQL.Ast
         public required string TableName { get; init; }
         
         public AstNode? Where;
+
+        public override TResult Accept<TResult>(IAstVisitor<TResult> visitor)
+            => visitor.Visit(this);
     }
 }

@@ -7,9 +7,11 @@ public class SQLiteModule : IModuleLoader
 {
     public async Task AppStart()
     {
-        Eventing.Eventing.Of<RepositoryConstructionEvents>().Constructed.Concurrent(repository =>
+        Eventing.Eventing.Of<RepositoryConstructionEvents>().Constructed.Concurrent(ctx =>
         {
-            repository.Adapter = new SQLiteAdapter();
+            var adapter = new SQLiteAdapter();
+            adapter.EnsureTable(ctx.EntityType);
+            ctx.Adapter = adapter;
         });
     }
 

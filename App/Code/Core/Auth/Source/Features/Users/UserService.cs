@@ -1,5 +1,6 @@
 using LLE.Auth.Dto;
 using LLE.Auth.Exceptions;
+using LLE.Auth.Features.Roles;
 using LLE.Auth.Utilities;
 using LLE.Kernel.Attributes;
 using Microsoft.AspNetCore.Http;
@@ -30,6 +31,15 @@ public class UserService(IUserRepository userRepository)
         
         context.Session.SetString("UserId", user.Id.ToString());
 
+        return user;
+    }
+
+    public Task<User?> GetCurrentUser(HttpContext context)
+    {
+        var id = Guid.NewGuid();
+
+        var user = userRepository.FindByIdAsync(id);
+        
         return user;
     }
 }

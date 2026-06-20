@@ -434,8 +434,11 @@ public static class RepositoryProxyBuilder
         switch (method.Name)
         {
             case "CreateAsync":
-            case "UpdateAsync":
                 EmitWriteQueryNode(il, entityType);
+                break;
+
+            case "UpdateAsync":
+                EmitWriteQueryNodeWithFilter(il, entityType);
                 break;
 
             case "DeleteAsync":
@@ -466,7 +469,7 @@ public static class RepositoryProxyBuilder
 
     private static void EmitWriteQueryNode(ILGenerator il, Type entityType)
     {
-        // new WriteQueryNode { TableName = entityType.Name, Payload = arg_1 }
+        // new WriteQueryNode { TableName = entityType.Name, Payload = arg_1, EntityType = entityType }
         il.Emit(OpCodes.Newobj, WriteQueryNodeConstructor);
         il.Emit(OpCodes.Dup);
         il.Emit(OpCodes.Ldstr, entityType.Name);
@@ -474,15 +477,20 @@ public static class RepositoryProxyBuilder
         il.Emit(OpCodes.Dup);
         il.Emit(OpCodes.Ldarg_1);
         il.Emit(OpCodes.Callvirt, WriteQueryNodeSetPayload);
+        il.Emit(OpCodes.Dup);
+        il.Emit(OpCodes.Ldtoken, entityType);
+        il.Emit(OpCodes.Call, GetTypeFromHandleMethod);
+        il.Emit(OpCodes.Callvirt, AstNodeSetEntityType);
     }
 
-    private static void EmitDeleteQueryNode(ILGenerator il, Type entityType)
+    private static void EmitWriteQueryNodeWithFilter(ILGenerator il, Type entityType)
     {
         var idGetter = entityType.GetProperty("Id", BindingFlags.Public | BindingFlags.Instance)?.GetGetMethod()
             ?? throw new InvalidOperationException(
                 $"Entity type '{entityType.Name}' must have a public 'Id' property.");
 
         var filterLocal = il.DeclareLocal(typeof(FilterNode));
+        var entityLocal = il.DeclareLocal(entityType);
 
         // var filter = new FilterNode { ColumnName = "Id", Operator = Equals, Value = item.Id }
         il.Emit(OpCodes.Newobj, FilterNodeConstructor);
@@ -495,11 +503,56 @@ public static class RepositoryProxyBuilder
         il.Emit(OpCodes.Callvirt, FilterNodeSetOperator);
         il.Emit(OpCodes.Ldloc, filterLocal);
         il.Emit(OpCodes.Ldarg_1);
+        il.Emit(OpCodes.Dup);
+        il.Emit(OpCodes.Stloc, entityLocal);
         il.Emit(OpCodes.Callvirt, idGetter);
         il.Emit(OpCodes.Box, typeof(Guid));
         il.Emit(OpCodes.Callvirt, FilterNodeSetValue);
 
-        // new DeleteQueryNode { TableName = entityType.Name, Where = filter }
+        // new WriteQueryNode { TableName = entityType.Name, Payload = entity, Where = filter, EntityType = entityType }
+        il.Emit(OpCodes.Newobj, WriteQueryNodeConstructor);
+        il.Emit(OpCodes.Dup);
+        il.Emit(OpCodes.Ldstr, entityType.Name);
+        il.Emit(OpCodes.Callvirt, WriteQueryNodeSetTableName);
+        il.Emit(OpCodes.Dup);
+        il.Emit(OpCodes.Ldloc, entityLocal);
+        il.Emit(OpCodes.Callvirt, WriteQueryNodeSetPayload);
+        il.Emit(OpCodes.Dup);
+        il.Emit(OpCodes.Ldloc, filterLocal);
+        il.Emit(OpCodes.Callvirt, WriteQueryNodeSetWhere);
+        il.Emit(OpCodes.Dup);
+        il.Emit(OpCodes.Ldtoken, entityType);
+        il.Emit(OpCodes.Call, GetTypeFromHandleMethod);
+        il.Emit(OpCodes.Callvirt, AstNodeSetEntityType);
+    }
+
+    private static void EmitDeleteQueryNode(ILGenerator il, Type entityType)
+    {
+        var idGetter = entityType.GetProperty("Id", BindingFlags.Public | BindingFlags.Instance)?.GetGetMethod()
+            ?? throw new InvalidOperationException(
+                $"Entity type '{entityType.Name}' must have a public 'Id' property.");
+
+        var filterLocal = il.DeclareLocal(typeof(FilterNode));
+        var entityLocal = il.DeclareLocal(entityType);
+
+        // var filter = new FilterNode { ColumnName = "Id", Operator = Equals, Value = item.Id }
+        il.Emit(OpCodes.Newobj, FilterNodeConstructor);
+        il.Emit(OpCodes.Stloc, filterLocal);
+        il.Emit(OpCodes.Ldloc, filterLocal);
+        il.Emit(OpCodes.Ldstr, "Id");
+        il.Emit(OpCodes.Callvirt, FilterNodeSetColumnName);
+        il.Emit(OpCodes.Ldloc, filterLocal);
+        il.Emit(OpCodes.Ldc_I4_0);
+        il.Emit(OpCodes.Callvirt, FilterNodeSetOperator);
+        il.Emit(OpCodes.Ldloc, filterLocal);
+        il.Emit(OpCodes.Ldarg_1);
+        il.Emit(OpCodes.Dup);
+        il.Emit(OpCodes.Stloc, entityLocal);
+        il.Emit(OpCodes.Callvirt, idGetter);
+        il.Emit(OpCodes.Box, typeof(Guid));
+        il.Emit(OpCodes.Callvirt, FilterNodeSetValue);
+
+        // new DeleteQueryNode { TableName = entityType.Name, Where = filter, Payload = entity, EntityType = entityType }
         il.Emit(OpCodes.Newobj, DeleteQueryNodeConstructor);
         il.Emit(OpCodes.Dup);
         il.Emit(OpCodes.Ldstr, entityType.Name);
@@ -507,6 +560,13 @@ public static class RepositoryProxyBuilder
         il.Emit(OpCodes.Dup);
         il.Emit(OpCodes.Ldloc, filterLocal);
         il.Emit(OpCodes.Stfld, DeleteQueryNodeWhereField);
+        il.Emit(OpCodes.Dup);
+        il.Emit(OpCodes.Ldloc, entityLocal);
+        il.Emit(OpCodes.Callvirt, DeleteQueryNodeSetPayload);
+        il.Emit(OpCodes.Dup);
+        il.Emit(OpCodes.Ldtoken, entityType);
+        il.Emit(OpCodes.Call, GetTypeFromHandleMethod);
+        il.Emit(OpCodes.Callvirt, AstNodeSetEntityType);
     }
 
     private static void EmitReadQueryNodeWithFilter(ILGenerator il, Type entityType)
@@ -527,7 +587,7 @@ public static class RepositoryProxyBuilder
         il.Emit(OpCodes.Box, typeof(Guid));
         il.Emit(OpCodes.Callvirt, FilterNodeSetValue);
 
-        // new ReadQueryNode { TableName = entityType.Name, Where = filter }
+        // new ReadQueryNode { TableName = entityType.Name, Where = filter, EntityType = entityType }
         il.Emit(OpCodes.Newobj, ReadQueryNodeConstructor);
         il.Emit(OpCodes.Dup);
         il.Emit(OpCodes.Ldstr, entityType.Name);
@@ -535,15 +595,23 @@ public static class RepositoryProxyBuilder
         il.Emit(OpCodes.Dup);
         il.Emit(OpCodes.Ldloc, filterLocal);
         il.Emit(OpCodes.Stfld, ReadQueryNodeWhereField);
+        il.Emit(OpCodes.Dup);
+        il.Emit(OpCodes.Ldtoken, entityType);
+        il.Emit(OpCodes.Call, GetTypeFromHandleMethod);
+        il.Emit(OpCodes.Callvirt, AstNodeSetEntityType);
     }
 
     private static void EmitReadQueryNode(ILGenerator il, Type entityType)
     {
-        // new ReadQueryNode { TableName = entityType.Name }
+        // new ReadQueryNode { TableName = entityType.Name, EntityType = entityType }
         il.Emit(OpCodes.Newobj, ReadQueryNodeConstructor);
         il.Emit(OpCodes.Dup);
         il.Emit(OpCodes.Ldstr, entityType.Name);
         il.Emit(OpCodes.Callvirt, ReadQueryNodeSetTableName);
+        il.Emit(OpCodes.Dup);
+        il.Emit(OpCodes.Ldtoken, entityType);
+        il.Emit(OpCodes.Call, GetTypeFromHandleMethod);
+        il.Emit(OpCodes.Callvirt, AstNodeSetEntityType);
     }
 
     /// <summary>
@@ -585,6 +653,12 @@ public static class RepositoryProxyBuilder
         il.Emit(OpCodes.Ldc_I4_0);
         il.Emit(OpCodes.Callvirt, AstNodeSetOperationKind);
 
+        // node.EntityType = entityType
+        il.Emit(OpCodes.Dup);
+        il.Emit(OpCodes.Ldtoken, entityType);
+        il.Emit(OpCodes.Call, GetTypeFromHandleMethod);
+        il.Emit(OpCodes.Callvirt, AstNodeSetEntityType);
+
         // stack: [adapter, node] → ExecuteAsync<TResult>(adapter, node)
         var resultType = method.ReturnType.IsGenericType
             ? method.ReturnType.GetGenericArguments()[0]
@@ -624,6 +698,9 @@ public static class RepositoryProxyBuilder
     private static readonly MethodInfo AstNodeSetOperationKind =
         typeof(AstNode).GetMethod("set_OperationKind")!;
 
+    private static readonly MethodInfo AstNodeSetEntityType =
+        typeof(AstNode).GetMethod("set_EntityType")!;
+
     // --- ReadQueryNode ---
     private static readonly ConstructorInfo ReadQueryNodeConstructor =
         typeof(ReadQueryNode).GetConstructor(Type.EmptyTypes)!;
@@ -644,12 +721,18 @@ public static class RepositoryProxyBuilder
     private static readonly MethodInfo WriteQueryNodeSetPayload =
         typeof(WriteQueryNode).GetMethod("set_Payload")!;
 
+    private static readonly MethodInfo WriteQueryNodeSetWhere =
+        typeof(WriteQueryNode).GetMethod("set_Where")!;
+
     // --- DeleteQueryNode ---
     private static readonly ConstructorInfo DeleteQueryNodeConstructor =
         typeof(DeleteQueryNode).GetConstructor(Type.EmptyTypes)!;
 
     private static readonly MethodInfo DeleteQueryNodeSetTableName =
         typeof(DeleteQueryNode).GetMethod("set_TableName")!;
+
+    private static readonly MethodInfo DeleteQueryNodeSetPayload =
+        typeof(DeleteQueryNode).GetMethod("set_Payload")!;
 
     private static readonly FieldInfo DeleteQueryNodeWhereField =
         typeof(DeleteQueryNode).GetField("Where")!;

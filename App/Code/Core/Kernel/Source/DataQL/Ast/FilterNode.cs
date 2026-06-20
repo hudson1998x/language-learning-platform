@@ -7,6 +7,9 @@ public class FilterNode : AstNode
     public FilterOperator Operator { get; init; }
     
     public required object Value { get; init; }
+
+    public override TResult Accept<TResult>(IAstVisitor<TResult> visitor)
+        => visitor.Visit(this);
 }
 
 public enum FilterOperator

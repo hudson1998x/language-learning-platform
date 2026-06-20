@@ -17,24 +17,18 @@ namespace LLE.Sockets
     /// HTTPS, a separate SSL module should subscribe to <see cref="KestrelHttpEvents.Listen"/>
     /// and call <c>listen.UseHttps(...)</c> on the dispatched <see cref="Microsoft.AspNetCore.Server.Kestrel.Core.ListenOptions"/>.
     /// </remarks>
-    /// <param name="httpPort">The port to listen on.</param>
-    public sealed partial class HttpSocket(
-        int httpPort)
+    public sealed partial class HttpSocket
         : IAsyncDisposable
     {
-        /// <summary>
-        /// The running <see cref="WebApplication"/> instance, or <c>null</c> if the server
-        /// has not been started (or has been stopped).
-        /// </summary>
+        private readonly int _httpPort;
         private WebApplication? _application;
 
-        /// <summary>
-        /// Builds and starts the underlying <see cref="WebApplication"/>, configuring Kestrel
-        /// to listen on the configured HTTP port. Other modules (e.g. SSL) can hook into the
-        /// <see cref="KestrelHttpEvents"/> dispatched during this process to extend the server.
-        /// </summary>
-        /// <param name="cancellationToken">A token to cancel the startup operation.</param>
-        /// <exception cref="InvalidOperationException">Thrown if the server has already been started.</exception>
+        public HttpSocket(int httpPort)
+        {
+            _httpPort = httpPort;
+            SubscribeToFeatures();
+        }
+
         public async Task StartAsync(
             CancellationToken cancellationToken = default)
         {
@@ -43,42 +37,31 @@ namespace LLE.Sockets
                 throw new InvalidOperationException(
                     "Server already started.");
             }
-            
-            SubscribeToFeatures();
 
             var builder = WebApplication.CreateBuilder();
 
-            // Allow external subscribers to configure the WebApplicationBuilder before
-            // Kestrel options or the app itself are set up (e.g. registering services).
             await Eventing.Eventing.Of<KestrelHttpEvents>().WebAppBuilder.DispatchAsync(builder);
 
             builder.WebHost.ConfigureKestrel(options =>
             {
                 options.ListenAnyIP(
-                    httpPort,
+                    _httpPort,
                     listen =>
                     {
-                        // Hand this specific listener off to subscribers (e.g. an SSL module),
-                        // which can call listen.UseHttps(...) to enable TLS on this port.
-                        // HttpSocket itself has no knowledge of certificates.
                         AsyncUtils.Await(Eventing.Eventing.Of<KestrelHttpEvents>().Listen.DispatchAsync(listen));
                     });
 
-                // Allow external subscribers to further customize Kestrel's server options
-                // as a whole (e.g. request limits, additional endpoints) after the listener is set.
                 AsyncUtils.Await(Eventing.Eventing.Of<KestrelHttpEvents>().ServerOptions.DispatchAsync(options));
             });
 
             var app = builder.Build();
-        
-            // Allow external subscribers to configure the built WebApplication
-            // (e.g. middleware, routing) before it starts accepting requests.
+
             await Eventing.Eventing.Of<KestrelHttpEvents>().WebApplication.DispatchAsync(app);
 
             await app.StartAsync(cancellationToken);
 
             _application = app;
-            
+
             FlushPendingFeatures(app);
 
             await Eventing.Eventing.Of<HttpSocketEvents>().Ready.DispatchAsync(this);
@@ -92,12 +75,6 @@ namespace LLE.Sockets
             }
         }
 
-        /// <summary>
-        /// Stops the underlying <see cref="WebApplication"/> and disposes it. Safe to call
-        /// even if the server was never started or has already been stopped, in which case
-        /// this is a no-op.
-        /// </summary>
-        /// <param name="cancellationToken">A token to cancel the shutdown operation.</param>
         public async Task StopAsync(
             CancellationToken cancellationToken = default)
         {
@@ -112,10 +89,6 @@ namespace LLE.Sockets
             _application = null;
         }
 
-        /// <summary>
-        /// Stops and disposes the underlying <see cref="WebApplication"/> if it is running.
-        /// Equivalent to calling <see cref="StopAsync"/> with the default cancellation token.
-        /// </summary>
         public async ValueTask DisposeAsync()
         {
             await StopAsync();
