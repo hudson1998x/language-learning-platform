@@ -1,0 +1,13 @@
+{
+  "type": "module",
+  "dependencies": {
+    "react": "*",
+    "react-dom": "*"
+  },
+  "devDependencies": {
+    "@types/react": "*",
+    "@types/react-dom": "*",
+    "esbuild": "*",
+    "esbuild-sass-plugin": "*"
+  }
+}

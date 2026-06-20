@@ -51,6 +51,23 @@ public class ReactFrontendModule : IModuleLoader
                 );
             }
         );
+
+        Eventing.Eventing.Of<NodeEvents>().PackageJson.Concurrent(
+            packageJson =>
+            {
+                // basic react packages.
+                packageJson.AddDependency("react", Dependencies.App);
+                packageJson.AddDependency("react-dom", Dependencies.App);
+                
+                // types etc...
+                packageJson.AddDependency("@types/react", Dependencies.Dev);
+                packageJson.AddDependency("@types/react-dom", Dependencies.Dev);
+                
+                // tooling.
+                packageJson.AddDependency("esbuild", Dependencies.Dev);
+                packageJson.AddDependency("esbuild-sass-plugin", Dependencies.Dev);
+            }
+        );
         
         
         
