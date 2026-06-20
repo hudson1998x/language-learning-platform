@@ -34,12 +34,22 @@ public class UserService(IUserRepository userRepository)
         return user;
     }
 
-    public Task<User?> GetCurrentUser(HttpContext context)
+    public async Task<User?> GetCurrentUser(HttpContext context)
     {
-        var id = Guid.NewGuid();
-
-        var user = userRepository.FindByIdAsync(id);
+        if (!context.Session.IsAvailable)
+        {
+            return null;
+        }
         
-        return user;
+        var userIdStr = context.Session.GetString("UserId");
+
+        if (string.IsNullOrEmpty(userIdStr))
+        {
+            return null;
+        }
+
+        var userId = Guid.Parse(userIdStr);
+        
+        return await userRepository.FindByIdAsync(userId);
     }
 }
