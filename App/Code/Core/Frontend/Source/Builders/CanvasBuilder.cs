@@ -17,7 +17,6 @@ public static class CanvasBuilder
         rootVNode = await Eventing.Eventing.Of<CanvasBuilderEvents>().Created.DispatchAsync(rootVNode);
 
         var builder = await HtmlBuilder.Create();
-        await builder.Initialize();
         
         // inject it into the page.
         builder.AddSnippet("<script>window.canvasState = " + rootVNode + ";</script>");

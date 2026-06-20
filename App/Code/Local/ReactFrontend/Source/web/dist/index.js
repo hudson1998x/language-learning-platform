@@ -5,11 +5,11 @@
   var __getOwnPropNames = Object.getOwnPropertyNames;
   var __getProtoOf = Object.getPrototypeOf;
   var __hasOwnProp = Object.prototype.hasOwnProperty;
-  var __commonJS = (cb, mod) => function __require() {
+  var __commonJS = (cb, mod2) => function __require() {
     try {
-      return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+      return mod2 || (0, cb[__getOwnPropNames(cb)[0]])((mod2 = { exports: {} }).exports, mod2), mod2.exports;
     } catch (e) {
-      throw mod = 0, e;
+      throw mod2 = 0, e;
     }
   };
   var __copyProps = (to, from, except, desc) => {
@@ -20,13 +20,13 @@
     }
     return to;
   };
-  var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  var __toESM = (mod2, isNodeMode, target) => (target = mod2 != null ? __create(__getProtoOf(mod2)) : {}, __copyProps(
     // If the importer is in node compatibility mode or this is not an ESM
     // file that has been converted to a CommonJS file using a Babel-
     // compatible transform (i.e. "__esModule" has not been set), then set
     // "default" to the CommonJS "module.exports" for node compatibility.
-    isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
-    mod
+    isNodeMode || !mod2 || !mod2.__esModule ? __defProp(target, "default", { value: mod2, enumerable: true }) : target,
+    mod2
   ));
 
   // node_modules/scheduler/cjs/scheduler.development.js
@@ -21726,16 +21726,41 @@
   var import_client = __toESM(require_client(), 1);
 
   // App/Code/Local/ReactFrontend/Source/web/canvas.tsx
+  var import_react = __toESM(require_react(), 1);
+
+  // App/Code/Local/ReactFrontend/Source/web/registry.tsx
   var import_jsx_runtime = __toESM(require_jsx_runtime(), 1);
-  var Canvas = () => {
-    return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Canvas loaded" });
+  window.__canvas_components = {};
+  var mod = (name) => {
+    if (window.__canvas_components[name]) {
+      return window.__canvas_components[name];
+    }
+    return () => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "error", children: `Unknown component ${name}` });
+  };
+
+  // App/Code/Local/ReactFrontend/Source/web/canvas.tsx
+  var import_jsx_runtime2 = __toESM(require_jsx_runtime(), 1);
+  var import_react2 = __toESM(require_react(), 1);
+  var renderNode = (node, key) => {
+    const { t, p, c } = node;
+    const isHtmlElement = t === t.toLowerCase();
+    const children = c.map((child, index) => renderNode(child, index));
+    if (isHtmlElement) {
+      return (0, import_react.createElement)(t, { ...p, key }, ...children);
+    }
+    const Component = mod(t);
+    return /* @__PURE__ */ (0, import_react2.createElement)(Component, { ...p, key }, children);
+  };
+  var Canvas = (props) => {
+    const { children } = props;
+    return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(import_jsx_runtime2.Fragment, { children: renderNode(children) });
   };
 
   // App/Code/Local/ReactFrontend/Source/web/index.tsx
-  var import_jsx_runtime2 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime3 = __toESM(require_jsx_runtime(), 1);
   var root = (0, import_client.createRoot)(document.getElementById("app"));
   root.render(
-    /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(Canvas, { children: window.canvasState })
+    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(Canvas, { children: window.canvasState })
   );
 })();
 /*! Bundled license information:
