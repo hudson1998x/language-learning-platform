@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using LLE.Kernel.Attributes;
 using LLE.Sockets.Attributes;
 using LLE.Sockets.Enums;
+using LLE.Sockets.Events;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 
@@ -14,7 +15,17 @@ public partial class HttpSocket
     private readonly Dictionary<Type, object> _controllers = new();
     
     // allow custom serializers for certain classes 
-    private Dictionary<Type, Func<HttpContext, object, ValueTask>> _serializers = new();
+    private readonly Dictionary<Type, Func<HttpContext, object, ValueTask>> _serializers = new();
+
+    /// <summary>
+    /// Add a custom serializer for a certain type. 
+    /// </summary>
+    /// <param name="serializer"></param>
+    /// <typeparam name="T"></typeparam>
+    public void AddSerializer<T>(Func<HttpContext, T, ValueTask> serializer) where T : class
+    {
+        _serializers[typeof(T)] = (ctx, obj) => serializer(ctx, (T)obj);
+    }
     
     public void LoadControllers(object[] controllers)
     {
@@ -124,6 +135,14 @@ public partial class HttpSocket
             if (routeValues.TryGetValue(p.Name ?? string.Empty, out var raw))
             {
                 args[i] = ConvertValue(raw, p.ParameterType);
+                continue;
+            }
+
+            var resolver = Eventing.Eventing.Of<DependencyInjectionEvents>().Parameter.Resolve(p);
+
+            if (resolver is not null)
+            {
+                args[i] = resolver;
                 continue;
             }
 

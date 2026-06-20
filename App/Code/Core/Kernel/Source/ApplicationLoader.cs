@@ -39,6 +39,7 @@ public static partial class ApplicationLoader
             {
                 await module.Install();
                 state.IsInstalled = true;
+                state.IsEnabled = true;
                 PersistState();
             }
 

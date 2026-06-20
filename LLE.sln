@@ -12,6 +12,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedUtils", "App\Code\Cor
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kernel", "App\Code\Core\Kernel\Source\Kernel.csproj", "{655C75B8-CEF1-4827-901B-F47A73073203}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Frontend", "App\Code\Core\Frontend\Source\Frontend.csproj", "{635CB714-EF99-4CE4-9B5D-D315B78E3BB0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -66,5 +68,9 @@ Global
 		{655C75B8-CEF1-4827-901B-F47A73073203}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{655C75B8-CEF1-4827-901B-F47A73073203}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{655C75B8-CEF1-4827-901B-F47A73073203}.Release|Any CPU.Build.0 = Release|Any CPU
+		{635CB714-EF99-4CE4-9B5D-D315B78E3BB0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{635CB714-EF99-4CE4-9B5D-D315B78E3BB0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{635CB714-EF99-4CE4-9B5D-D315B78E3BB0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{635CB714-EF99-4CE4-9B5D-D315B78E3BB0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
