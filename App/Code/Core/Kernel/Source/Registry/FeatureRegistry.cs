@@ -23,7 +23,7 @@ public static class FeatureRegistry
     /// The dispatch is not awaited. Exceptions raised during dispatch (as opposed to
     /// during compilation) will not propagate to the caller.
     /// </remarks>
-    public static void Add<TInput, TOutput>(Feature<TInput, TOutput> feature)
+    public static void Add<TInput, TOutput>(Feature<TInput, TOutput> feature) where TOutput : class
     {
         var definition = FeatureCompiler.Compile(feature);
 
@@ -115,7 +115,7 @@ internal static class FeatureCompiler
     /// <typeparam name="TOutput">The output type produced by the feature's handler.</typeparam>
     /// <param name="feature">The feature to compile.</param>
     /// <returns>The compiled, type-erased <see cref="FeatureDefinition"/>.</returns>
-    public static FeatureDefinition Compile<TInput, TOutput>(Feature<TInput, TOutput> feature)
+    public static FeatureDefinition Compile<TInput, TOutput>(Feature<TInput, TOutput> feature) where TOutput : class
     {
         return new FeatureDefinition(
             Route: feature.Route,
@@ -123,7 +123,7 @@ internal static class FeatureCompiler
             InputType: typeof(TInput),
             OutputType: typeof(TOutput),
             Executor: BuildExecutor(feature.Handler),
-            ExceptionRules: (Dictionary<Type, FeatureExceptionRule<object>>)(object)feature.Catch
+            ExceptionRules: BuildRules(feature.Catch)
         );
     }
 
@@ -151,27 +151,32 @@ internal static class FeatureCompiler
     /// <summary>
     /// Type-erases a feature's exception rules so they operate on boxed outputs.
     /// </summary>
+    /// <remarks>
+    /// <see cref="Dictionary{TKey, TValue}"/> is invariant in its value type, so a
+    /// <c>Dictionary&lt;Type, FeatureExceptionRule&lt;TOutput&gt;&gt;</c> cannot be passed or cast
+    /// directly where a <c>Dictionary&lt;Type, FeatureExceptionRule&lt;object&gt;&gt;</c> is expected —
+    /// each entry has to be rebuilt into a new dictionary instead. The original exception-type keys are
+    /// preserved, since <see cref="FeatureDefinition.ExceptionRules"/> is looked up by exception type at
+    /// dispatch time.
+    /// </remarks>
     /// <typeparam name="TOutput">The original output type of the rules being erased.</typeparam>
     /// <param name="rules">The typed exception rules, keyed by exception type.</param>
     /// <returns>
-    /// The type-erased rules, or an empty list if <paramref name="rules"/> contains none.
+    /// The type-erased rules, keyed by the same exception types as <paramref name="rules"/>.
     /// </returns>
-    private static IReadOnlyList<FeatureExceptionRule<object>> BuildRules<TOutput>(
+    private static Dictionary<Type, FeatureExceptionRule<object>> BuildRules<TOutput>(
         Dictionary<Type, FeatureExceptionRule<TOutput>> rules)
     {
-        if (rules.Count == 0)
-            return [];
+        var erased = new Dictionary<Type, FeatureExceptionRule<object>>(rules.Count);
 
-        var list = new List<FeatureExceptionRule<object>>(rules.Count);
-
-        foreach (var rule in rules.Values)
+        foreach (var (exceptionType, rule) in rules)
         {
-            list.Add(new FeatureExceptionRule<object>
+            erased[exceptionType] = new FeatureExceptionRule<object>
             {
                 Map = ex => (object)rule.Map(ex)!
-            });
+            };
         }
 
-        return list;
+        return erased;
     }
 }

@@ -12,6 +12,7 @@
     </ItemGroup>
     <ItemGroup>
       <ProjectReference Include="..\..\Eventing\Source\Eventing.csproj" />
+      <ProjectReference Include="..\..\SharedUtils\Source\SharedUtils.csproj" />
     </ItemGroup>
 
     <ItemGroup>

@@ -1,11 +1,44 @@
-using System;
 using System.Reflection;
 using System.Reflection.Emit;
+using LLE.Kernel.Contracts;
+using LLE.Kernel.DataQL.Ast;
+using LLE.Kernel.DataQL.Attributes;
 
 namespace LLE.Kernel.Builders;
 
+/// <summary>
+/// Builds runtime proxy implementations of repository interfaces using <see cref="System.Reflection.Emit"/>.
+/// </summary>
+/// <remarks>
+/// <para>
+/// A "repository interface" is any interface that (directly or transitively) inherits
+/// <see cref="IEntityRepository{T}"/> — and therefore <see cref="IDatabaseAdapter"/> — and may additionally
+/// declare custom query methods decorated with <see cref="QueryAttribute"/>.
+/// </para>
+/// <para>
+/// For a given repository interface, this builder emits a concrete class at runtime that:
+/// <list type="bullet">
+///   <item>Implements every method on the interface and its full inherited interface chain.</item>
+///   <item>Holds a single <see cref="IDatabaseAdapter"/> field, lazily resolved (and cached) on first
+///   use via <see cref="RepositoryProxyHelper.GetOrInitializeAdapter"/> — not in the constructor. This
+///   decouples proxy construction from database-module registration order: a proxy can be built before
+///   its owning database module has subscribed, as long as the module has registered by the time the
+///   first call is actually made.</item>
+///   <item>Forwards every call — whether it's an <see cref="IEntityRepository{T}"/> CRUD method or a
+///   custom <see cref="QueryAttribute"/> method — to the adapter as an <see cref="AstNode"/>, letting
+///   whichever database module owns the adapter interpret the call.</item>
+/// </list>
+/// </para>
+/// <para>
+/// Each call to <see cref="BuildProxyRepository(Type)"/> defines a brand-new dynamic type (suffixed with a
+/// fresh GUID), so the same repository interface can safely be proxied multiple times without type-name
+/// collisions within the dynamic module.
+/// </para>
+/// </remarks>
 public static class RepositoryProxyBuilder
 {
+    // A single dynamic assembly/module is reused for the lifetime of the process. Run-only access means
+    // the generated types are never persisted to disk — they exist purely in memory for this process.
     private static readonly AssemblyBuilder _assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(
         new AssemblyName("LLE.Kernel.DynamicProxies"),
         AssemblyBuilderAccess.Run);
@@ -13,17 +46,71 @@ public static class RepositoryProxyBuilder
     private static readonly ModuleBuilder _moduleBuilder =
         _assemblyBuilder.DefineDynamicModule("LLE.Kernel.DynamicProxies.Module");
 
+    /// <summary>
+    /// Attributes applied to every emitted interface-implementing method: public, overridable via the
+    /// v-table (Virtual), and matching the interface signature exactly by name and type (HideBySig).
+    /// </summary>
+    private const MethodAttributes ImplAttributes =
+        MethodAttributes.Public | MethodAttributes.Virtual |
+        MethodAttributes.HideBySig;
+
+    /// <summary>
+    /// Builds and instantiates a proxy implementation of repository interface <typeparamref name="T"/>.
+    /// </summary>
+    /// <typeparam name="T">The repository interface to implement (must inherit <see cref="IEntityRepository{TEntity}"/>).</typeparam>
+    /// <returns>A new instance of the generated proxy, cast to <typeparamref name="T"/>.</returns>
     public static T BuildProxyRepository<T>() => (T)BuildProxyRepository(typeof(T));
 
+    /// <summary>
+    /// Builds and instantiates a proxy implementation of the given repository interface type.
+    /// </summary>
+    /// <param name="type">
+    /// The repository interface to implement. Must transitively inherit <see cref="IEntityRepository{T}"/>.
+    /// </param>
+    /// <returns>A new instance of the generated proxy type, boxed as <see cref="object"/>.</returns>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown by <see cref="ResolveEntityType"/> if <paramref name="type"/> does not implement
+    /// <see cref="IEntityRepository{T}"/>.
+    /// </exception>
+    /// <exception cref="NotSupportedException">
+    /// Thrown by <see cref="CreateMethodOnProxy"/> if the interface declares a method that is neither
+    /// part of <see cref="IEntityRepository{T}"/>/<see cref="IDatabaseAdapter"/> nor decorated with
+    /// <see cref="QueryAttribute"/>.
+    /// </exception>
     public static object BuildProxyRepository(Type type)
     {
+        // Step 1: Work out the entity type T from IEntityRepository<T>. This is needed up front because
+        // it gets passed into the proxy's constructor so the adapter-resolution logic knows what entity
+        // the repository is for, independent of which specific repository interface is being proxied.
+        var entityType = ResolveEntityType(type);
+
+        // Step 2: Determine the full set of interfaces the proxy type must declare.
+        //
+        // IMPORTANT: type.GetInterfaces() already returns the *entire transitive closure* of inherited
+        // interfaces (e.g. for IUserRepository : IEntityRepository<User>, and IEntityRepository<T> :
+        // IDatabaseAdapter, this returns both IEntityRepository<User> AND IDatabaseAdapter — not just the
+        // immediate parent). We must declare all of them on the TypeBuilder, or the CLR will refuse to
+        // finalize the type: a type that claims to implement an interface must also explicitly implement
+        // every interface that interface itself inherits.
+        var allInterfaces = type.IsInterface
+            ? new[] { type }.Concat(type.GetInterfaces()).Distinct().ToArray()
+            : Array.Empty<Type>();
+
+        // Step 3: Start defining the dynamic type. The interface-based branch is the primary, supported
+        // path: a public class deriving from object that implements every interface from Step 2.
         var typeBuilder = _moduleBuilder.DefineType(
             $"{type.Name}_Proxy_{Guid.NewGuid():N}",
             TypeAttributes.Public | TypeAttributes.Class,
             typeof(object),
-            type.IsInterface ? new[] { type } : Array.Empty<Type>());
+            allInterfaces);
 
-        // If we're proxying a concrete class rather than an interface, inherit from it instead.
+        // NOTE: this branch currently has no effect on the interface case above — it unconditionally
+        // reassigns typeBuilder when `type` is a class, subclassing `type` directly instead of
+        // implementing interfaces. Class-based repository "interfaces" are not really exercised by the
+        // rest of this builder (ResolveEntityType requires GetInterfaces() to find IEntityRepository<T>,
+        // which a plain base class won't satisfy on its own), so this path is effectively dead/unused
+        // today. Left in place in case base-class repositories are supported in the future, but worth
+        // revisiting if it's not actually needed.
         if (!type.IsInterface)
         {
             typeBuilder = _moduleBuilder.DefineType(
@@ -32,29 +119,151 @@ public static class RepositoryProxyBuilder
                 type);
         }
 
+        // Step 4: Declare the fields the proxy needs at call time.
+        //
+        // Adapter resolution is deliberately DEFERRED rather than done in the constructor. Repository
+        // proxies and database modules can be constructed/registered in either order depending on module
+        // load order, so resolving eagerly in the constructor made proxy construction brittle: building a
+        // repository before its owning database module had subscribed would throw immediately. Instead,
+        // _adapter starts out null and is lazily resolved (and cached) by RepositoryProxyHelper on first
+        // use, via GetOrInitializeAdapter — by which point all modules have had a chance to register.
+        var adapterField = typeBuilder.DefineField(
+            "_adapter",
+            typeof(IDatabaseAdapter),
+            FieldAttributes.Private);
+
+        // _repositoryType / _entityType are captured once at construction time (they're cheap, static
+        // facts about the proxy) so GetOrInitializeAdapter has what it needs to resolve _adapter on
+        // first use without the constructor having to do that resolution itself.
+        var repositoryTypeField = typeBuilder.DefineField(
+            "_repositoryType",
+            typeof(Type),
+            FieldAttributes.Private);
+
+        var entityTypeField = typeBuilder.DefineField(
+            "_entityType",
+            typeof(Type),
+            FieldAttributes.Private);
+
+        // Step 5: Emit the parameterless constructor, which now just records the type info needed for
+        // later lazy adapter resolution — it no longer resolves the adapter itself.
+        CreateConstructor(typeBuilder, repositoryTypeField, entityTypeField, type, entityType);
+
+        // Step 6: Emit auto-property backing fields/accessors for any properties declared on the
+        // interface itself (not from GetInterfaces() — properties aren't part of the AstNode dispatch
+        // contract the way methods are, so only the leaf interface's own properties are handled here).
         foreach (var property in type.GetProperties())
         {
             CreatePropertyOnProxy(typeBuilder, property);
         }
 
-        foreach (var method in type.GetMethods())
+        // Step 7: Gather every method that needs an implementation. Like Step 2, this must walk the full
+        // interface closure rather than relying on type.GetMethods() alone, since methods declared on
+        // ancestor interfaces (e.g. CreateAsync on IEntityRepository<T>, ExecuteQuery on IDatabaseAdapter)
+        // need their own emitted bodies on the proxy, distinct from methods declared directly on `type`
+        // (e.g. a custom [Query] method like GetByEmailAsync on IUserRepository itself).
+        var allMethods = type.IsInterface
+            ? new[] { type }.Concat(type.GetInterfaces()).SelectMany(i => i.GetMethods()).Distinct()
+            : type.GetMethods();
+
+        foreach (var method in allMethods)
         {
-            // Skip property accessor methods (get_X / set_X) - they're handled by CreatePropertyOnProxy.
+            // Property accessors (get_X / set_X) are special-name methods already handled by
+            // CreatePropertyOnProxy above — skip them here to avoid emitting duplicate method bodies.
             if (method.IsSpecialName && (method.Name.StartsWith("get_") || method.Name.StartsWith("set_")))
             {
                 continue;
             }
 
-            CreateMethodOnProxy(typeBuilder, method);
+            CreateMethodOnProxy(typeBuilder, method, adapterField, repositoryTypeField, entityTypeField);
         }
 
+        // Step 8: Finalize the type. This is where the CLR validates that every interface member has a
+        // matching emitted method body — if anything from Step 2's interface list lacks an implementation,
+        // CreateType() throws a TypeLoadException here.
         var proxyType = typeBuilder.CreateType();
 
+        // Step 9: Instantiate via the parameterless constructor emitted in Step 5.
         return Activator.CreateInstance(proxyType)!;
     }
 
+    /// <summary>
+    /// Finds the closed <c>T</c> in <see cref="IEntityRepository{T}"/> implemented by
+    /// <paramref name="repositoryType"/>.
+    /// </summary>
+    /// <param name="repositoryType">The repository interface to inspect.</param>
+    /// <returns>The entity type <c>T</c>.</returns>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown if <paramref name="repositoryType"/> does not implement <see cref="IEntityRepository{T}"/>.
+    /// </exception>
+    private static Type ResolveEntityType(Type repositoryType)
+    {
+        foreach (var iface in repositoryType.GetInterfaces())
+        {
+            // Compare against the open generic definition (IEntityRepository<>) since `iface` here is a
+            // closed generic type (e.g. IEntityRepository<User>).
+            if (iface.IsGenericType && iface.GetGenericTypeDefinition() == typeof(IEntityRepository<>))
+            {
+                return iface.GetGenericArguments()[0];
+            }
+        }
+
+        throw new InvalidOperationException(
+            $"Type '{repositoryType.Name}' does not implement IEntityRepository<T>.");
+    }
+
+    /// <summary>
+    /// Emits the proxy's parameterless constructor. The constructor no longer resolves an
+    /// <see cref="IDatabaseAdapter"/> directly — it simply records <paramref name="repositoryType"/> and
+    /// <paramref name="entityType"/> so that <see cref="RepositoryProxyHelper.GetOrInitializeAdapter"/> can
+    /// lazily resolve (and cache) the adapter the first time any generated method actually needs it.
+    /// </summary>
+    /// <param name="typeBuilder">The proxy type under construction.</param>
+    /// <param name="repositoryTypeField">The field that will hold the repository interface type (e.g. IUserRepository).</param>
+    /// <param name="entityTypeField">The field that will hold the entity type T resolved from IEntityRepository&lt;T&gt;.</param>
+    /// <param name="repositoryType">The original repository interface type (e.g. IUserRepository).</param>
+    /// <param name="entityType">The entity type T resolved from IEntityRepository&lt;T&gt;.</param>
+    private static void CreateConstructor(TypeBuilder typeBuilder, FieldBuilder repositoryTypeField,
+        FieldBuilder entityTypeField, Type repositoryType, Type entityType)
+    {
+        var ctorBuilder = typeBuilder.DefineConstructor(
+            MethodAttributes.Public,
+            CallingConventions.Standard,
+            Type.EmptyTypes);
+
+        var il = ctorBuilder.GetILGenerator();
+
+        // base.ctor() — call object's parameterless constructor first, as required for any class.
+        il.Emit(OpCodes.Ldarg_0);
+        il.Emit(OpCodes.Call, typeof(object).GetConstructor(Type.EmptyTypes)!);
+
+        // this._repositoryType = typeof(repositoryType);
+        il.Emit(OpCodes.Ldarg_0);
+        il.Emit(OpCodes.Ldtoken, repositoryType);
+        il.Emit(OpCodes.Call, GetTypeFromHandleMethod);
+        il.Emit(OpCodes.Stfld, repositoryTypeField);
+
+        // this._entityType = typeof(entityType);
+        il.Emit(OpCodes.Ldarg_0);
+        il.Emit(OpCodes.Ldtoken, entityType);
+        il.Emit(OpCodes.Call, GetTypeFromHandleMethod);
+        il.Emit(OpCodes.Stfld, entityTypeField);
+
+        // NOTE: this._adapter is deliberately left at its default value (null) here. It's resolved lazily
+        // by RepositoryProxyHelper.GetOrInitializeAdapter on first use — see CreateExecuteQueryMethod and
+        // CreateDelegateMethod, both of which call it before touching the adapter.
+        il.Emit(OpCodes.Ret);
+    }
+
+    /// <summary>
+    /// Emits a simple auto-property (private backing field + get/set accessors) on the proxy for a
+    /// property declared on the repository interface.
+    /// </summary>
+    /// <param name="typeBuilder">The proxy type under construction.</param>
+    /// <param name="property">The property to implement.</param>
     private static void CreatePropertyOnProxy(TypeBuilder typeBuilder, PropertyInfo property)
     {
+        // Backing field: _PropertyName
         var fieldBuilder = typeBuilder.DefineField(
             $"_{property.Name}",
             property.PropertyType,
@@ -78,6 +287,7 @@ public static class RepositoryProxyBuilder
                 property.PropertyType,
                 Type.EmptyTypes);
 
+            // return this._PropertyName;
             var il = getMethodBuilder.GetILGenerator();
             il.Emit(OpCodes.Ldarg_0);
             il.Emit(OpCodes.Ldfld, fieldBuilder);
@@ -92,8 +302,9 @@ public static class RepositoryProxyBuilder
                 $"set_{property.Name}",
                 accessorAttributes,
                 null,
-                new[] { property.PropertyType });
+                [property.PropertyType]);
 
+            // this._PropertyName = value;
             var il = setMethodBuilder.GetILGenerator();
             il.Emit(OpCodes.Ldarg_0);
             il.Emit(OpCodes.Ldarg_1);
@@ -104,9 +315,159 @@ public static class RepositoryProxyBuilder
         }
     }
 
-    private static void CreateMethodOnProxy(TypeBuilder typeBuilder, MethodInfo method)
+    /// <summary>
+    /// Routes a single interface method to the appropriate IL-emission strategy based on where the
+    /// method is declared (or whether it carries a <see cref="QueryAttribute"/>).
+    /// </summary>
+    /// <param name="typeBuilder">The proxy type under construction.</param>
+    /// <param name="method">The method to implement.</param>
+    /// <param name="adapterField">The field holding the (possibly not-yet-resolved) <see cref="IDatabaseAdapter"/>.</param>
+    /// <param name="repositoryTypeField">The field holding the repository interface type, used for lazy adapter resolution.</param>
+    /// <param name="entityTypeField">The field holding the entity type, used for lazy adapter resolution.</param>
+    /// <exception cref="NotSupportedException">
+    /// Thrown if <paramref name="method"/> is not declared on <see cref="IDatabaseAdapter"/> or
+    /// <see cref="IEntityRepository{T}"/>, and is not decorated with <see cref="QueryAttribute"/>.
+    /// </exception>
+    private static void CreateMethodOnProxy(TypeBuilder typeBuilder, MethodInfo method,
+        FieldBuilder adapterField, FieldBuilder repositoryTypeField, FieldBuilder entityTypeField)
     {
-        // Stub - implement interception/dispatch logic here.
-        throw new NotImplementedException();
+        // Case 1: IDatabaseAdapter.ExecuteQuery itself — forward the caller-supplied AstNode directly
+        // to the adapter, with no synthesized node. This is the one method where the proxy is purely a
+        // pass-through rather than a translator.
+        if (method.DeclaringType == typeof(IDatabaseAdapter))
+        {
+            CreateExecuteQueryMethod(typeBuilder, method, adapterField, repositoryTypeField, entityTypeField);
+            return;
+        }
+
+        // Case 2: a CRUD method inherited from IEntityRepository<T> (CreateAsync, UpdateAsync,
+        // DeleteAsync, FindByIdAsync, FindAllAsync). DeclaringType here is the *closed* generic type
+        // (e.g. IEntityRepository<User>), so we compare against the open generic definition.
+        if (method.DeclaringType.IsGenericType &&
+            method.DeclaringType.GetGenericTypeDefinition() == typeof(IEntityRepository<>))
+        {
+            CreateDelegateMethod(typeBuilder, method, adapterField, repositoryTypeField, entityTypeField);
+            return;
+        }
+
+        // Case 3: a custom method declared directly on the repository interface (e.g.
+        // IUserRepository.GetByEmailAsync), explicitly opted in via [Query].
+        if (method.GetCustomAttribute<QueryAttribute>() != null)
+        {
+            CreateDelegateMethod(typeBuilder, method, adapterField, repositoryTypeField, entityTypeField);
+            return;
+        }
+
+        // Anything else is an interface member the builder doesn't know how to satisfy — fail loudly at
+        // build time rather than emitting a broken/missing method and failing later at CLR load time.
+        throw new NotSupportedException(
+            $"Method '{method.Name}' on repository '{method.DeclaringType?.Name}' is not supported. " +
+            $"Only IEntityRepository<T> members and methods decorated with [Query] are allowed.");
     }
+
+    /// <summary>
+    /// Emits a method body for <see cref="IDatabaseAdapter.ExecuteQuery"/> that lazily resolves the
+    /// adapter (caching it in <paramref name="adapterField"/>) and forwards its single
+    /// <see cref="AstNode"/> argument to it.
+    /// </summary>
+    /// <remarks>
+    /// Equivalent to:
+    /// <c>return RepositoryProxyHelper.GetOrInitializeAdapter(ref this._adapter, this._repositoryType, this._entityType).ExecuteQuery(node);</c>
+    /// </remarks>
+    private static void CreateExecuteQueryMethod(TypeBuilder typeBuilder, MethodInfo method,
+        FieldBuilder adapterField, FieldBuilder repositoryTypeField, FieldBuilder entityTypeField)
+    {
+        var paramTypes = method.GetParameters().Select(p => p.ParameterType).ToArray();
+        var methodBuilder = typeBuilder.DefineMethod(method.Name, ImplAttributes, method.ReturnType, paramTypes);
+
+        var il = methodBuilder.GetILGenerator();
+
+        // Push the by-ref address of this._adapter (NOT its value — Ldflda, not Ldfld) along with
+        // this._repositoryType and this._entityType, then call the helper. The helper checks whether the
+        // field at that address is still null; if so it resolves an adapter and writes it back through
+        // the ref, caching it on the instance for every subsequent call. Either way it returns the
+        // now-non-null adapter.
+        il.Emit(OpCodes.Ldarg_0);
+        il.Emit(OpCodes.Ldflda, adapterField);       // ref this._adapter
+        il.Emit(OpCodes.Ldarg_0);
+        il.Emit(OpCodes.Ldfld, repositoryTypeField);  // this._repositoryType
+        il.Emit(OpCodes.Ldarg_0);
+        il.Emit(OpCodes.Ldfld, entityTypeField);      // this._entityType
+        il.Emit(OpCodes.Call, GetOrInitializeAdapterMethod); // -> IDatabaseAdapter (resolved + cached)
+
+        il.Emit(OpCodes.Ldarg_1);                              // node (the single AstNode parameter)
+        il.Emit(OpCodes.Callvirt, DatabaseAdapterExecuteQuery); // adapter.ExecuteQuery(node)
+        il.Emit(OpCodes.Ret);
+    }
+
+    /// <summary>
+    /// Emits a method body for a CRUD or custom <see cref="QueryAttribute"/> method that lazily resolves
+    /// the adapter, synthesizes a fresh, empty <see cref="AstNode"/>, and forwards both to
+    /// <see cref="RepositoryProxyHelper.ExecuteAsync{T}"/> for dispatch and result-type coercion.
+    /// </summary>
+    /// <remarks>
+    /// Equivalent to:
+    /// <code>
+    /// var adapter = RepositoryProxyHelper.GetOrInitializeAdapter(ref this._adapter, this._repositoryType, this._entityType);
+    /// return RepositoryProxyHelper.ExecuteAsync&lt;TResult&gt;(adapter, new AstNode());
+    /// </code>
+    /// where <c>TResult</c> is the unwrapped generic argument of the method's <see cref="Task{T}"/> return
+    /// type (or <see cref="object"/> if the return type isn't generic).
+    /// </remarks>
+    private static void CreateDelegateMethod(TypeBuilder typeBuilder, MethodInfo method,
+        FieldBuilder adapterField, FieldBuilder repositoryTypeField, FieldBuilder entityTypeField)
+    {
+        var paramTypes = method.GetParameters().Select(p => p.ParameterType).ToArray();
+        var methodBuilder = typeBuilder.DefineMethod(method.Name, ImplAttributes, method.ReturnType, paramTypes);
+
+        var il = methodBuilder.GetILGenerator();
+
+        // Resolve (and, on first call, cache) the adapter the same way as CreateExecuteQueryMethod above.
+        il.Emit(OpCodes.Ldarg_0);
+        il.Emit(OpCodes.Ldflda, adapterField);       // ref this._adapter
+        il.Emit(OpCodes.Ldarg_0);
+        il.Emit(OpCodes.Ldfld, repositoryTypeField);  // this._repositoryType
+        il.Emit(OpCodes.Ldarg_0);
+        il.Emit(OpCodes.Ldfld, entityTypeField);      // this._entityType
+        il.Emit(OpCodes.Call, GetOrInitializeAdapterMethod); // -> IDatabaseAdapter (resolved + cached)
+
+        // new AstNode() — every CRUD/query method currently builds an empty placeholder node rather than
+        // encoding its actual arguments. The interpretation of *what* to query is left entirely to the
+        // subscribing database adapter.
+        il.Emit(OpCodes.Newobj, AstNodeConstructor);
+
+        // Unwrap Task<TResult> to get TResult for the generic ExecuteAsync<T> call below. Methods whose
+        // return type isn't generic (shouldn't normally occur for these methods, but guarded here) fall
+        // back to object.
+        var resultType = method.ReturnType.IsGenericType
+            ? method.ReturnType.GetGenericArguments()[0]
+            : typeof(object);
+
+        // RepositoryProxyHelper.ExecuteAsync<TResult>(adapter, node)
+        il.Emit(OpCodes.Call, ExecuteAsyncMethod.MakeGenericMethod(resultType));
+        il.Emit(OpCodes.Ret);
+    }
+
+    // --- Cached reflection handles used during IL emission ---
+    // Resolved once at static-init time rather than per proxy/method, since reflection lookups are
+    // comparatively expensive and these targets never change.
+
+    private static readonly MethodInfo GetTypeFromHandleMethod =
+        typeof(Type).GetMethod("GetTypeFromHandle", [typeof(RuntimeTypeHandle)])!;
+
+    private static readonly MethodInfo GetOrInitializeAdapterMethod =
+        typeof(RepositoryProxyHelper).GetMethod(
+            nameof(RepositoryProxyHelper.GetOrInitializeAdapter),
+            BindingFlags.Public | BindingFlags.Static)!;
+
+    private static readonly ConstructorInfo AstNodeConstructor =
+        typeof(AstNode).GetConstructor(Type.EmptyTypes)!;
+
+    private static readonly MethodInfo DatabaseAdapterExecuteQuery =
+        typeof(IDatabaseAdapter).GetMethod(nameof(IDatabaseAdapter.ExecuteQuery))!;
+
+    private static readonly MethodInfo ExecuteAsyncMethod =
+        typeof(RepositoryProxyHelper).GetMethod(
+            nameof(RepositoryProxyHelper.ExecuteAsync),
+            BindingFlags.Public | BindingFlags.Static)!;
 }

@@ -14,5 +14,9 @@
   "LLE.TypeScript.TypeScriptModule": {
     "IsEnabled": true,
     "IsInstalled": true
+  },
+  "LLE.SQLiteAdapter.SQLiteModule": {
+    "IsEnabled": true,
+    "IsInstalled": true
   }
 }

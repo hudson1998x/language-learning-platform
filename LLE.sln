@@ -26,6 +26,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommunityModuleRegistry", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Auth", "App\Code\Core\Auth\Source\Auth.csproj", "{56899090-3624-4F7F-BBF0-D6E64E77DE4B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SQLite", "App\Code\Community\SQLite\Source\SQLite.csproj", "{100AE4D8-F0F6-4C12-8E06-4073C1CA7909}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -112,5 +114,9 @@ Global
 		{56899090-3624-4F7F-BBF0-D6E64E77DE4B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{56899090-3624-4F7F-BBF0-D6E64E77DE4B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{56899090-3624-4F7F-BBF0-D6E64E77DE4B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{100AE4D8-F0F6-4C12-8E06-4073C1CA7909}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{100AE4D8-F0F6-4C12-8E06-4073C1CA7909}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{100AE4D8-F0F6-4C12-8E06-4073C1CA7909}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{100AE4D8-F0F6-4C12-8E06-4073C1CA7909}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
