@@ -10,6 +10,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\Local\AppRegistry\Source\LocalAppRegistry.csproj" />
       <ProjectReference Include="..\Dependencies\Source\Dependencies.csproj" />
       <ProjectReference Include="..\Frontend\Source\Frontend.csproj" />
       <ProjectReference Include="..\Kernel\Source\Kernel.csproj" />

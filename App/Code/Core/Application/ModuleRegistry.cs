@@ -12,5 +12,10 @@ public static class ModuleRegistry
         // here
         // ============================
         ApplicationLoader.AddModule(new FrontendModule());
+        
+        // ============================
+        // Add Local Modules here
+        // ============================
+        LocalAppRegistry.LocalAppRegistry.LoadModules();
     }
 }

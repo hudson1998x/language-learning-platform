@@ -9,7 +9,7 @@ namespace LLE.Frontend;
 public class FrontendModule : IModuleLoader
 {
     
-    public async Task AppStart()
+    public Task AppStart()
     {
         // register the serializer for HtmlBuilder.
         Eventing.Eventing.Of<HttpSocketEvents>().Ready.Concurrent((http) =>
@@ -32,15 +32,20 @@ public class FrontendModule : IModuleLoader
                 await FrontendApp(context);
             });
         });
+        
+        // until an await is used, we just return this.
+        return Task.CompletedTask;
     }
 
-    private async Task FrontendApp(HttpContext context, bool is404 = false)
+    private static async Task FrontendApp(HttpContext context, bool is404 = false)
     {
         context.Response.StatusCode = 200;
         context.Response.ContentType = "text/html";
 
         var builder = await HtmlBuilder.Create();
 
+        // TODO: Instead of Untitled, put something more useful, potentially
+        //  a configuration thing.
         builder.WithTitle(is404 ? "Page not found" : "Untitled");
         
         await builder.WriteToStreamAsync(context.Response.BodyWriter);
