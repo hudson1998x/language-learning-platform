@@ -1,5 +1,6 @@
 using LLE.Frontend.Events;
 using LLE.Kernel.Contracts;
+using LLE.ReactFrontend.Generators;
 using LLE.Sockets.Events;
 using LLE.TypeScript.Builders;
 using LLE.TypeScript.Events;
@@ -31,9 +32,9 @@ public class ReactFrontendModule : IModuleLoader
                 tsconfig.CompilerOptions.Jsx = JsxMode.ReactJsx;
                 tsconfig.CompilerOptions.Paths.TryAdd(
                     "@component/*", [
-                        "./Design/React/Components/Local/*",
-                        "./Design/React/Components/Community/*",
-                        "./Design/React/Components/Core/*",
+                        "./App/Design/React/Components/Local/*",
+                        "./App/Design/React/Components/Community/*",
+                        "./App/Design/React/Components/Core/*",
                     ]
                 );
                 tsconfig.CompilerOptions.Paths.TryAdd(
@@ -45,17 +46,23 @@ public class ReactFrontendModule : IModuleLoader
                 );
                 tsconfig.CompilerOptions.Paths.TryAdd(
                     "@theme:admin/*", [
-                        "./Design/React/Themes/Admin/Local/*",
-                        "./Design/React/Themes/Admin/Community/*",
-                        "./Design/React/Themes/Admin/Core/*",
+                        "./App/Design/React/Themes/Admin/Local/*",
+                        "./App/Design/React/Themes/Admin/Community/*",
+                        "./App/Design/React/Themes/Admin/Core/*",
                     ]
                 );
                 tsconfig.CompilerOptions.Paths.TryAdd(
                     "@theme:frontend/*", [
-                        "./Design/React/Themes/Frontend/Local/*",
-                        "./Design/React/Themes/Frontend/Community/*",
-                        "./Design/React/Themes/Frontend/Core/*",
+                        "./App/Design/React/Themes/Frontend/Local/*",
+                        "./App/Design/React/Themes/Frontend/Community/*",
+                        "./App/Design/React/Themes/Frontend/Core/*",
                     ]
+                );
+                tsconfig.Include.Add(
+                    "./App/Code/Local/ReactFrontend/Source/web/index.tsx"
+                );
+                tsconfig.Exclude.Add(
+                    "./App/Code/Local/ReactFrontend/Source/web/dist/*"
                 );
             }
         );
@@ -91,15 +98,20 @@ public class ReactFrontendModule : IModuleLoader
                 });
                 httpServer.MapGet("/app.css", async httpContext =>
                 {
-                    httpContext.Response.ContentType = "text/javascript";
+                    httpContext.Response.ContentType = "text/css";
                     httpContext.Response.StatusCode = 200;
                     await httpContext.Response.WriteAsync(await File.ReadAllTextAsync("App/Code/Local/ReactFrontend/Source/web/dist/index.css"));
                 });
             }
         );
         
+        // load all components into a registry. 
+        var generator = new ComponentRegistryGenerator();
+        generator.GenerateComponentRegistry();
+        
         return Task.CompletedTask;
     }
+
 
     public Task AppStop() => Noop();
 

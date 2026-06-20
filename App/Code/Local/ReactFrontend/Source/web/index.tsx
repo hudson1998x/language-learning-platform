@@ -1,6 +1,7 @@
 import { createRoot } from 'react-dom/client'
 import {Canvas, CanvasNode} from "./canvas";
 import './global.scss'
+import './generated.registry'
 
 const root = createRoot(document.getElementById('app'));
 

@@ -4,9 +4,9 @@
     "allowJs": true,
     "paths": {
       "@component/*": [
-        "./Design/React/Components/Local/*",
-        "./Design/React/Components/Community/*",
-        "./Design/React/Components/Core/*"
+        "./App/Design/React/Components/Local/*",
+        "./App/Design/React/Components/Community/*",
+        "./App/Design/React/Components/Core/*"
       ],
       "@hook/*": [
         "./Design/React/Hooks/Local/*",
@@ -14,17 +14,21 @@
         "./Design/React/Hooks/Core/*"
       ],
       "@theme:admin/*": [
-        "./Design/React/Themes/Admin/Local/*",
-        "./Design/React/Themes/Admin/Community/*",
-        "./Design/React/Themes/Admin/Core/*"
+        "./App/Design/React/Themes/Admin/Local/*",
+        "./App/Design/React/Themes/Admin/Community/*",
+        "./App/Design/React/Themes/Admin/Core/*"
       ],
       "@theme:frontend/*": [
-        "./Design/React/Themes/Frontend/Local/*",
-        "./Design/React/Themes/Frontend/Community/*",
-        "./Design/React/Themes/Frontend/Core/*"
+        "./App/Design/React/Themes/Frontend/Local/*",
+        "./App/Design/React/Themes/Frontend/Community/*",
+        "./App/Design/React/Themes/Frontend/Core/*"
       ]
     }
   },
-  "include": [],
-  "exclude": []
+  "include": [
+    "./App/Code/Local/ReactFrontend/Source/web/index.tsx"
+  ],
+  "exclude": [
+    "./App/Code/Local/ReactFrontend/Source/web/dist/*"
+  ]
 }

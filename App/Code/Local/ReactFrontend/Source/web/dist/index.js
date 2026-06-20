@@ -21731,6 +21731,9 @@
   // App/Code/Local/ReactFrontend/Source/web/registry.tsx
   var import_jsx_runtime = __toESM(require_jsx_runtime(), 1);
   window.__canvas_components = {};
+  var register = (name, node) => {
+    window.__canvas_components[name] = node;
+  };
   var mod = (name) => {
     if (window.__canvas_components[name]) {
       return window.__canvas_components[name];
@@ -21756,11 +21759,20 @@
     return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(import_jsx_runtime2.Fragment, { children: renderNode(children) });
   };
 
-  // App/Code/Local/ReactFrontend/Source/web/index.tsx
+  // App/Design/React/Components/Core/Text/index.tsx
   var import_jsx_runtime3 = __toESM(require_jsx_runtime(), 1);
+  var Text = (props) => {
+    return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("p", { children: props.text });
+  };
+
+  // App/Code/Local/ReactFrontend/Source/web/generated.registry.tsx
+  register("@component/Text", Text);
+
+  // App/Code/Local/ReactFrontend/Source/web/index.tsx
+  var import_jsx_runtime4 = __toESM(require_jsx_runtime(), 1);
   var root = (0, import_client.createRoot)(document.getElementById("app"));
   root.render(
-    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(Canvas, { children: window.canvasState })
+    /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Canvas, { children: window.canvasState })
   );
 })();
 /*! Bundled license information:
