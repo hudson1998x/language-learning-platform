@@ -67,7 +67,7 @@ public class PagesModule : IModuleLoader
                     "@component/Text",
                     new Dictionary<string, object>()
                     {
-                        ["Text"] = "After edit"
+                        ["Text"] = "After edit 2"
                     },
                     []
                 )

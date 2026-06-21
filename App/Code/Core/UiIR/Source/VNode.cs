@@ -95,7 +95,7 @@ public class VNode
     public override string ToString()
     {
         var props = string.Join(",", (_properties ?? []).Select(kvp =>
-            $"\"{EscapeJson(kvp.Key)}\":{FormatValue(kvp.Value)}"));
+            $"\"{EscapeJson(char.ToLowerInvariant(kvp.Key[0]) + kvp.Key[1..])}\":{FormatValue(kvp.Value)}"));
 
         var children = string.Join(",", (_children ?? []).Select(c => c.ToString()));
 
@@ -121,8 +121,6 @@ public class VNode
         {
             return string.Empty;
         }
-
-        s = char.ToLowerInvariant(s[0]) + s[1..];
 
         return s
             .Replace("\\", "\\\\")
