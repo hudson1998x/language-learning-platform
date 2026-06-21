@@ -1,4 +1,5 @@
 using LLE.Kernel;
+using LLE.Languages;
 using LLE.Pages;
 using LLE.ReactFrontend;
 using LLE.SQLiteAdapter;
@@ -12,5 +13,6 @@ public static class CommunityModuleRegistry
         ApplicationLoader.AddModule(new ReactFrontendModule());
         ApplicationLoader.AddModule(new SQLiteModule());
         ApplicationLoader.AddModule(new PagesModule());
+        ApplicationLoader.AddModule(new LanguageModule());
     }
 }

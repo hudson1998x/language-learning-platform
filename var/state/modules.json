@@ -3,6 +3,10 @@
     "IsEnabled": true,
     "IsInstalled": true
   },
+  "LLE.Languages.LanguageModule": {
+    "IsEnabled": true,
+    "IsInstalled": true
+  },
   "LLE.Frontend.FrontendModule": {
     "IsEnabled": true,
     "IsInstalled": true

@@ -1,8 +1,7 @@
-export interface User {
-    email: string;
-    password: string;
-    fullName: string;
-    roleId?: string | null;
+export interface Language {
+    name: string;
+    description: string;
+    flagIcon: string;
     id: string;
     createTime: string;
     updateTime: string;
@@ -14,8 +13,8 @@ export interface ApiResponse<T> {
     data?: T | null;
 }
 
-export const createUser = (payload: User): Promise<ApiResponse<User>> => {
-    return fetch('/api/user/create', {
+export const createLanguage = (payload: Language): Promise<ApiResponse<Language>> => {
+    return fetch('/api/language/create', {
         method: "PUT",
         headers: {
             "Content-Type": "application/json"
@@ -30,8 +29,8 @@ export const createUser = (payload: User): Promise<ApiResponse<User>> => {
     });
 };
 
-export const updateUser = (payload: User): Promise<ApiResponse<User>> => {
-    return fetch('/api/user/update', {
+export const updateLanguage = (payload: Language): Promise<ApiResponse<Language>> => {
+    return fetch('/api/language/update', {
         method: "PATCH",
         headers: {
             "Content-Type": "application/json"
@@ -46,8 +45,8 @@ export const updateUser = (payload: User): Promise<ApiResponse<User>> => {
     });
 };
 
-export const deleteUser = (payload: User): Promise<ApiResponse<User>> => {
-    return fetch('/api/user/delete', {
+export const deleteLanguage = (payload: Language): Promise<ApiResponse<Language>> => {
+    return fetch('/api/language/delete', {
         method: "DELETE",
         headers: {
             "Content-Type": "application/json"
@@ -62,8 +61,8 @@ export const deleteUser = (payload: User): Promise<ApiResponse<User>> => {
     });
 };
 
-export const listAllUser = (): Promise<ApiResponse<User[]>> => {
-    return fetch('/api/user/list', {
+export const listAllLanguage = (): Promise<ApiResponse<Language[]>> => {
+    return fetch('/api/language/list', {
         method: "GET",
     })
     .then((response: Response) => {
@@ -74,8 +73,8 @@ export const listAllUser = (): Promise<ApiResponse<User[]>> => {
     });
 };
 
-export const loadUser = (): Promise<ApiResponse<User>> => {
-    return fetch('/api/user/{id}', {
+export const loadLanguage = (): Promise<ApiResponse<Language>> => {
+    return fetch('/api/language/{id}', {
         method: "GET",
     })
     .then((response: Response) => {

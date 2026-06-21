@@ -6,6 +6,7 @@ export interface LoginBody {
 export interface User {
     email: string;
     password: string;
+    fullName: string;
     roleId?: string | null;
     id: string;
     createTime: string;
