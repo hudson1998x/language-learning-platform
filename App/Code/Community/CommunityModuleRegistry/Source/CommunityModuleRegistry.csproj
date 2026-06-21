@@ -9,6 +9,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\..\Core\Kernel\Source\Kernel.csproj" />
+      <ProjectReference Include="..\..\Pages\Source\Pages.csproj" />
       <ProjectReference Include="..\..\ReactFrontend\Source\ReactFrontend.csproj" />
       <ProjectReference Include="..\..\SQLite\Source\SQLite.csproj" />
     </ItemGroup>

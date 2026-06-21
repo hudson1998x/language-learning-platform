@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace LLE.UiIR;
 
 /// <summary>
@@ -7,8 +9,31 @@ namespace LLE.UiIR;
 public class VNode
 {
     private string _component;
-    private readonly Dictionary<string, object> _properties;
+    private Dictionary<string, object> _properties;
     private readonly List<VNode> _children = [];
+
+    /// <summary>
+    /// Gets or sets the component identifier.
+    /// </summary>
+    public string Component { get => _component; set => _component = value; }
+
+    /// <summary>
+    /// Gets or sets the component properties.
+    /// </summary>
+    public Dictionary<string, object> Properties { get => _properties; set => _properties = value; }
+
+    /// <summary>
+    /// Gets or sets the child VNodes.
+    /// </summary>
+    public List<VNode> Children
+    {
+        get => _children;
+        set
+        {
+            _children.Clear();
+            _children.AddRange(value);
+        }
+    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="VNode"/> class.
@@ -21,6 +46,20 @@ public class VNode
         _component = component;
         _properties = props;
         _children.AddRange(children);
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="VNode"/> class from deserialized JSON.
+    /// </summary>
+    /// <param name="component">The component identifier.</param>
+    /// <param name="properties">The component properties.</param>
+    /// <param name="children">The child VNodes.</param>
+    [JsonConstructor]
+    public VNode(string component, Dictionary<string, object> properties, List<VNode> children)
+    {
+        _component = component;
+        _properties = properties;
+        _children = children ?? [];
     }
     
     /// <summary>
@@ -55,10 +94,10 @@ public class VNode
 
     public override string ToString()
     {
-        var props = string.Join(",", _properties.Select(kvp =>
+        var props = string.Join(",", (_properties ?? []).Select(kvp =>
             $"\"{EscapeJson(kvp.Key)}\":{FormatValue(kvp.Value)}"));
 
-        var children = string.Join(",", _children.Select(c => c.ToString()));
+        var children = string.Join(",", (_children ?? []).Select(c => c.ToString()));
 
         return $"{{\"t\":\"{EscapeJson(_component)}\",\"p\":{{{props}}},\"c\":[{children}]}}";
     }
@@ -91,5 +130,14 @@ public class VNode
             .Replace("\n", "\\n")
             .Replace("\r", "\\r")
             .Replace("\t", "\\t");
+    }
+
+    public void Change(VNode canvasNode)
+    {
+        _component = canvasNode._component;
+        _children.Clear();
+        _children.AddRange(canvasNode._children);
+        _properties.Clear();
+        _properties = canvasNode._properties;
     }
 }

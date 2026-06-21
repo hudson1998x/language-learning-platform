@@ -1,8 +1,9 @@
 using LLE.Kernel;
+using LLE.Pages;
 using LLE.ReactFrontend;
 using LLE.SQLiteAdapter;
 
-namespace LLE.LocalAppRegistry;
+namespace LLE.CommunityModuleRegistry;
 
 public static class CommunityModuleRegistry
 {
@@ -10,5 +11,6 @@ public static class CommunityModuleRegistry
     {
         ApplicationLoader.AddModule(new ReactFrontendModule());
         ApplicationLoader.AddModule(new SQLiteModule());
+        ApplicationLoader.AddModule(new PagesModule());
     }
 }

@@ -7,4 +7,11 @@
         <RootNamespace>LLE.Pages</RootNamespace>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\..\..\Core\Frontend\Source\Frontend.csproj" />
+      <ProjectReference Include="..\..\..\Core\Kernel\Source\Kernel.csproj" />
+      <ProjectReference Include="..\..\..\Core\Sockets\Source\Sockets.csproj" />
+      <ProjectReference Include="..\..\..\Core\UiIR\Source\UiIR.csproj" />
+    </ItemGroup>
+
 </Project>

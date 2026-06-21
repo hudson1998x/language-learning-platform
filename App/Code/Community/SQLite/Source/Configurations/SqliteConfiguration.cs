@@ -5,5 +5,5 @@ namespace LLE.SQLiteAdapter.Configurations;
 [Configuration]
 public class SqliteConfiguration
 {
-    public string AppDbFile { get; set; } = "var/app.db";
+    public string AppDbFile { get; set; } = "var/lle.db";
 }

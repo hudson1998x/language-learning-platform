@@ -21,7 +21,7 @@ public static class ModuleRegistry
         // ============================
         // Community Modules
         // ============================
-        CommunityModuleRegistry.LoadModules();
+        CommunityModuleRegistry.CommunityModuleRegistry.LoadModules();
         
         // ============================
         // Add Local Modules here

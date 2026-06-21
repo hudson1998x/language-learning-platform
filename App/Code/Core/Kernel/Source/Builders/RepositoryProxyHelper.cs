@@ -99,7 +99,23 @@ public static class RepositoryProxyHelper
                 break;
         }
 
-        var result = (T)(await adapter.ExecuteQuery(node).ConfigureAwait(false))!;
+        var raw = await adapter.ExecuteQuery(node).ConfigureAwait(false);
+        T result;
+        if (raw is System.Collections.IList list
+            && typeof(T).IsGenericType
+            && typeof(T).GetGenericTypeDefinition() == typeof(List<>))
+        {
+            var elementType = typeof(T).GetGenericArguments()[0];
+            var typedList = (System.Collections.IList)Activator
+                .CreateInstance(typeof(List<>).MakeGenericType(elementType))!;
+            for (var i = 0; i < list.Count; i++)
+                typedList.Add(list[i]);
+            result = (T)typedList;
+        }
+        else
+        {
+            result = (T)raw!;
+        }
 
         switch (node)
         {

@@ -18,5 +18,9 @@
   "LLE.SQLiteAdapter.SQLiteModule": {
     "IsEnabled": true,
     "IsInstalled": true
+  },
+  "LLE.Pages.PagesModule": {
+    "IsEnabled": true,
+    "IsInstalled": true
   }
 }
