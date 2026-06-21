@@ -8,6 +8,12 @@ namespace LLE.Kernel.DataQL.Ast
         
         public AstNode? Where;
 
+        public List<SortOption>? OrderBy;
+
+        public Pagination? Pagination;
+
+        public bool IsCount;
+
         public override TResult Accept<TResult>(IAstVisitor<TResult> visitor)
             => visitor.Visit(this);
     }

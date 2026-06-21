@@ -572,12 +572,53 @@ public static class RepositoryProxyBuilder
 
             case "FindAllAsync" when isCached:
             {
-                // return Task.FromResult(FindAllFromCache<T>(cache))
+                var sortByIdx = FindParameterIndex(method, typeof(SortOption));
+                var paginationIdx = FindParameterIndex(method, typeof(Pagination));
+
+                var findAllResultType = method.ReturnType.GetGenericArguments()[0];
+
+                if (sortByIdx < 0 && paginationIdx < 0)
+                {
+                    // return Task.FromResult(FindAllFromCache<T>(cache))
+                    il.Emit(OpCodes.Ldloc, cacheLocal!);
+                    il.Emit(OpCodes.Call, FindAllFromCacheMethod.MakeGenericMethod(entityType));
+
+                    il.Emit(OpCodes.Call, TaskFromResultMethod.MakeGenericMethod(findAllResultType));
+                    il.Emit(OpCodes.Ret);
+                    return;
+                }
+
+                // Runtime check: if sortBy != null || pagination != null, use adapter
+                var useAdapter = il.DefineLabel();
+                var useCache = il.DefineLabel();
+
+                if (sortByIdx >= 0)
+                {
+                    EmitLoadArg(il, sortByIdx + 1);
+                    il.Emit(OpCodes.Brtrue, useAdapter);
+                }
+
+                if (paginationIdx >= 0)
+                {
+                    EmitLoadArg(il, paginationIdx + 1);
+                    il.Emit(OpCodes.Brtrue, useAdapter);
+                }
+
+                il.Emit(OpCodes.Br, useCache);
+
+                il.MarkLabel(useAdapter);
+                il.Emit(OpCodes.Ldloc, adapterLocal);
+                EmitReadQueryNode(il, entityType);
+                EmitSortingAndPaginationOnNode(il, method);
+                EmitContextAndOptions(il, method);
+
+                il.Emit(OpCodes.Call, ExecuteAsyncMethod.MakeGenericMethod(findAllResultType));
+                il.Emit(OpCodes.Ret);
+
+                il.MarkLabel(useCache);
                 il.Emit(OpCodes.Ldloc, cacheLocal!);
                 il.Emit(OpCodes.Call, FindAllFromCacheMethod.MakeGenericMethod(entityType));
-
-                var resultType = method.ReturnType.GetGenericArguments()[0];
-                il.Emit(OpCodes.Call, TaskFromResultMethod.MakeGenericMethod(resultType));
+                il.Emit(OpCodes.Call, TaskFromResultMethod.MakeGenericMethod(findAllResultType));
                 il.Emit(OpCodes.Ret);
                 return;
             }
@@ -586,10 +627,25 @@ public static class RepositoryProxyBuilder
             {
                 il.Emit(OpCodes.Ldloc, adapterLocal);
                 EmitReadQueryNode(il, entityType);
+                EmitSortingAndPaginationOnNode(il, method);
                 EmitContextAndOptions(il, method);
 
                 var resultType = method.ReturnType.GetGenericArguments()[0];
                 il.Emit(OpCodes.Call, ExecuteAsyncMethod.MakeGenericMethod(resultType));
+                il.Emit(OpCodes.Ret);
+                return;
+            }
+
+            case "TotalRecords":
+            {
+                il.Emit(OpCodes.Ldloc, adapterLocal);
+                EmitReadQueryNode(il, entityType);
+                il.Emit(OpCodes.Dup);
+                il.Emit(OpCodes.Ldc_I4_1);
+                il.Emit(OpCodes.Stfld, ReadQueryNodeIsCountField);
+                EmitContextAndOptions(il, method);
+
+                il.Emit(OpCodes.Call, ExecuteAsyncMethod.MakeGenericMethod(typeof(int)));
                 il.Emit(OpCodes.Ret);
                 return;
             }
@@ -824,6 +880,9 @@ public static class RepositoryProxyBuilder
         il.Emit(OpCodes.Callvirt, AstNodeSetEntityType);
 
         // stack: [adapter, node]
+        // node.OrderBy = sortBy (if present); node.Pagination = pagination (if present)
+        EmitSortingAndPaginationOnNode(il, method);
+        // stack: [adapter, node]
         EmitContextAndOptions(il, method);
 
         // stack: [adapter, node, context, options] → ExecuteAsync<TResult>(adapter, node, context, options)
@@ -843,6 +902,37 @@ public static class RepositoryProxyBuilder
             var paramType = parameters[i].ParameterType;
             if (paramType == typeof(UserContext) || paramType == typeof(DataOptions))
                 EmitLoadArg(il, i + 1);
+        }
+    }
+
+    private static int FindParameterIndex(MethodInfo method, Type type)
+    {
+        var parameters = method.GetParameters();
+        for (var i = 0; i < parameters.Length; i++)
+        {
+            if (parameters[i].ParameterType == type)
+                return i;
+        }
+        return -1;
+    }
+
+    private static void EmitSortingAndPaginationOnNode(ILGenerator il, MethodInfo method)
+    {
+        var sortByIdx = FindParameterIndex(method, typeof(SortOption));
+        var paginationIdx = FindParameterIndex(method, typeof(Pagination));
+
+        if (sortByIdx >= 0)
+        {
+            il.Emit(OpCodes.Dup);
+            EmitLoadArg(il, sortByIdx + 1);
+            il.Emit(OpCodes.Stfld, ReadQueryNodeOrderByField);
+        }
+
+        if (paginationIdx >= 0)
+        {
+            il.Emit(OpCodes.Dup);
+            EmitLoadArg(il, paginationIdx + 1);
+            il.Emit(OpCodes.Stfld, ReadQueryNodePaginationField);
         }
     }
 
@@ -961,6 +1051,15 @@ public static class RepositoryProxyBuilder
 
     private static readonly FieldInfo ReadQueryNodeWhereField =
         typeof(ReadQueryNode).GetField("Where")!;
+
+    private static readonly FieldInfo ReadQueryNodeOrderByField =
+        typeof(ReadQueryNode).GetField(nameof(ReadQueryNode.OrderBy))!;
+
+    private static readonly FieldInfo ReadQueryNodePaginationField =
+        typeof(ReadQueryNode).GetField(nameof(ReadQueryNode.Pagination))!;
+
+    private static readonly FieldInfo ReadQueryNodeIsCountField =
+        typeof(ReadQueryNode).GetField(nameof(ReadQueryNode.IsCount))!;
 
     // --- WriteQueryNode ---
     private static readonly ConstructorInfo WriteQueryNodeConstructor =
