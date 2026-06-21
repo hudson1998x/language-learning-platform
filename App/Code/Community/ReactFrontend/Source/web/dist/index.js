@@ -22101,49 +22101,87 @@
     ] }) });
   };
 
-  // App/Design/React/Themes/Frontend/Local/Default/Blocks/Topbar/index.tsx
+  // App/Design/React/Themes/Frontend/Local/Default/Blocks/UserCard/index.tsx
   var import_jsx_runtime6 = __toESM(require_jsx_runtime(), 1);
+  var UserCard = () => {
+    const { session } = useSession();
+    const { user } = session;
+    return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "user-card", children: user?.email });
+  };
+
+  // App/Design/React/Themes/Frontend/Local/Default/Blocks/Navbar/index.tsx
+  var import_jsx_runtime7 = __toESM(require_jsx_runtime(), 1);
+  var LINKS = [
+    { label: "Dashboard", href: "/" },
+    { label: "Flash cards", href: "/flashcards" },
+    { label: "Music translation", href: "/musiclyrics" },
+    { label: "Scenarios", href: "/scenarios" },
+    { label: "Leddit", href: "/leddit" },
+    { label: "LeMessage", href: "/lemessage" }
+  ];
+  var NavBar = ({ links = LINKS, initialActive = links[0]?.href }) => {
+    const active = links.filter((l) => l.href == location.pathname)?.[0]?.href;
+    return /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("nav", { className: "navbar", children: /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("ul", { className: "navbar__list", children: links.map((link) => /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("li", { className: "navbar__item", children: /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(
+      "a",
+      {
+        href: link.href,
+        className: `navbar__link ${active === link.href ? "navbar__link--active" : ""}`,
+        "aria-current": active === link.href ? "page" : void 0,
+        children: link.label
+      }
+    ) }, link.href)) }) });
+  };
+
+  // App/Design/React/Themes/Frontend/Local/Default/Blocks/Topbar/index.tsx
+  var import_jsx_runtime8 = __toESM(require_jsx_runtime(), 1);
   var Topbar = () => {
-    return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "lle-topbar" });
+    return /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)("div", { className: "lle-topbar", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("div", { className: "logo-box", children: "LLE" }),
+      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("div", { className: "nav-container", children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(NavBar, {}) }),
+      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(UserCard, {})
+    ] });
   };
 
   // App/Design/React/Themes/Frontend/Local/Default/index.tsx
-  var import_jsx_runtime7 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime9 = __toESM(require_jsx_runtime(), 1);
   var LLEThemeWrapper = (props) => {
-    return /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(SessionProvider, { children: /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(LLETheme, { ...props }) });
+    return /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(SessionProvider, { children: /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(LLETheme, { ...props }) });
   };
   var LLETheme = (props) => {
     const { session } = useSession();
     const [page, setPage] = (0, import_react7.useState)(0 /* SignIn */);
     if (!session?.user) {
       if (page == 0 /* SignIn */) {
-        return /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(AppSignin, { onSwitchToRegister: () => setPage(1 /* Register */) });
+        return /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(AppSignin, { onSwitchToRegister: () => setPage(1 /* Register */) });
       }
       if (page == 1 /* Register */) {
-        return /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(AppRegister, { onSwitchToSignIn: () => setPage(0 /* SignIn */) });
+        return /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(AppRegister, { onSwitchToSignIn: () => setPage(0 /* SignIn */) });
       }
     }
-    return /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("div", { className: "lle-default-theme", children: /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(Topbar, {}) });
+    return /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "lle-default-theme", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Topbar, {}),
+      /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("div", { className: "lle-default-page-content", children: props.children })
+    ] });
   };
   var Default_default = LLEThemeWrapper;
 
   // App/Design/React/Themes/Admin/Core/Default/index.tsx
-  var import_jsx_runtime8 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime10 = __toESM(require_jsx_runtime(), 1);
 
   // App/Design/React/Components/Core/Text/index.tsx
-  var import_jsx_runtime9 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime11 = __toESM(require_jsx_runtime(), 1);
   var Text = (props) => {
-    return /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("p", { children: props.text });
+    return /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("p", { children: props.text });
   };
 
   // App/Code/Community/ReactFrontend/Source/web/generated.registry.tsx
   register("@component/Text", Text);
 
   // App/Code/Community/ReactFrontend/Source/web/index.tsx
-  var import_jsx_runtime10 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime12 = __toESM(require_jsx_runtime(), 1);
   var root = (0, import_client.createRoot)(document.getElementById("app"));
   root.render(
-    /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Default_default, { children: /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Canvas, { children: window.canvasState }) })
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Default_default, { children: /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Canvas, { children: window.canvasState }) })
   );
 })();
 /*! Bundled license information:

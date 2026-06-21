@@ -1,6 +1,9 @@
 using LLE.Auth.Dto;
 using LLE.Auth.Exceptions;
+using LLE.Auth.Features.Roles;
+using LLE.Auth.Features.Users;
 using LLE.Auth.Handlers;
+using LLE.Kernel.AutoEntity;
 using LLE.Kernel.Registry;
 
 namespace LLE.Auth
@@ -9,6 +12,10 @@ namespace LLE.Auth
     {
         public static void LoadFeatures()
         {
+            AutoEntityFeature.AutoFeature<User, IUserRepository>();
+            AutoEntityFeature.AutoFeature<Role, IRoleRepository>();
+            
+            
             FeatureRegistry.Add(new Feature<LoginBody, LoginResponse>
             {
                 FeatureName = "userLogin",

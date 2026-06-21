@@ -354,4 +354,97 @@ body {
   inset: 0;
   background: #0b0c0e;
 }
+
+/* App/Design/React/Themes/Frontend/Local/Default/Blocks/Navbar/style.scss */
+.navbar {
+  --navbar-bg: #1c1c1e;
+  --navbar-border: #38383a;
+  --navbar-text: #98989d;
+  --navbar-text-active: #f5f5f7;
+  --navbar-active-bg: #241786;
+  display: flex;
+  align-items: center;
+  height: 24px;
+  padding: 3px;
+  background: var(--navbar-bg);
+  border: 1px solid var(--navbar-border);
+  border-radius: 4px;
+  width: fit-content;
+}
+.navbar__list {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.navbar__item {
+  flex: 1;
+  height: 100%;
+  display: flex;
+}
+.navbar__link {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 0 10px;
+  border-radius: 2px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--navbar-text);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.2s ease, background-color 0.2s ease;
+  font-family: system-ui;
+}
+.navbar__link:hover {
+  color: var(--navbar-text-active);
+}
+.navbar__link:focus-visible {
+  outline: 2px solid #0a84ff;
+  outline-offset: 2px;
+}
+.navbar__link--active {
+  color: var(--navbar-text-active);
+  background: var(--navbar-active-bg);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* App/Design/React/Themes/Frontend/Local/Default/Blocks/Topbar/style.scss */
+.lle-topbar {
+  --navbar-active-bg: #241786;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 70px;
+}
+.lle-topbar .logo-box {
+  flex: 0 0 auto;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #f5f5f7;
+  background: var(--navbar-active-bg);
+  font-family: system-ui;
+  min-width: 50px;
+  min-height: 30px;
+  text-align: center;
+  line-height: 30px;
+  border-radius: 8px;
+}
+.lle-topbar .nav-container {
+  flex: 1 1 auto;
+  display: flex;
+  justify-content: center;
+  min-width: 0;
+}
 /*# sourceMappingURL=index.css.map */

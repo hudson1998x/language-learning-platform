@@ -53,6 +53,11 @@ public class TypeScriptTypeMapper
             return;
         }
 
+        if (type.IsGenericParameter)
+        {
+            return;
+        }
+
         if (IsCollection(type, out var elementType))
         {
             EmitRecursive(builder, emitted, elementType!);
@@ -66,28 +71,40 @@ public class TypeScriptTypeMapper
             return;
         }
 
-        if (!emitted.Add(type))
+        // For generic types, emit concrete type arguments first (e.g. Role in ApiResponse<Role>)
+        // so their interfaces appear before the generic definition.
+        if (type.IsGenericType)
         {
-            // Already emitted (or currently being emitted higher up the stack —
-            // the Add happens before we recurse into properties, so cycles terminate here).
+            foreach (var arg in type.GetGenericArguments())
+            {
+                EmitRecursive(builder, emitted, arg);
+            }
+        }
+
+        // Track and emit by the open generic definition (e.g. ApiResponse<>), not the closed one,
+        // so the generic interface is written only once per feature group.
+        var effectiveType = type.IsGenericType ? type.GetGenericTypeDefinition() : type;
+
+        if (!emitted.Add(effectiveType))
+        {
             return;
         }
 
-        if (type.IsEnum)
+        if (effectiveType.IsEnum)
         {
-            EmitEnum(builder, type);
+            EmitEnum(builder, effectiveType);
             return;
         }
 
         // Recurse into property types BEFORE emitting this interface, so dependencies
         // appear earlier in the file (purely cosmetic, but reads naturally top-down).
-        var properties = GetTsProperties(type);
+        var properties = GetTsProperties(effectiveType);
         foreach (var prop in properties)
         {
             EmitRecursive(builder, emitted, prop.PropertyType);
         }
 
-        EmitInterface(builder, type, properties);
+        EmitInterface(builder, effectiveType, properties);
     }
 
     private static void EmitEnum(StringBuilder builder, Type enumType)
@@ -104,7 +121,15 @@ public class TypeScriptTypeMapper
 
     private void EmitInterface(StringBuilder builder, Type type, List<PropertyInfo> properties)
     {
-        builder.AppendLine($"export interface {type.Name} {{");
+        var interfaceName = type.Name;
+        if (type.IsGenericType)
+        {
+            interfaceName = StripGenericArity(interfaceName);
+            var typeParams = type.GetGenericArguments().Select(p => p.Name);
+            interfaceName += "<" + string.Join(", ", typeParams) + ">";
+        }
+
+        builder.AppendLine($"export interface {interfaceName} {{");
 
         foreach (var prop in properties)
         {
@@ -174,8 +199,23 @@ public class TypeScriptTypeMapper
             return inner.Contains(' ') ? $"({inner})[]" : $"{inner}[]";
         }
 
-        // Fallback: complex type — reference it by name; EmitRecursive is responsible
-        // for ensuring the declaration actually exists in the output.
+        // Generic type parameter (T, U, etc.) — use its name directly.
+        if (type.IsGenericParameter)
+        {
+            return type.Name;
+        }
+
+        // Closed generic type (e.g. ApiResponse<Role>) — strip the .NET backtick suffix
+        // and format as ApiResponse<Role>.
+        if (type.IsGenericType)
+        {
+            var name = StripGenericArity(type.GetGenericTypeDefinition().Name);
+            var args = type.GetGenericArguments().Select(MapTypeReference);
+            return $"{name}<{string.Join(", ", args)}>";
+        }
+
+        // Fallback: non-generic complex type — reference it by name;
+        // EmitRecursive is responsible for ensuring the declaration exists.
         return type.Name;
     }
 
@@ -275,6 +315,15 @@ public class TypeScriptTypeMapper
         }
 
         return false;
+    }
+
+    /// <summary>
+    /// Strips the .NET generic arity suffix, e.g. "ApiResponse`1" → "ApiResponse".
+    /// </summary>
+    private static string StripGenericArity(string name)
+    {
+        var tick = name.IndexOf('`');
+        return tick > 0 ? name[..tick] : name;
     }
 
     private static string ToCamelCase(string name)

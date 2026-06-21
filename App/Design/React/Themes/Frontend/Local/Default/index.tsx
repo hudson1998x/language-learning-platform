@@ -45,6 +45,9 @@ const LLETheme: FC<PropsWithChildren> = (props) => {
     return (
         <div className={'lle-default-theme'}>
             <Topbar />
+            <div className={'lle-default-page-content'}>
+                {props.children}
+            </div>
         </div>
     )
 }
