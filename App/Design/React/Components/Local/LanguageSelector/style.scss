@@ -1,0 +1,241 @@
+.language-selector {
+  position: relative;
+  flex: 0 0 auto;
+  height: 40px;
+  margin-top: 8px;
+
+  &-current {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    height: 100%;
+    padding: 0 12px 0 8px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    background: transparent;
+    color: #9aa0a8;
+    font-size: 13px;
+    font-family: system-ui;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.06);
+      color: #f2f3f5;
+    }
+
+    &:focus-visible {
+      outline: none;
+      border-color: #5b8def;
+    }
+
+    .flag-icon {
+      width: 22px;
+      height: 16px;
+      object-fit: cover;
+      border-radius: 3px;
+      flex: 0 0 auto;
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08);
+    }
+
+    .current-text {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      line-height: 1.15;
+    }
+
+    .current-eyebrow {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #6b7078;
+    }
+
+    .current-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: #f2f3f5;
+      text-transform: capitalize;
+    }
+
+    .chevron {
+      display: flex;
+      align-items: center;
+      color: #6b7078;
+      margin-left: 2px;
+      transition: transform 0.2s;
+
+      &.open {
+        transform: rotate(180deg);
+      }
+    }
+  }
+
+  &-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    width: 320px;
+    max-height: 420px;
+    display: flex;
+    flex-direction: column;
+    background: #1c1f24;
+    border: 1px solid #2a2d33;
+    border-radius: 14px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+    z-index: 100;
+    overflow: hidden;
+  }
+
+  .dropdown-header {
+    flex: 0 0 auto;
+    padding: 14px 14px 10px;
+    border-bottom: 1px solid #25282e;
+  }
+
+  .dropdown-title {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #f2f3f5;
+    margin-bottom: 10px;
+  }
+
+  .search-field {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 34px;
+    padding: 0 10px;
+    background: #14161a;
+    border: 1px solid #2a2d33;
+    border-radius: 8px;
+    transition: border-color 0.15s;
+
+    &:focus-within {
+      border-color: #5b8def;
+    }
+
+    .search-icon {
+      flex: 0 0 auto;
+      color: #6b7078;
+    }
+
+    input {
+      flex: 1 1 auto;
+      min-width: 0;
+      border: none;
+      background: transparent;
+      color: #f2f3f5;
+      font-size: 13px;
+      font-family: system-ui;
+
+      &::placeholder {
+        color: #5d6168;
+      }
+
+      &:focus {
+        outline: none;
+      }
+    }
+  }
+
+  .language-grid {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4px;
+    padding: 8px;
+
+    &::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: #2a2d33;
+      border-radius: 4px;
+    }
+  }
+
+  .no-results {
+    grid-column: 1 / -1;
+    padding: 24px 12px;
+    text-align: center;
+    color: #6b7078;
+    font-size: 13px;
+  }
+
+  .language-card {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: transparent;
+    color: #c4c7cc;
+    font-size: 13px;
+    font-family: system-ui;
+    text-transform: capitalize;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.12s, border-color 0.12s, color 0.12s;
+
+    &:hover {
+      background: rgba(91, 141, 239, 0.1);
+      color: #f2f3f5;
+    }
+
+    &:focus-visible {
+      outline: none;
+      border-color: #5b8def;
+    }
+
+    &.active {
+      color: #f2f3f5;
+      background: rgba(91, 141, 239, 0.16);
+      border-color: rgba(91, 141, 239, 0.4);
+    }
+
+    .flag-icon {
+      width: 22px;
+      height: 16px;
+      object-fit: cover;
+      border-radius: 3px;
+      flex: 0 0 auto;
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08);
+    }
+
+    .lang-name {
+      flex: 1 1 auto;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .active-badge {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #5b8def;
+      color: #fff;
+    }
+  }
+
+  &-placeholder {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    padding: 0 10px;
+    color: #6b7078;
+    font-size: 13px;
+    font-family: system-ui;
+  }
+}

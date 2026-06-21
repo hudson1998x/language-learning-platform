@@ -2,6 +2,11 @@ using LLE.Kernel.AutoEntity;
 using LLE.Kernel.Contracts;
 using LLE.Kernel.Events;
 using LLE.Kernel.Security;
+using LLE.Sockets.Events;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 
 namespace LLE.Languages;
 
@@ -96,6 +101,18 @@ public class LanguageModule : IModuleLoader
                 "korean");
 
             return repository;
+        });
+
+        Eventing.Eventing.Of<KestrelHttpEvents>().WebApplication.Concurrent(app =>
+        {
+            var env = app.Services.GetRequiredService<IWebHostEnvironment>();
+
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(
+                    Path.Combine(env.ContentRootPath, "App/Code/Community/Languages/Source/web")),
+                RequestPath = "/media/languages"
+            });
         });
 
         return Task.CompletedTask;

@@ -9,6 +9,11 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\..\Core\Kernel\Source\Kernel.csproj" />
+      <ProjectReference Include="..\..\..\Core\Sockets\Source\Sockets.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="web\" />
     </ItemGroup>
 
 </Project>

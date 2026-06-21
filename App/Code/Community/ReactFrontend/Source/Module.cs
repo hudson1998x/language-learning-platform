@@ -33,7 +33,7 @@ public class ReactFrontendModule : IModuleLoader
                 tsconfig.CompilerOptions.Jsx = JsxMode.ReactJsx;
                 tsconfig.CompilerOptions.Paths.TryAdd(
                     "@component/*", [
-                        "./App/Design/React/Local/Community/*",
+                        "./App/Design/React/Components/Local/*",
                         "./App/Design/React/Components/Community/*",
                         "./App/Design/React/Components/Core/*",
                     ]

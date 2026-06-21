@@ -484,6 +484,222 @@ body {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
+/* App/Design/React/Components/Local/LanguageSelector/style.scss */
+.language-selector {
+  position: relative;
+  flex: 0 0 auto;
+  height: 40px;
+  margin-top: 8px;
+}
+.language-selector-current {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  height: 100%;
+  padding: 0 12px 0 8px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: #9aa0a8;
+  font-size: 13px;
+  font-family: system-ui;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.language-selector-current:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #f2f3f5;
+}
+.language-selector-current:focus-visible {
+  outline: none;
+  border-color: #5b8def;
+}
+.language-selector-current .flag-icon {
+  width: 22px;
+  height: 16px;
+  object-fit: cover;
+  border-radius: 3px;
+  flex: 0 0 auto;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+.language-selector-current .current-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.15;
+}
+.language-selector-current .current-eyebrow {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #6b7078;
+}
+.language-selector-current .current-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: #f2f3f5;
+  text-transform: capitalize;
+}
+.language-selector-current .chevron {
+  display: flex;
+  align-items: center;
+  color: #6b7078;
+  margin-left: 2px;
+  transition: transform 0.2s;
+}
+.language-selector-current .chevron.open {
+  transform: rotate(180deg);
+}
+.language-selector-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 320px;
+  max-height: 420px;
+  display: flex;
+  flex-direction: column;
+  background: #1c1f24;
+  border: 1px solid #2a2d33;
+  border-radius: 14px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+  z-index: 100;
+  overflow: hidden;
+}
+.language-selector .dropdown-header {
+  flex: 0 0 auto;
+  padding: 14px 14px 10px;
+  border-bottom: 1px solid #25282e;
+}
+.language-selector .dropdown-title {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #f2f3f5;
+  margin-bottom: 10px;
+}
+.language-selector .search-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 10px;
+  background: #14161a;
+  border: 1px solid #2a2d33;
+  border-radius: 8px;
+  transition: border-color 0.15s;
+}
+.language-selector .search-field:focus-within {
+  border-color: #5b8def;
+}
+.language-selector .search-field .search-icon {
+  flex: 0 0 auto;
+  color: #6b7078;
+}
+.language-selector .search-field input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  color: #f2f3f5;
+  font-size: 13px;
+  font-family: system-ui;
+}
+.language-selector .search-field input::placeholder {
+  color: #5d6168;
+}
+.language-selector .search-field input:focus {
+  outline: none;
+}
+.language-selector .language-grid {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
+  padding: 8px;
+}
+.language-selector .language-grid::-webkit-scrollbar {
+  width: 8px;
+}
+.language-selector .language-grid::-webkit-scrollbar-thumb {
+  background: #2a2d33;
+  border-radius: 4px;
+}
+.language-selector .no-results {
+  grid-column: 1/-1;
+  padding: 24px 12px;
+  text-align: center;
+  color: #6b7078;
+  font-size: 13px;
+}
+.language-selector .language-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: #c4c7cc;
+  font-size: 13px;
+  font-family: system-ui;
+  text-transform: capitalize;
+  cursor: pointer;
+  text-align: left;
+  transition:
+    background 0.12s,
+    border-color 0.12s,
+    color 0.12s;
+}
+.language-selector .language-card:hover {
+  background: rgba(91, 141, 239, 0.1);
+  color: #f2f3f5;
+}
+.language-selector .language-card:focus-visible {
+  outline: none;
+  border-color: #5b8def;
+}
+.language-selector .language-card.active {
+  color: #f2f3f5;
+  background: rgba(91, 141, 239, 0.16);
+  border-color: rgba(91, 141, 239, 0.4);
+}
+.language-selector .language-card .flag-icon {
+  width: 22px;
+  height: 16px;
+  object-fit: cover;
+  border-radius: 3px;
+  flex: 0 0 auto;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+.language-selector .language-card .lang-name {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.language-selector .language-card .active-badge {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #5b8def;
+  color: #fff;
+}
+.language-selector-placeholder {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding: 0 10px;
+  color: #6b7078;
+  font-size: 13px;
+  font-family: system-ui;
+}
+
 /* App/Design/React/Themes/Frontend/Local/Default/Blocks/Topbar/style.scss */
 .lle-topbar {
   --navbar-active-bg: #241786;
@@ -510,7 +726,8 @@ body {
   text-align: center;
   line-height: 30px;
   border-radius: 8px;
-  margin-top: 4px;
+  position: relative;
+  top: 5px;
 }
 .lle-topbar .nav-container {
   flex: 1 1 auto;

@@ -1,5 +1,6 @@
 import {FC, PropsWithChildren, useState} from "react";
 import { SessionProvider, useSession } from '@hook/session-provider'
+import { LanguageProvider } from '@hook/language-provider'
 import { AppSignin } from './DefaultPages/SignIn'
 import { AppRegister } from './DefaultPages/SignUp'
 import './style.scss'
@@ -9,7 +10,9 @@ const LLEThemeWrapper: FC<PropsWithChildren> = (props) => {
 
     return (
         <SessionProvider>
-            <LLETheme {...props}/>
+            <LanguageProvider>
+                <LLETheme {...props}/>
+            </LanguageProvider>
         </SessionProvider>
     )
 }

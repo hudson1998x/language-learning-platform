@@ -21760,7 +21760,7 @@
   };
 
   // App/Design/React/Themes/Frontend/Local/Default/index.tsx
-  var import_react7 = __toESM(require_react(), 1);
+  var import_react9 = __toESM(require_react(), 1);
 
   // App/Design/React/Hooks/Core/session-provider.tsx
   var import_react4 = __toESM(require_react(), 1);
@@ -21850,15 +21850,70 @@
     return ctx;
   };
 
-  // App/Design/React/Themes/Frontend/Local/Default/DefaultPages/SignIn/index.tsx
+  // App/Design/React/Hooks/Core/language-provider.tsx
   var import_react5 = __toESM(require_react(), 1);
+
+  // App/Api/language.ts
+  var listAllLanguage = () => {
+    return fetch("/api/language/list", {
+      method: "GET"
+    }).then((response) => {
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+      return response.json();
+    });
+  };
+
+  // App/Design/React/Hooks/Core/language-provider.tsx
   var import_jsx_runtime4 = __toESM(require_jsx_runtime(), 1);
+  var LS_KEY = "lle-language";
+  var LanguageContext = (0, import_react5.createContext)(
+    void 0
+  );
+  var LanguageProvider = ({ children }) => {
+    const [response, isLoading, error] = usePromise(listAllLanguage, []);
+    const availableLanguages = response?.data ?? [];
+    const [selectedId, setSelectedId] = (0, import_react5.useState)(() => {
+      try {
+        return localStorage.getItem(LS_KEY);
+      } catch {
+        return null;
+      }
+    });
+    const language = availableLanguages.find((l) => l.id === selectedId);
+    const setLanguage = (0, import_react5.useCallback)((lang) => {
+      setSelectedId(lang.id);
+      try {
+        localStorage.setItem(LS_KEY, lang.id);
+      } catch {
+      }
+    }, []);
+    return /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+      LanguageContext.Provider,
+      {
+        value: { language, availableLanguages, isLoading, error, setLanguage },
+        children
+      }
+    );
+  };
+  var useLanguage = () => {
+    const ctx = (0, import_react5.useContext)(LanguageContext);
+    if (ctx === void 0) {
+      throw new Error("useLanguage must be used within a LanguageProvider");
+    }
+    return ctx;
+  };
+
+  // App/Design/React/Themes/Frontend/Local/Default/DefaultPages/SignIn/index.tsx
+  var import_react6 = __toESM(require_react(), 1);
+  var import_jsx_runtime5 = __toESM(require_jsx_runtime(), 1);
   var AppSignin = ({ onSwitchToRegister }) => {
-    const [email, setEmail] = (0, import_react5.useState)("");
-    const [password, setPassword] = (0, import_react5.useState)("");
-    const [showPassword, setShowPassword] = (0, import_react5.useState)(false);
-    const [isSubmitting, setIsSubmitting] = (0, import_react5.useState)(false);
-    const [error, setError] = (0, import_react5.useState)("");
+    const [email, setEmail] = (0, import_react6.useState)("");
+    const [password, setPassword] = (0, import_react6.useState)("");
+    const [showPassword, setShowPassword] = (0, import_react6.useState)(false);
+    const [isSubmitting, setIsSubmitting] = (0, import_react6.useState)(false);
+    const [error, setError] = (0, import_react6.useState)("");
     const handleSubmit = (e) => {
       e.preventDefault();
       setError("");
@@ -21879,17 +21934,17 @@
         setError(error2.message);
       });
     };
-    return /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "lle-signin-page", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "lle-signin-page__card", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("h1", { className: "lle-signin-page__title", children: "Sign in" }),
-      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("p", { className: "lle-signin-page__subtitle", children: "Enter your details to continue" }),
-      error && /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(import_jsx_runtime4.Fragment, { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "lle-signin-page__form-error", role: "alert", children: error }),
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("br", {})
+    return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "lle-signin-page", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "lle-signin-page__card", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("h1", { className: "lle-signin-page__title", children: "Sign in" }),
+      /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("p", { className: "lle-signin-page__subtitle", children: "Enter your details to continue" }),
+      error && /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(import_jsx_runtime5.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "lle-signin-page__form-error", role: "alert", children: error }),
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("br", {})
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("form", { className: "lle-signin-page__form", onSubmit: handleSubmit, noValidate: true, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "lle-signin-page__form-field", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("label", { className: "lle-signin-page__form-label", htmlFor: "email", children: "Email" }),
-          /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+      /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("form", { className: "lle-signin-page__form", onSubmit: handleSubmit, noValidate: true, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "lle-signin-page__form-field", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("label", { className: "lle-signin-page__form-label", htmlFor: "email", children: "Email" }),
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
             "input",
             {
               id: "email",
@@ -21903,13 +21958,13 @@
             }
           )
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "lle-signin-page__form-field", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "lle-signin-page__form-label-row", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("label", { className: "lle-signin-page__form-label", htmlFor: "password", children: "Password" }),
-            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("a", { className: "lle-signin-page__form-link", href: "#forgot-password", children: "Forgot password?" })
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "lle-signin-page__form-field", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "lle-signin-page__form-label-row", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("label", { className: "lle-signin-page__form-label", htmlFor: "password", children: "Password" }),
+            /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("a", { className: "lle-signin-page__form-link", href: "#forgot-password", children: "Forgot password?" })
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "lle-signin-page__form-input-wrap", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "lle-signin-page__form-input-wrap", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
               "input",
               {
                 id: "password",
@@ -21922,7 +21977,7 @@
                 onChange: (e) => setPassword(e.target.value)
               }
             ),
-            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+            /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
               "button",
               {
                 type: "button",
@@ -21934,7 +21989,7 @@
             )
           ] })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
           "button",
           {
             type: "submit",
@@ -21944,10 +21999,10 @@
           }
         )
       ] }),
-      onSwitchToRegister && /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("p", { className: "lle-signin-page__footer", children: [
+      onSwitchToRegister && /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("p", { className: "lle-signin-page__footer", children: [
         "Don't have an account?",
         " ",
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
           "button",
           {
             type: "button",
@@ -21961,16 +22016,16 @@
   };
 
   // App/Design/React/Themes/Frontend/Local/Default/DefaultPages/SignUp/index.tsx
-  var import_react6 = __toESM(require_react(), 1);
-  var import_jsx_runtime5 = __toESM(require_jsx_runtime(), 1);
+  var import_react7 = __toESM(require_react(), 1);
+  var import_jsx_runtime6 = __toESM(require_jsx_runtime(), 1);
   var AppRegister = ({ onSwitchToSignIn }) => {
-    const [email, setEmail] = (0, import_react6.useState)("");
-    const [password, setPassword] = (0, import_react6.useState)("");
-    const [confirmPassword, setConfirmPassword] = (0, import_react6.useState)("");
-    const [showPassword, setShowPassword] = (0, import_react6.useState)(false);
-    const [isSubmitting, setIsSubmitting] = (0, import_react6.useState)(false);
-    const [error, setError] = (0, import_react6.useState)("");
-    const [success, setSuccess] = (0, import_react6.useState)(false);
+    const [email, setEmail] = (0, import_react7.useState)("");
+    const [password, setPassword] = (0, import_react7.useState)("");
+    const [confirmPassword, setConfirmPassword] = (0, import_react7.useState)("");
+    const [showPassword, setShowPassword] = (0, import_react7.useState)(false);
+    const [isSubmitting, setIsSubmitting] = (0, import_react7.useState)(false);
+    const [error, setError] = (0, import_react7.useState)("");
+    const [success, setSuccess] = (0, import_react7.useState)(false);
     const handleSubmit = (e) => {
       e.preventDefault();
       setError("");
@@ -21996,10 +22051,10 @@
       });
     };
     if (success) {
-      return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "lle-register-page", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "lle-register-page__card", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("h1", { className: "lle-register-page__title", children: "Account created" }),
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("p", { className: "lle-register-page__subtitle", children: "You can now sign in with your new account." }),
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+      return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "lle-register-page", children: /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "lle-register-page__card", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("h1", { className: "lle-register-page__title", children: "Account created" }),
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("p", { className: "lle-register-page__subtitle", children: "You can now sign in with your new account." }),
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
           "button",
           {
             type: "button",
@@ -22010,13 +22065,13 @@
         )
       ] }) });
     }
-    return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "lle-register-page", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "lle-register-page__card", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("h1", { className: "lle-register-page__title", children: "Create account" }),
-      /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("p", { className: "lle-register-page__subtitle", children: "Enter your details to get started" }),
-      /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("form", { className: "lle-register-page__form", onSubmit: handleSubmit, noValidate: true, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "lle-register-page__form-field", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("label", { className: "lle-register-page__form-label", htmlFor: "email", children: "Email" }),
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+    return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "lle-register-page", children: /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "lle-register-page__card", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("h1", { className: "lle-register-page__title", children: "Create account" }),
+      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("p", { className: "lle-register-page__subtitle", children: "Enter your details to get started" }),
+      /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("form", { className: "lle-register-page__form", onSubmit: handleSubmit, noValidate: true, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "lle-register-page__form-field", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("label", { className: "lle-register-page__form-label", htmlFor: "email", children: "Email" }),
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
             "input",
             {
               id: "email",
@@ -22030,10 +22085,10 @@
             }
           )
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "lle-register-page__form-field", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("label", { className: "lle-register-page__form-label", htmlFor: "password", children: "Password" }),
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "lle-register-page__form-input-wrap", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "lle-register-page__form-field", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("label", { className: "lle-register-page__form-label", htmlFor: "password", children: "Password" }),
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "lle-register-page__form-input-wrap", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
               "input",
               {
                 id: "password",
@@ -22046,7 +22101,7 @@
                 onChange: (e) => setPassword(e.target.value)
               }
             ),
-            /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
               "button",
               {
                 type: "button",
@@ -22058,9 +22113,9 @@
             )
           ] })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "lle-register-page__form-field", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("label", { className: "lle-register-page__form-label", htmlFor: "confirmPassword", children: "Confirm password" }),
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "lle-register-page__form-field", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("label", { className: "lle-register-page__form-label", htmlFor: "confirmPassword", children: "Confirm password" }),
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
             "input",
             {
               id: "confirmPassword",
@@ -22074,8 +22129,8 @@
             }
           )
         ] }),
-        error && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "lle-register-page__form-error", role: "alert", children: error }),
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+        error && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "lle-register-page__form-error", role: "alert", children: error }),
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
           "button",
           {
             type: "submit",
@@ -22085,10 +22140,10 @@
           }
         )
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("p", { className: "lle-register-page__footer", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("p", { className: "lle-register-page__footer", children: [
         "Already have an account?",
         " ",
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
           "button",
           {
             type: "button",
@@ -22102,7 +22157,7 @@
   };
 
   // App/Design/React/Themes/Frontend/Local/Default/Blocks/UserCard/index.tsx
-  var import_jsx_runtime6 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime7 = __toESM(require_jsx_runtime(), 1);
   var getInitials = (name, email) => {
     if (name && name.trim().length > 0) {
       const parts = name.trim().split(/\s+/);
@@ -22120,17 +22175,17 @@
     const { user } = session;
     const initials = getInitials(user?.fullName, user?.email);
     const displayName = user?.fullName && user.fullName.trim().length > 0 ? user.fullName : user?.email;
-    return /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { onClick: () => location.pathname = "/account", className: "user-card", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "user-card__avatar", "aria-hidden": "true", children: initials }),
-      /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "user-card__meta", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("span", { className: "user-card__name", children: displayName }),
-        user?.fullName && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("span", { className: "user-card__email", children: user.email })
+    return /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { onClick: () => location.pathname = "/account", className: "user-card", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("div", { className: "user-card__avatar", "aria-hidden": "true", children: initials }),
+      /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { className: "user-card__meta", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("span", { className: "user-card__name", children: displayName }),
+        user?.fullName && /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("span", { className: "user-card__email", children: user.email })
       ] })
     ] });
   };
 
   // App/Design/React/Themes/Frontend/Local/Default/Blocks/Navbar/index.tsx
-  var import_jsx_runtime7 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime8 = __toESM(require_jsx_runtime(), 1);
   var LINKS = [
     { label: "Dashboard", href: "/" },
     { label: "Flash cards", href: "/flashcards" },
@@ -22141,7 +22196,7 @@
   ];
   var NavBar = ({ links = LINKS, initialActive = links[0]?.href }) => {
     const active = links.filter((l) => l.href == location.pathname)?.[0]?.href;
-    return /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("nav", { className: "navbar", children: /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("ul", { className: "navbar__list", children: links.map((link) => /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("li", { className: "navbar__item", children: /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(
+    return /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("nav", { className: "navbar", children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("ul", { className: "navbar__list", children: links.map((link) => /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("li", { className: "navbar__item", children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
       "a",
       {
         href: link.href,
@@ -22152,56 +22207,186 @@
     ) }, link.href)) }) });
   };
 
+  // App/Design/React/Components/Local/LanguageSelector/index.tsx
+  var import_react8 = __toESM(require_react(), 1);
+  var import_jsx_runtime9 = __toESM(require_jsx_runtime(), 1);
+  var LanguageSelector = () => {
+    const { language, availableLanguages, setLanguage, isLoading } = useLanguage();
+    const [open, setOpen] = (0, import_react8.useState)(false);
+    const [query, setQuery] = (0, import_react8.useState)("");
+    const ref = (0, import_react8.useRef)(null);
+    const searchRef = (0, import_react8.useRef)(null);
+    (0, import_react8.useEffect)(() => {
+      if (!open) return;
+      const handleClick = (e) => {
+        if (ref.current && !ref.current.contains(e.target)) {
+          setOpen(false);
+        }
+      };
+      const handleKey = (e) => {
+        if (e.key === "Escape") setOpen(false);
+      };
+      document.addEventListener("mousedown", handleClick);
+      document.addEventListener("keydown", handleKey);
+      return () => {
+        document.removeEventListener("mousedown", handleClick);
+        document.removeEventListener("keydown", handleKey);
+      };
+    }, [open]);
+    (0, import_react8.useEffect)(() => {
+      if (open) {
+        searchRef.current?.focus();
+      } else {
+        setQuery("");
+      }
+    }, [open]);
+    const filtered = (0, import_react8.useMemo)(() => {
+      const q = query.trim().toLowerCase();
+      if (!q) return availableLanguages;
+      return availableLanguages.filter(
+        (lang) => lang.name.toLowerCase().includes(q)
+      );
+    }, [availableLanguages, query]);
+    if (isLoading || availableLanguages.length === 0) {
+      return /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("div", { className: "language-selector", children: /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("div", { className: "language-selector-placeholder", children: "Language" }) });
+    }
+    return /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "language-selector", ref, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)(
+        "button",
+        {
+          className: "language-selector-current",
+          onClick: () => setOpen((prev) => !prev),
+          "aria-expanded": open,
+          children: [
+            language ? /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)(import_jsx_runtime9.Fragment, { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
+                "img",
+                {
+                  className: "flag-icon",
+                  src: `/media/languages/${language.flagIcon}.png`,
+                  alt: ""
+                }
+              ),
+              /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("span", { className: "current-text", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("span", { className: "current-eyebrow", children: "Learning" }),
+                /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("span", { className: "current-name", children: language.name })
+              ] })
+            ] }) : /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("span", { className: "current-name", children: "Choose a language" }),
+            /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("span", { className: `chevron${open ? " open" : ""}`, children: /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("svg", { width: "10", height: "6", viewBox: "0 0 10 6", fill: "none", children: /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("path", { d: "M1 1L5 5L9 1", stroke: "currentColor", strokeWidth: "1.5", strokeLinecap: "round", strokeLinejoin: "round" }) }) })
+          ]
+        }
+      ),
+      open && /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "language-selector-dropdown", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "dropdown-header", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("span", { className: "dropdown-title", children: "Pick a language to learn" }),
+          /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "search-field", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("svg", { className: "search-icon", width: "14", height: "14", viewBox: "0 0 14 14", fill: "none", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("circle", { cx: "6", cy: "6", r: "4.5", stroke: "currentColor", strokeWidth: "1.3" }),
+              /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("path", { d: "M9.5 9.5L13 13", stroke: "currentColor", strokeWidth: "1.3", strokeLinecap: "round" })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
+              "input",
+              {
+                ref: searchRef,
+                type: "text",
+                value: query,
+                onChange: (e) => setQuery(e.target.value),
+                placeholder: "Search languages"
+              }
+            )
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "language-grid", role: "listbox", children: [
+          filtered.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "no-results", children: [
+            "No languages match \u201C",
+            query,
+            "\u201D"
+          ] }),
+          filtered.map((lang) => {
+            const isActive = lang.id === language?.id;
+            return /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)(
+              "button",
+              {
+                role: "option",
+                "aria-selected": isActive,
+                className: `language-card${isActive ? " active" : ""}`,
+                onClick: () => {
+                  setLanguage(lang);
+                  setOpen(false);
+                },
+                children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
+                    "img",
+                    {
+                      className: "flag-icon",
+                      src: `/media/languages/${lang.flagIcon}.png`,
+                      alt: ""
+                    }
+                  ),
+                  /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("span", { className: "lang-name", children: lang.name }),
+                  isActive && /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("span", { className: "active-badge", children: /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("svg", { width: "11", height: "9", viewBox: "0 0 11 9", fill: "none", children: /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("path", { d: "M1 4.5L4 7.5L10 1", stroke: "currentColor", strokeWidth: "1.6", strokeLinecap: "round", strokeLinejoin: "round" }) }) })
+                ]
+              },
+              lang.id
+            );
+          })
+        ] })
+      ] })
+    ] });
+  };
+
   // App/Design/React/Themes/Frontend/Local/Default/Blocks/Topbar/index.tsx
-  var import_jsx_runtime8 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime10 = __toESM(require_jsx_runtime(), 1);
   var Topbar = () => {
-    return /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)("div", { className: "lle-topbar", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("div", { className: "logo-box", children: "LLE" }),
-      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("div", { className: "nav-container", children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(NavBar, {}) }),
-      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(UserCard, {})
+    return /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("div", { className: "lle-topbar", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("div", { className: "logo-box", children: "LLE" }),
+      /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(LanguageSelector, {}),
+      /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("div", { className: "nav-container", children: /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(NavBar, {}) }),
+      /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(UserCard, {})
     ] });
   };
 
   // App/Design/React/Themes/Frontend/Local/Default/index.tsx
-  var import_jsx_runtime9 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime11 = __toESM(require_jsx_runtime(), 1);
   var LLEThemeWrapper = (props) => {
-    return /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(SessionProvider, { children: /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(LLETheme, { ...props }) });
+    return /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(SessionProvider, { children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(LanguageProvider, { children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(LLETheme, { ...props }) }) });
   };
   var LLETheme = (props) => {
     const { session } = useSession();
-    const [page, setPage] = (0, import_react7.useState)(0 /* SignIn */);
+    const [page, setPage] = (0, import_react9.useState)(0 /* SignIn */);
     if (!session?.user) {
       if (page == 0 /* SignIn */) {
-        return /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(AppSignin, { onSwitchToRegister: () => setPage(1 /* Register */) });
+        return /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(AppSignin, { onSwitchToRegister: () => setPage(1 /* Register */) });
       }
       if (page == 1 /* Register */) {
-        return /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(AppRegister, { onSwitchToSignIn: () => setPage(0 /* SignIn */) });
+        return /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(AppRegister, { onSwitchToSignIn: () => setPage(0 /* SignIn */) });
       }
     }
-    return /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)("div", { className: "lle-default-theme", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Topbar, {}),
-      /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("div", { className: "lle-default-page-content", children: props.children })
+    return /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "lle-default-theme", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Topbar, {}),
+      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "lle-default-page-content", children: props.children })
     ] });
   };
   var Default_default = LLEThemeWrapper;
 
   // App/Design/React/Themes/Admin/Core/Default/index.tsx
-  var import_jsx_runtime10 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime12 = __toESM(require_jsx_runtime(), 1);
 
   // App/Design/React/Components/Core/Text/index.tsx
-  var import_jsx_runtime11 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime13 = __toESM(require_jsx_runtime(), 1);
   var Text = (props) => {
-    return /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("p", { children: props.text });
+    return /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("p", { children: props.text });
   };
 
   // App/Code/Community/ReactFrontend/Source/web/generated.registry.tsx
+  register("@component/LanguageSelector", LanguageSelector);
   register("@component/Text", Text);
 
   // App/Code/Community/ReactFrontend/Source/web/index.tsx
-  var import_jsx_runtime12 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime14 = __toESM(require_jsx_runtime(), 1);
   var root = (0, import_client.createRoot)(document.getElementById("app"));
   root.render(
-    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Default_default, { children: /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Canvas, { children: window.canvasState }) })
+    /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Default_default, { children: /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Canvas, { children: window.canvasState }) })
   );
 })();
 /*! Bundled license information:
