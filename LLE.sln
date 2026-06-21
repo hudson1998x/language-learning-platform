@@ -30,6 +30,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SQLite", "App\Code\Communit
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pages", "App\Code\Community\Pages\Source\Pages.csproj", "{BD08D398-B1F3-43EB-89F7-A573E99D99F2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TypeScriptTests", "App\Code\Core\TypeScript\Tests\TypeScriptTests.csproj", "{EB0F97EA-A688-440A-A95E-FFA30BC99D0C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -124,5 +126,9 @@ Global
 		{BD08D398-B1F3-43EB-89F7-A573E99D99F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BD08D398-B1F3-43EB-89F7-A573E99D99F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BD08D398-B1F3-43EB-89F7-A573E99D99F2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EB0F97EA-A688-440A-A95E-FFA30BC99D0C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EB0F97EA-A688-440A-A95E-FFA30BC99D0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EB0F97EA-A688-440A-A95E-FFA30BC99D0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EB0F97EA-A688-440A-A95E-FFA30BC99D0C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
