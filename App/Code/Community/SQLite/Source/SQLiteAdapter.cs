@@ -142,9 +142,6 @@ public class SQLiteAdapter : IDatabaseAdapter
 
             var entities = rows.Select(r => MapToEntity(r, entityType)).ToList();
 
-            if (readNode.Where is not null)
-                return entities.Count > 0 ? entities[0] : null!;
-
             return entities;
         }
 

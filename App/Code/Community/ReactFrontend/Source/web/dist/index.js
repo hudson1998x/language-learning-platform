@@ -22373,7 +22373,7 @@
   var import_jsx_runtime12 = __toESM(require_jsx_runtime(), 1);
 
   // App/Design/React/Components/Local/Pages/FlashCards/index.tsx
-  var import_react12 = __toESM(require_react(), 1);
+  var import_react13 = __toESM(require_react(), 1);
 
   // App/Design/React/Hooks/Core/usePagination.tsx
   var import_react10 = __toESM(require_react(), 1);
@@ -22644,14 +22644,277 @@
     ] }) });
   };
 
-  // App/Design/React/Components/Local/Pages/FlashCards/index.tsx
+  // App/Design/React/Components/Local/Pages/FlashCards/Study/index.tsx
+  var import_react12 = __toESM(require_react(), 1);
   var import_jsx_runtime15 = __toESM(require_jsx_runtime(), 1);
+  var PRESETS = [5, 10, 20, 50, 100];
+  var MAX_CUSTOM = 200;
+  var normalize = (s) => s.trim().toLowerCase().replace(/\s+/g, " ");
+  var Study = ({ onClose }) => {
+    const [phase, setPhase] = (0, import_react12.useState)("pick");
+    const [cardCount, setCardCount] = (0, import_react12.useState)(10);
+    const [customCount, setCustomCount] = (0, import_react12.useState)("");
+    const [cards, setCards] = (0, import_react12.useState)([]);
+    const [currentIndex, setCurrentIndex] = (0, import_react12.useState)(0);
+    const [showFront, setShowFront] = (0, import_react12.useState)(true);
+    const [userAnswer, setUserAnswer] = (0, import_react12.useState)("");
+    const [checked, setChecked] = (0, import_react12.useState)(false);
+    const [results, setResults] = (0, import_react12.useState)([]);
+    const [isLoading, setIsLoading] = (0, import_react12.useState)(false);
+    const [error, setError] = (0, import_react12.useState)(null);
+    const inputRef = (0, import_react12.useRef)(null);
+    const card = cards[currentIndex];
+    const expectedAnswer = card ? showFront ? card.backStatement : card.frontStatement : "";
+    const isAnswerCorrect = checked && normalize(userAnswer) === normalize(expectedAnswer);
+    const startSession = async (count) => {
+      const clamped = Math.min(Math.max(count, 1), MAX_CUSTOM);
+      setIsLoading(true);
+      setError(null);
+      try {
+        const response = await getStudySession({ cardCount: clamped });
+        if (!response.success) {
+          setError(response.message ?? "Failed to start study session");
+          return;
+        }
+        const fetched = response.data ?? [];
+        if (fetched.length === 0) {
+          setError("No cards available for studying");
+          return;
+        }
+        setCards(fetched);
+        setCurrentIndex(0);
+        setShowFront(Math.random() < 0.5);
+        setUserAnswer("");
+        setChecked(false);
+        setResults([]);
+        setPhase("session");
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to start study session");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    const goToCard = (deck, index) => {
+      setCards(deck);
+      setCurrentIndex(index);
+      setShowFront(Math.random() < 0.5);
+      setUserAnswer("");
+      setChecked(false);
+    };
+    const handleCheck = () => {
+      if (!userAnswer.trim()) return;
+      setChecked(true);
+    };
+    const handleGrade = async (wasCorrect) => {
+      try {
+        await updateFlashCardScore({ cardId: card.id, isCorrect: wasCorrect });
+      } catch {
+      }
+      setResults((prev) => [...prev, { card, wasCorrect, showedFront: showFront }]);
+      const nextIndex = currentIndex + 1;
+      if (nextIndex >= cards.length) {
+        setPhase("results");
+      } else {
+        goToCard(cards, nextIndex);
+      }
+    };
+    const handleRetryMissed = () => {
+      const missed = results.filter((r) => !r.wasCorrect).map((r) => r.card);
+      if (missed.length === 0) return;
+      setResults([]);
+      goToCard(missed, 0);
+      setPhase("session");
+    };
+    (0, import_react12.useEffect)(() => {
+      if (phase !== "session" || isLoading || error) return;
+      const onKeyDown = (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          if (!checked) handleCheck();
+          return;
+        }
+        if (!checked) return;
+        if (e.key === "1" || e.key === "ArrowLeft") {
+          e.preventDefault();
+          handleGrade(false);
+        } else if (e.key === "2" || e.key === "ArrowRight") {
+          e.preventDefault();
+          handleGrade(true);
+        }
+      };
+      window.addEventListener("keydown", onKeyDown);
+      return () => window.removeEventListener("keydown", onKeyDown);
+    }, [phase, isLoading, error, checked, userAnswer, currentIndex]);
+    (0, import_react12.useEffect)(() => {
+      if (phase === "session" && !checked) inputRef.current?.focus();
+    }, [phase, checked, currentIndex]);
+    const missedCount = (0, import_react12.useMemo)(() => results.filter((r) => !r.wasCorrect).length, [results]);
+    if (phase === "pick") {
+      return /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "modal-overlay", onClick: onClose, children: /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "modal study-pick", onClick: (e) => e.stopPropagation(), children: [
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "modal-header", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("h2", { children: "How many cards?" }),
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("button", { className: "modal-close", onClick: onClose, children: "\u2715" })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "modal-body", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "preset-grid", children: PRESETS.map((n) => /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
+            "button",
+            {
+              className: `preset-btn ${cardCount === n && !customCount ? "active" : ""}`,
+              onClick: () => {
+                setCardCount(n);
+                setCustomCount("");
+              },
+              children: n
+            },
+            n
+          )) }),
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "custom-row", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
+              "input",
+              {
+                type: "number",
+                min: 1,
+                max: MAX_CUSTOM,
+                placeholder: "Custom",
+                value: customCount,
+                onChange: (e) => {
+                  setCustomCount(e.target.value);
+                  setCardCount(Number(e.target.value) || 10);
+                }
+              }
+            ),
+            /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
+              "button",
+              {
+                className: "start-btn",
+                onClick: () => startSession(cardCount),
+                disabled: isLoading,
+                children: isLoading ? "Starting..." : "Start"
+              }
+            )
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "hint-row", children: [
+            "Up to ",
+            MAX_CUSTOM,
+            " cards per session"
+          ] }),
+          error && /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "modal-error", children: error })
+        ] })
+      ] }) });
+    }
+    if (phase === "results") {
+      const correctCount = results.filter((r) => r.wasCorrect).length;
+      const pct = results.length ? Math.round(correctCount / results.length * 100) : 0;
+      return /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "study-results study-fullscreen", children: /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "results-content", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "results-header", children: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("h2", { children: "Session complete" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "results-summary", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: `summary-pct ${pct >= 70 ? "summary-good" : "summary-bad"}`, children: [
+            pct,
+            "%"
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "summary-detail", children: [
+            correctCount,
+            " of ",
+            results.length,
+            " correct"
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "results-list", children: results.map((r, i) => /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: `result-item ${r.wasCorrect ? "correct" : "incorrect"}`, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("span", { className: "result-icon", children: r.wasCorrect ? "\u2713" : "\u2717" }),
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("span", { className: "result-front", children: r.showedFront ? r.card.frontStatement : r.card.backStatement }),
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("span", { className: "result-arrow", children: "\u2192" }),
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("span", { className: "result-back", children: r.showedFront ? r.card.backStatement : r.card.frontStatement })
+        ] }, i)) }),
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "results-actions", children: [
+          missedCount > 0 && /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("button", { onClick: handleRetryMissed, children: [
+            "Retry ",
+            missedCount,
+            " missed"
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("button", { className: "primary", onClick: onClose, children: "Done" })
+        ] })
+      ] }) });
+    }
+    if (isLoading) {
+      return /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "study-fullscreen", children: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "session-status", children: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Spinner, {}) }) });
+    }
+    if (error) {
+      return /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "study-fullscreen", children: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "session-status", children: /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "modal-error", children: error }),
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "results-actions", style: { marginTop: 16 }, children: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("button", { className: "primary", onClick: onClose, children: "Close" }) })
+      ] }) }) });
+    }
+    if (!card) return null;
+    const shown = showFront ? card.frontStatement : card.backStatement;
+    return /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "study-fullscreen", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "session-track", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "track-top", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("span", { className: "track-meta", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("strong", { children: currentIndex + 1 }),
+            " / ",
+            cards.length
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("button", { className: "exit-btn", onClick: () => setPhase("results"), children: "End session" })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "track-bar", children: cards.map((_, i) => {
+          const result = results[i];
+          let segClass = "";
+          if (result) segClass = result.wasCorrect ? "done-correct" : "done-incorrect";
+          else if (i === currentIndex) segClass = "current";
+          return /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: `track-seg ${segClass}` }, i);
+        }) })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "session-stage", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "session-card", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "card-label", children: showFront ? "Front" : "Back" }),
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "card-text", children: shown })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "session-input-area", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("label", { children: [
+            "Type the ",
+            showFront ? "back" : "front",
+            ":"
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
+            "input",
+            {
+              ref: inputRef,
+              type: "text",
+              value: userAnswer,
+              disabled: checked,
+              onChange: (e) => setUserAnswer(e.target.value),
+              placeholder: `Enter ${showFront ? "back" : "front"} statement...`,
+              className: checked ? isAnswerCorrect ? "input-correct" : "input-incorrect" : ""
+            }
+          ),
+          checked && /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: `answer-feedback ${isAnswerCorrect ? "is-correct" : "is-incorrect"}`, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("span", { className: "feedback-label", children: isAnswerCorrect ? "Matched" : "Answer:" }),
+            !isAnswerCorrect && /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("span", { className: "feedback-value", children: expectedAnswer })
+          ] })
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "session-actions", children: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "actions-inner", children: !checked ? /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)(import_jsx_runtime15.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("button", { className: "check-btn", onClick: handleCheck, disabled: !userAnswer.trim(), children: "Check answer" }),
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("span", { className: "kbd-hint", children: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("kbd", { children: "Enter" }) })
+      ] }) : /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)(import_jsx_runtime15.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("button", { className: "incorrect-btn", onClick: () => handleGrade(false), children: "Incorrect" }),
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("button", { className: "correct-btn", onClick: () => handleGrade(true), children: "Correct" }),
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("span", { className: "kbd-hint", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("kbd", { children: "1" }),
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("kbd", { children: "2" })
+        ] })
+      ] }) }) })
+    ] });
+  };
+
+  // App/Design/React/Components/Local/Pages/FlashCards/index.tsx
+  var import_jsx_runtime16 = __toESM(require_jsx_runtime(), 1);
   var FlashCards = () => {
     const { language } = useLanguage();
     const { session } = useSession();
-    const [isModalOpen, setIsModalOpen] = (0, import_react12.useState)(false);
-    const [isDeleting, setIsDeleting] = (0, import_react12.useState)(null);
-    const [isStudyActive, setIsStudyActive] = (0, import_react12.useState)(false);
+    const [isModalOpen, setIsModalOpen] = (0, import_react13.useState)(false);
+    const [isDeleting, setIsDeleting] = (0, import_react13.useState)(null);
+    const [isStudyActive, setIsStudyActive] = (0, import_react13.useState)(false);
     const {
       page,
       size,
@@ -22665,7 +22928,7 @@
       setSortField,
       setSortDir
     } = usePagination(listFlashCardPagedSorted, [language, isModalOpen, isDeleting]);
-    const [flippedIds, setFlippedIds] = (0, import_react12.useState)(/* @__PURE__ */ new Set());
+    const [flippedIds, setFlippedIds] = (0, import_react13.useState)(/* @__PURE__ */ new Set());
     const toggleFlip = (id) => {
       setFlippedIds((prev) => {
         const next = new Set(prev);
@@ -22687,32 +22950,32 @@
       }
     };
     if (flashCardsLoading) {
-      return /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Spinner, {});
+      return /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Spinner, {});
     }
     if (flashCardsError) {
-      return /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "error", children: `An error occured loading your flash cards: ${flashCardsError}` });
+      return /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "error", children: `An error occured loading your flash cards: ${flashCardsError}` });
     }
     const cards = flashCards ?? [];
     const userId = session?.user?.id;
     const languageId = language?.id;
-    return /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "flashcards", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "card-actions", children: [
-        page <= 1 ? null : /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("button", { onClick: prevPage, disabled: page <= 1, children: "Previous" }),
-        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("span", { children: `Page ${page}` }),
-        cards.length > size ? /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("button", { onClick: nextPage, children: "Next" }) : null,
-        /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("select", { value: sortField ?? "", onChange: (e) => setSortField(e.target.value || void 0), children: [
-          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("option", { value: "", children: "Sort by..." }),
-          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("option", { value: "frontStatement", children: "Front" }),
-          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("option", { value: "backStatement", children: "Back" }),
-          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("option", { value: "difficulty", children: "Difficulty" }),
-          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("option", { value: "reviewCount", children: "Reviews" }),
-          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("option", { value: "createTime", children: "Created" })
+    return /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "flashcards", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "card-actions", children: [
+        page <= 1 ? null : /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("button", { onClick: prevPage, disabled: page <= 1, children: "Previous" }),
+        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("span", { children: `Page ${page}` }),
+        cards.length > size ? /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("button", { onClick: nextPage, children: "Next" }) : null,
+        /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("select", { value: sortField ?? "", onChange: (e) => setSortField(e.target.value || void 0), children: [
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("option", { value: "", children: "Sort by..." }),
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("option", { value: "frontStatement", children: "Front" }),
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("option", { value: "backStatement", children: "Back" }),
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("option", { value: "difficulty", children: "Difficulty" }),
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("option", { value: "reviewCount", children: "Reviews" }),
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("option", { value: "createTime", children: "Created" })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("select", { value: sortDir ?? "asc", onChange: (e) => setSortDir(e.target.value), children: [
-          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("option", { value: "asc", children: "Asc" }),
-          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("option", { value: "desc", children: "Desc" })
+        /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("select", { value: sortDir ?? "asc", onChange: (e) => setSortDir(e.target.value), children: [
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("option", { value: "asc", children: "Asc" }),
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("option", { value: "desc", children: "Desc" })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
           "button",
           {
             className: "create-button",
@@ -22721,7 +22984,7 @@
             children: "Create new"
           }
         ),
-        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
           "button",
           {
             className: "study-button",
@@ -22731,19 +22994,19 @@
           }
         )
       ] }),
-      Boolean(!cards || cards.length === 0) && /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "notice", children: "You have no flashcards, click create new to begin" }),
-      cards && cards.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "card-grid", children: cards.map((card) => {
+      Boolean(!cards || cards.length === 0) && /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "notice", children: "You have no flashcards, click create new to begin" }),
+      cards && cards.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "card-grid", children: cards.map((card) => {
         const isFlipped = flippedIds.has(card.id);
-        return /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
+        return /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
           "div",
           {
             className: `flashcard ${isFlipped ? "flipped" : ""}`,
             onClick: () => toggleFlip(card.id),
-            children: /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "flashcard-inner", children: [
-              /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "flashcard-face flashcard-front", children: [
-                /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "statement", children: card.frontStatement }),
-                card.category && /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "tag category", children: card.category }),
-                /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
+            children: /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "flashcard-inner", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "flashcard-face flashcard-front", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "statement", children: card.frontStatement }),
+                card.category && /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "tag category", children: card.category }),
+                /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
                   "button",
                   {
                     className: "delete-button",
@@ -22753,12 +23016,12 @@
                   }
                 )
               ] }),
-              /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "flashcard-face flashcard-back", children: [
-                /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "statement", children: card.backStatement }),
-                card.pronunciation && /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "pronunciation", children: card.pronunciation }),
-                card.notes && /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "notes", children: card.notes }),
-                card.tags && /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "tag tags", children: card.tags }),
-                /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "difficulty", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "flashcard-face flashcard-back", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "statement", children: card.backStatement }),
+                card.pronunciation && /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "pronunciation", children: card.pronunciation }),
+                card.notes && /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "notes", children: card.notes }),
+                card.tags && /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "tag tags", children: card.tags }),
+                /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "difficulty", children: [
                   "Difficulty: ",
                   card.difficulty
                 ] })
@@ -22768,7 +23031,7 @@
           card.id
         );
       }) }),
-      isModalOpen && userId && languageId && /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
+      isModalOpen && userId && languageId && /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
         CreateFlashCardModal,
         {
           userId,
@@ -22777,187 +23040,7 @@
           onCreated: () => setIsModalOpen(false)
         }
       ),
-      isStudyActive && /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(StudySession, { onClose: () => setIsStudyActive(false) })
-    ] });
-  };
-
-  // App/Design/React/Components/Local/Pages/FlashCards/Study/index.tsx
-  var import_react13 = __toESM(require_react(), 1);
-  var import_jsx_runtime16 = __toESM(require_jsx_runtime(), 1);
-  var PRESETS = [5, 10, 20, 50, 100];
-  var Study = ({ onClose }) => {
-    const [phase, setPhase] = (0, import_react13.useState)("pick");
-    const [cardCount, setCardCount] = (0, import_react13.useState)(10);
-    const [customCount, setCustomCount] = (0, import_react13.useState)("");
-    const [cards, setCards] = (0, import_react13.useState)([]);
-    const [currentIndex, setCurrentIndex] = (0, import_react13.useState)(0);
-    const [showFront, setShowFront] = (0, import_react13.useState)(true);
-    const [userAnswer, setUserAnswer] = (0, import_react13.useState)("");
-    const [results, setResults] = (0, import_react13.useState)([]);
-    const [isLoading, setIsLoading] = (0, import_react13.useState)(false);
-    const [error, setError] = (0, import_react13.useState)(null);
-    const handleStart = async (count) => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const response = await getStudySession({ cardCount: count });
-        if (!response.success) {
-          setError(response.message ?? "Failed to start study session");
-          setIsLoading(false);
-          return;
-        }
-        const fetched = response.data ?? [];
-        if (fetched.length === 0) {
-          setError("No cards available for studying");
-          setIsLoading(false);
-          return;
-        }
-        setCards(fetched);
-        setCurrentIndex(0);
-        setShowFront(Math.random() < 0.5);
-        setUserAnswer("");
-        setResults([]);
-        setPhase("session");
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to start study session");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    const handleGrade = async (wasCorrect) => {
-      const card2 = cards[currentIndex];
-      try {
-        await updateFlashCardScore({ cardId: card2.id, isCorrect: wasCorrect });
-      } catch {
-      }
-      setResults((prev) => [...prev, { card: card2, wasCorrect }]);
-      const nextIndex = currentIndex + 1;
-      if (nextIndex >= cards.length) {
-        setPhase("results");
-      } else {
-        setCurrentIndex(nextIndex);
-        setShowFront(Math.random() < 0.5);
-        setUserAnswer("");
-      }
-    };
-    if (phase === "pick") {
-      return /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "modal-overlay", onClick: onClose, children: /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "modal study-pick", onClick: (e) => e.stopPropagation(), children: [
-        /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "modal-header", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("h2", { children: "How many cards?" }),
-          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("button", { className: "modal-close", onClick: onClose, children: "\u2715" })
-        ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "modal-body", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "preset-grid", children: PRESETS.map((n) => /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
-            "button",
-            {
-              className: `preset-btn ${cardCount === n && !customCount ? "active" : ""}`,
-              onClick: () => {
-                setCardCount(n);
-                setCustomCount("");
-              },
-              children: n
-            },
-            n
-          )) }),
-          /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "custom-row", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
-              "input",
-              {
-                type: "number",
-                min: 1,
-                max: 200,
-                placeholder: "Custom",
-                value: customCount,
-                onChange: (e) => {
-                  setCustomCount(e.target.value);
-                  setCardCount(Number(e.target.value) || 10);
-                }
-              }
-            ),
-            /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
-              "button",
-              {
-                className: "start-btn",
-                onClick: () => handleStart(cardCount),
-                disabled: isLoading,
-                children: isLoading ? "Starting..." : "Start"
-              }
-            )
-          ] }),
-          error && /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "modal-error", children: error })
-        ] })
-      ] }) });
-    }
-    if (phase === "results") {
-      const correctCount = results.filter((r) => r.wasCorrect).length;
-      return /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "modal-overlay", children: /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "modal study-results", onClick: (e) => e.stopPropagation(), children: [
-        /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "modal-header", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("h2", { children: "Study Results" }),
-          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("button", { className: "modal-close", onClick: onClose, children: "\u2715" })
-        ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "modal-body", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "results-summary", children: [
-            correctCount,
-            " of ",
-            results.length,
-            " correct (",
-            Math.round(correctCount / results.length * 100),
-            "%)"
-          ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "results-list", children: results.map((r, i) => /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: `result-item ${r.wasCorrect ? "correct" : "incorrect"}`, children: [
-            /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("span", { className: "result-icon", children: r.wasCorrect ? "\u2713" : "\u2717" }),
-            /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("span", { className: "result-front", children: r.card.frontStatement }),
-            /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("span", { className: "result-arrow", children: "\u2192" }),
-            /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("span", { className: "result-back", children: r.card.backStatement })
-          ] }, i)) })
-        ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "modal-actions", children: /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("button", { onClick: onClose, children: "Close" }) })
-      ] }) });
-    }
-    if (isLoading) {
-      return /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Spinner, {});
-    }
-    if (error) {
-      return /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "modal-overlay", children: /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "modal", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "modal-body", children: /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "modal-error", children: error }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "modal-actions", children: /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("button", { onClick: onClose, children: "Close" }) })
-      ] }) });
-    }
-    const card = cards[currentIndex];
-    const shown = showFront ? card.frontStatement : card.backStatement;
-    return /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "study-session", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "session-header", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("span", { className: "progress", children: [
-          currentIndex + 1,
-          " / ",
-          cards.length
-        ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("button", { className: "end-btn", onClick: () => setPhase("results"), children: "End Session" })
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "session-card", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "card-label", children: showFront ? "Front" : "Back" }),
-        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "card-text", children: shown })
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "session-input-area", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("label", { children: [
-          "Type the ",
-          showFront ? "back" : "front",
-          ":"
-        ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
-          "input",
-          {
-            type: "text",
-            value: userAnswer,
-            onChange: (e) => setUserAnswer(e.target.value),
-            placeholder: `Enter ${showFront ? "back" : "front"} statement...`
-          }
-        )
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "grade-buttons", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("button", { className: "incorrect-btn", onClick: () => handleGrade(false), children: "Incorrect" }),
-        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("button", { className: "correct-btn", onClick: () => handleGrade(true), children: "Correct" })
-      ] })
+      isStudyActive && /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Study, { onClose: () => setIsStudyActive(false) })
     ] });
   };
 

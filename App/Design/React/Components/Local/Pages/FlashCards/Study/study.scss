@@ -1,3 +1,29 @@
+// ── Shared tokens ──────────────────────────────────────────────
+$bg: #0e0e0e;
+$surface: #161616;
+$surface-raised: #1a1a1a;
+$border: #2a2a2a;
+$border-strong: #333;
+$text: #e5e5e5;
+$text-dim: #aaa;
+$text-faint: #777;
+$accent: #4f46e5;
+$accent-hover: #4338ca;
+$good: #059669;
+$good-hover: #047857;
+$good-text: #34d399;
+$bad: #dc2626;
+$bad-hover: #b91c1c;
+$bad-text: #f87171;
+
+@mixin focus-ring {
+  &:focus-visible {
+    outline: 2px solid $accent;
+    outline-offset: 2px;
+  }
+}
+
+// ── Pick screen (unchanged modal — entry point stays lightweight) ──
 .study-pick {
   max-width: 380px;
 
@@ -10,21 +36,20 @@
       flex: 1;
       min-width: 56px;
       padding: 10px 0;
-      border: 1px solid #333;
+      border: 1px solid $border-strong;
       border-radius: 6px;
-      background: #1a1a1a;
-      color: #e5e5e5;
+      background: $surface-raised;
+      color: $text;
       font-size: 15px;
       cursor: pointer;
       transition: background 0.15s ease;
+      @include focus-ring;
 
-      &:hover {
-        background: #262626;
-      }
+      &:hover { background: #262626; }
 
       &.active {
-        background: #4f46e5;
-        border-color: #4f46e5;
+        background: $accent;
+        border-color: $accent;
       }
     }
   }
@@ -36,245 +61,440 @@
 
     input {
       flex: 1;
-      background: #0e0e0e;
-      border: 1px solid #333;
+      background: $bg;
+      border: 1px solid $border-strong;
       border-radius: 6px;
       padding: 8px 10px;
-      color: #e5e5e5;
+      color: $text;
       font-size: 14px;
       font-family: inherit;
+      @include focus-ring;
 
-      &:focus {
-        outline: none;
-        border-color: #4f46e5;
-      }
+      &:focus { border-color: $accent; }
     }
 
     .start-btn {
-      background: #4f46e5;
-      border: 1px solid #4f46e5;
-      color: #e5e5e5;
+      background: $accent;
+      border: 1px solid $accent;
+      color: $text;
       padding: 8px 20px;
       border-radius: 6px;
       cursor: pointer;
       font-size: 14px;
+      @include focus-ring;
 
-      &:hover:not(:disabled) {
-        background: #4338ca;
-      }
-
-      &:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
+      &:hover:not(:disabled) { background: $accent-hover; }
+      &:disabled { opacity: 0.5; cursor: not-allowed; }
     }
+  }
+
+  .hint-row {
+    margin-top: 4px;
+    font-size: 12px;
+    color: $text-faint;
   }
 }
 
-.study-session {
-  padding: 24px;
-  max-width: 600px;
-  margin: 0 auto;
-  color: #e5e5e5;
+// ── Fullscreen session shell ───────────────────────────────────
+// Viewport-filling, not browser-chrome fullscreen: fixed to the
+// window so it sits above the rest of the app regardless of scroll.
+.study-fullscreen {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh; // dynamic viewport height, correct on mobile browser chrome
+  background: $bg;
+  color: $text;
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+  overflow: hidden;
+}
 
-  .session-header {
+// Track: the one signature element. The dot is literally where you
+// are in the deck, the filled segments are cards already graded —
+// a real timeline because study order is real sequence.
+.session-track {
+  flex-shrink: 0;
+  padding: 20px 24px 0;
+
+  .track-top {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 24px;
+    margin-bottom: 12px;
 
-    .progress {
-      font-size: 15px;
-      color: #aaa;
+    .track-meta {
+      font-size: 13px;
+      color: $text-dim;
+      font-variant-numeric: tabular-nums;
+
+      strong {
+        color: $text;
+        font-weight: 600;
+      }
     }
 
-    .end-btn {
+    .exit-btn {
       background: transparent;
-      border: 1px solid #555;
-      color: #aaa;
+      border: 1px solid $border-strong;
+      color: $text-dim;
       padding: 6px 14px;
       border-radius: 6px;
       cursor: pointer;
       font-size: 13px;
+      @include focus-ring;
 
       &:hover {
-        color: #f87171;
-        border-color: #f87171;
+        color: $bad-text;
+        border-color: $bad-text;
       }
     }
   }
 
-  .session-card {
-    background: #161616;
-    border: 1px solid #2a2a2a;
-    border-radius: 10px;
-    padding: 32px 24px;
-    text-align: center;
-    margin-bottom: 20px;
-
-    .card-label {
-      font-size: 12px;
-      color: #777;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 12px;
-    }
-
-    .card-text {
-      font-size: 22px;
-      font-weight: 500;
-      word-break: break-word;
-      line-height: 1.4;
-    }
-  }
-
-  .session-input-area {
-    margin-bottom: 20px;
-
-    label {
-      display: block;
-      font-size: 13px;
-      color: #aaa;
-      margin-bottom: 6px;
-    }
-
-    input {
-      width: 100%;
-      box-sizing: border-box;
-      background: #0e0e0e;
-      border: 1px solid #333;
-      border-radius: 6px;
-      padding: 10px 12px;
-      color: #e5e5e5;
-      font-size: 15px;
-      font-family: inherit;
-
-      &:focus {
-        outline: none;
-        border-color: #4f46e5;
-      }
-    }
-  }
-
-  .grade-buttons {
+  .track-bar {
     display: flex;
-    gap: 12px;
+    gap: 3px;
+    height: 4px;
 
-    button {
+    .track-seg {
       flex: 1;
-      padding: 12px;
-      border-radius: 6px;
-      border: 1px solid #333;
-      font-size: 15px;
-      cursor: pointer;
-      font-family: inherit;
-      transition: background 0.15s ease;
-    }
+      border-radius: 2px;
+      background: $border;
+      transition: background 0.2s ease;
 
-    .correct-btn {
-      background: #065f46;
-      border-color: #065f46;
-      color: #e5e5e5;
-
-      &:hover {
-        background: #047857;
-      }
-    }
-
-    .incorrect-btn {
-      background: #7f1d1d;
-      border-color: #7f1d1d;
-      color: #e5e5e5;
-
-      &:hover {
-        background: #991b1b;
+      &.done-correct { background: $good; }
+      &.done-incorrect { background: $bad; }
+      &.current {
+        background: $accent;
+        animation: pulse-seg 1.6s ease-in-out infinite;
       }
     }
   }
 }
 
+@keyframes pulse-seg {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+// Center stage: fills remaining space, card is vertically centered
+// regardless of viewport size.
+.session-stage {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  min-height: 0;
+}
+
+.session-card {
+  width: 100%;
+  max-width: 640px;
+  background: $surface;
+  border: 1px solid $border;
+  border-radius: 14px;
+  padding: clamp(32px, 6vh, 56px) clamp(24px, 5vw, 48px);
+  text-align: center;
+
+  .card-label {
+    font-size: 12px;
+    color: $text-faint;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 16px;
+  }
+
+  .card-text {
+    font-size: clamp(22px, 4vw, 30px);
+    font-weight: 500;
+    word-break: break-word;
+    line-height: 1.4;
+  }
+}
+
+.session-input-area {
+  width: 100%;
+  max-width: 640px;
+  margin-top: 20px;
+
+  label {
+    display: block;
+    font-size: 13px;
+    color: $text-dim;
+    margin-bottom: 6px;
+  }
+
+  input {
+    width: 100%;
+    box-sizing: border-box;
+    background: $surface;
+    border: 1px solid $border-strong;
+    border-radius: 8px;
+    padding: 14px 16px;
+    color: $text;
+    font-size: 16px;
+    font-family: inherit;
+    @include focus-ring;
+
+    &:focus { border-color: $accent; }
+
+    &.input-correct {
+      border-color: $good;
+      background: rgba(5, 150, 105, 0.08);
+    }
+
+    &.input-incorrect {
+      border-color: $bad;
+      background: rgba(220, 38, 38, 0.08);
+    }
+  }
+
+  .answer-feedback {
+    margin-top: 10px;
+    font-size: 14px;
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+
+    .feedback-label {
+      color: $text-faint;
+    }
+
+    .feedback-value {
+      color: $text;
+      font-weight: 500;
+    }
+
+    &.is-correct .feedback-label { color: $good-text; }
+    &.is-incorrect .feedback-label { color: $bad-text; }
+  }
+}
+
+// Action row: pinned to the bottom of the fullscreen shell so the
+// thumb (or pointer) always finds it in the same place.
+.session-actions {
+  flex-shrink: 0;
+  padding: 20px 24px clamp(20px, 4vh, 32px);
+  display: flex;
+  justify-content: center;
+
+  .actions-inner {
+    width: 100%;
+    max-width: 640px;
+    display: flex;
+    gap: 12px;
+  }
+
+  button {
+    flex: 1;
+    padding: 14px;
+    border-radius: 8px;
+    border: 1px solid $border-strong;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s ease, transform 0.1s ease;
+    @include focus-ring;
+
+    &:active { transform: scale(0.98); }
+  }
+
+  .check-btn {
+    background: $accent;
+    border-color: $accent;
+    color: $text;
+
+    &:hover:not(:disabled) { background: $accent-hover; }
+    &:disabled { opacity: 0.4; cursor: not-allowed; }
+  }
+
+  .correct-btn {
+    background: $good;
+    border-color: $good;
+    color: $text;
+    &:hover { background: $good-hover; }
+  }
+
+  .incorrect-btn {
+    background: $bad;
+    border-color: $bad;
+    color: $text;
+    &:hover { background: $bad-hover; }
+  }
+
+  .kbd-hint {
+    flex: 0 0 auto;
+    align-self: center;
+    font-size: 12px;
+    color: $text-faint;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0 4px;
+
+    kbd {
+      background: $surface-raised;
+      border: 1px solid $border-strong;
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-family: inherit;
+      font-size: 11px;
+    }
+  }
+}
+
+// ── Results: also fullscreen, so finishing a session doesn't dump
+// you back into a cramped modal mid-flow.
 .study-results {
-  max-width: 560px;
+  &.study-fullscreen {
+    align-items: center;
+  }
+
+  .results-content {
+    width: 100%;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 0 24px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .results-header {
+    flex-shrink: 0;
+    padding: 32px 0 8px;
+    text-align: center;
+
+    h2 {
+      margin: 0 0 4px;
+      font-size: 20px;
+    }
+  }
 
   .results-summary {
     text-align: center;
-    font-size: 16px;
-    font-weight: 500;
-    padding: 8px 0 16px;
+    flex-shrink: 0;
+    padding: 8px 0 20px;
+
+    .summary-pct {
+      font-size: 44px;
+      font-weight: 700;
+      line-height: 1;
+
+      &.summary-good { color: $good-text; }
+      &.summary-bad { color: $bad-text; }
+    }
+
+    .summary-detail {
+      margin-top: 6px;
+      font-size: 14px;
+      color: $text-dim;
+    }
   }
 
   .results-list {
     display: flex;
     flex-direction: column;
     gap: 6px;
-    max-height: 300px;
     overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+    padding-bottom: 8px;
 
     .result-item {
       display: flex;
       align-items: center;
-      gap: 8px;
-      padding: 8px 10px;
-      border-radius: 6px;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 8px;
       font-size: 13px;
-      background: #0e0e0e;
+      background: $surface;
+      border-left: 3px solid transparent;
 
-      &.correct {
-        border-left: 3px solid #059669;
-      }
-
-      &.incorrect {
-        border-left: 3px solid #dc2626;
-      }
+      &.correct { border-left-color: $good; }
+      &.incorrect { border-left-color: $bad; }
 
       .result-icon {
         flex-shrink: 0;
         font-size: 14px;
         width: 18px;
         text-align: center;
-
-        .correct & { color: #34d399; }
-        .incorrect & { color: #f87171; }
       }
+
+      .correct .result-icon { color: $good-text; }
+      .incorrect .result-icon { color: $bad-text; }
 
       .result-front,
       .result-back {
         word-break: break-word;
-        max-width: 40%;
+        max-width: 38%;
       }
 
-      .result-front {
-        color: #e5e5e5;
-      }
-
-      .result-arrow {
-        color: #555;
-        flex-shrink: 0;
-      }
-
-      .result-back {
-        color: #aaa;
-      }
+      .result-front { color: $text; }
+      .result-arrow { color: #555; flex-shrink: 0; }
+      .result-back { color: $text-dim; }
     }
   }
 
-  .modal-actions {
-    padding: 0 20px 20px;
+  .results-actions {
+    flex-shrink: 0;
+    padding: 16px 0 clamp(20px, 4vh, 32px);
     display: flex;
-    justify-content: flex-end;
+    gap: 12px;
 
     button {
-      padding: 8px 20px;
-      border-radius: 6px;
+      flex: 1;
+      padding: 12px;
+      border-radius: 8px;
       font-size: 14px;
       cursor: pointer;
-      border: 1px solid #333;
-      background: #1a1a1a;
-      color: #e5e5e5;
+      border: 1px solid $border-strong;
+      background: $surface-raised;
+      color: $text;
+      font-family: inherit;
+      @include focus-ring;
 
-      &:hover {
-        background: #262626;
+      &:hover { background: #262626; }
+
+      &.primary {
+        background: $accent;
+        border-color: $accent;
+        &:hover { background: $accent-hover; }
       }
     }
+  }
+}
+
+// ── Loading / error states inside the fullscreen shell ─────────
+.session-status {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-error {
+  color: $bad-text;
+  font-size: 14px;
+  text-align: center;
+}
+
+@media (max-width: 480px) {
+  .session-actions .actions-inner {
+    flex-wrap: wrap;
+  }
+  .session-actions .kbd-hint {
+    display: none; // keyboard hints are meaningless on touch
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .track-seg.current {
+    animation: none;
   }
 }

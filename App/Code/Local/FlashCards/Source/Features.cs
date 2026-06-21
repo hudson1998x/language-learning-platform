@@ -20,9 +20,10 @@ public static class Features
             Handler = async (payload, httpContext) =>
             {
                 var flashCards = RepositoryCatalog.GetRepository<IFlashCardRepository>();
-
+                var context = UserContext.FromHttpContext(httpContext);
+                
                 var items = await flashCards.GetStudySessionFlashCards(
-                    UserContext.FromHttpContext(httpContext),
+                    context,
                     DataOptions.Default,
                     new Pagination()
                     {
@@ -35,6 +36,25 @@ public static class Features
                         Ascending = false
                     }
                 );
+
+                if (items.Count == 0)
+                {
+                    // pull some random items. 
+                    items = await flashCards.FindAllAsync(
+                        context,
+                        DataOptions.Default,
+                        new SortOption()
+                        {
+                            Field = "IncorrectCount",
+                            Ascending = false
+                        },
+                        new Pagination()
+                        {
+                            PageNo = 1,
+                            Limit = payload.CardCount
+                        });
+                }
+                
                 return new ApiResponse<List<FlashCard>>()
                 {
                     Data = items,

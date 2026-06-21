@@ -120,6 +120,10 @@ public static class RepositoryProxyHelper
                 typedList.Add(list[i]);
             result = (T)typedList;
         }
+        else if (raw is System.Collections.IList singleList)
+        {
+            result = singleList.Count > 0 ? (T)singleList[0]! : default!;
+        }
         else
         {
             result = (T)raw!;

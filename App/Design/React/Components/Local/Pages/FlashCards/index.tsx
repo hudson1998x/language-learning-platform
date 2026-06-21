@@ -168,7 +168,7 @@ export const FlashCards = () => {
             )}
 
             {isStudyActive && (
-                <StudySession onClose={() => setIsStudyActive(false)} />
+                <Study onClose={() => setIsStudyActive(false)} />
             )}
         </div>
     )
