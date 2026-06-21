@@ -32,6 +32,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pages", "App\Code\Community
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TypeScriptTests", "App\Code\Core\TypeScript\Tests\TypeScriptTests.csproj", "{EB0F97EA-A688-440A-A95E-FFA30BC99D0C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KernelTests", "App\Code\Core\Kernel\Tests\KernelTests.csproj", "{F8D52D42-D1D0-494A-AA2C-84E1D8C0B21C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -130,5 +132,9 @@ Global
 		{EB0F97EA-A688-440A-A95E-FFA30BC99D0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EB0F97EA-A688-440A-A95E-FFA30BC99D0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EB0F97EA-A688-440A-A95E-FFA30BC99D0C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F8D52D42-D1D0-494A-AA2C-84E1D8C0B21C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F8D52D42-D1D0-494A-AA2C-84E1D8C0B21C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F8D52D42-D1D0-494A-AA2C-84E1D8C0B21C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F8D52D42-D1D0-494A-AA2C-84E1D8C0B21C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
