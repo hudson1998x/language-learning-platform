@@ -4,7 +4,6 @@ import { useSession } from '@hook/session-provider'
 import { usePagination } from '@hook/usePagination'
 import {
     listFlashCardPagedSorted,
-    createFlashCard,
     deleteFlashCard,
     FlashCard
 } from '@api/flashcard'
@@ -12,6 +11,33 @@ import { Spinner } from '@component/Spinner'
 import { CreateFlashCardModal } from './CreateFlashCardModal'
 import { Study } from './Study'
 import './style.scss'
+
+const MAX_DIFFICULTY = 5
+
+const SORT_OPTIONS = [
+    { value: 'createTime', label: 'Date created' },
+    { value: 'frontStatement', label: 'Front text' },
+    { value: 'backStatement', label: 'Back text' },
+    { value: 'difficulty', label: 'Difficulty' },
+    { value: 'reviewCount', label: 'Reviews' },
+] as const
+
+const formatLastReviewed = (iso?: string | null): string => {
+    if (!iso) return 'Not studied yet'
+    const date = new Date(iso)
+    const days = Math.floor((Date.now() - date.getTime()) / 86_400_000)
+    if (days <= 0) return 'Studied today'
+    if (days === 1) return 'Studied yesterday'
+    if (days < 30) return `Studied ${days}d ago`
+    const months = Math.floor(days / 30)
+    return `Studied ${months}mo ago`
+}
+
+const accuracyOf = (card: FlashCard): number | null => {
+    const total = card.correctCount + card.incorrectCount
+    if (total === 0) return null
+    return Math.round((card.correctCount / total) * 100)
+}
 
 export const FlashCards = () => {
 
@@ -21,7 +47,7 @@ export const FlashCards = () => {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [isDeleting, setIsDeleting] = useState<string | null>(null)
     const [isStudyActive, setIsStudyActive] = useState(false)
-    
+
     const {
         page,
         size,
@@ -61,94 +87,148 @@ export const FlashCards = () => {
     }
 
     if (flashCardsLoading) {
-        return <Spinner />
+        return (
+            <div className={'flashcards-status'}><Spinner /></div>
+        )
     }
 
     if (flashCardsError) {
         return (
-            <div className={'error'}>{`An error occured loading your flash cards: ${flashCardsError}`}</div>
+            <div className={'flashcards-status'}>
+                <div className={'error'}>{`Couldn't load your flashcards: ${flashCardsError}`}</div>
+            </div>
         )
     }
 
     const cards = flashCards ?? []
     const userId = session?.user?.id
     const languageId = language?.id
+    // The pagination hook has no total count — a full page is the only
+    // signal we have that another page might exist.
+    const mayHaveNextPage = cards.length === size
 
     return (
         <div className={'flashcards'}>
             <div className={'card-actions'}>
-                {page <= 1 ? null : <button onClick={prevPage} disabled={page <= 1}>Previous</button>}
-                <span>{`Page ${page}`}</span>
-                {cards.length > size ? <button onClick={nextPage}>Next</button> : null}
-                <select value={sortField ?? ''} onChange={(e) => setSortField(e.target.value || undefined)}>
-                    <option value="">Sort by...</option>
-                    <option value="frontStatement">Front</option>
-                    <option value="backStatement">Back</option>
-                    <option value="difficulty">Difficulty</option>
-                    <option value="reviewCount">Reviews</option>
-                    <option value="createTime">Created</option>
-                </select>
-                <select value={sortDir ?? 'asc'} onChange={(e) => setSortDir(e.target.value)}>
-                    <option value="asc">Asc</option>
-                    <option value="desc">Desc</option>
-                </select>
-                <button
-                    className={'create-button'}
-                    onClick={() => setIsModalOpen(true)}
-                    disabled={!userId || !languageId}
-                >
-                    Create new
-                </button>
-                <button
-                    className={'study-button'}
-                    onClick={() => setIsStudyActive(true)}
-                    disabled={!userId || !languageId}
-                >
-                    Study
-                </button>
+                <div className={'pagination'}>
+                    <button onClick={prevPage} disabled={page <= 1}>Previous</button>
+                    <span>{`Page ${page}`}</span>
+                    <button onClick={nextPage} disabled={!mayHaveNextPage}>Next</button>
+                </div>
+
+                <div className={'sort-controls'}>
+                    <select value={sortField ?? ''} onChange={(e) => setSortField(e.target.value || undefined)}>
+                        {SORT_OPTIONS.map((opt) => (
+                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        ))}
+                    </select>
+                    <select value={sortDir ?? 'desc'} onChange={(e) => setSortDir(e.target.value)}>
+                        <option value="asc">Asc</option>
+                        <option value="desc">Desc</option>
+                    </select>
+                </div>
+
+                <div className={'primary-actions'}>
+                    <button
+                        className={'create-button'}
+                        onClick={() => setIsModalOpen(true)}
+                        disabled={!userId || !languageId}
+                    >
+                        Create new
+                    </button>
+                    <button
+                        className={'study-button'}
+                        onClick={() => setIsStudyActive(true)}
+                        disabled={!userId || !languageId || cards.length === 0}
+                    >
+                        Study
+                    </button>
+                </div>
             </div>
 
-            {Boolean(!cards || cards.length === 0) && (
-                <div className={'notice'}>You have no flashcards, click create new to begin</div>
+            {cards.length === 0 && (
+                <div className={'notice'}>
+                    <div className={'notice-title'}>No flashcards yet</div>
+                    <div className={'notice-body'}>Click "Create new" to add your first card.</div>
+                </div>
             )}
 
-            {cards && cards.length > 0 && (
+            {cards.length > 0 && (
                 <div className={'card-grid'}>
                     {cards.map((card) => {
                         const isFlipped = flippedIds.has(card.id)
+                        const masteryTicks = Math.max(0, Math.min(MAX_DIFFICULTY, MAX_DIFFICULTY - card.difficulty))
+                        const accuracy = accuracyOf(card)
                         return (
                             <div
                                 key={card.id}
                                 className={`flashcard ${isFlipped ? 'flipped' : ''}`}
                                 onClick={() => toggleFlip(card.id)}
+                                role={'button'}
+                                tabIndex={0}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' || e.key === ' ') {
+                                        e.preventDefault()
+                                        toggleFlip(card.id)
+                                    }
+                                }}
                             >
                                 <div className={'flashcard-inner'}>
                                     <div className={'flashcard-face flashcard-front'}>
-                                        <div className={'statement'}>{card.frontStatement}</div>
-                                        {card.category && (
-                                            <div className={'tag category'}>{card.category}</div>
-                                        )}
                                         <button
                                             className={'delete-button'}
                                             onClick={(e) => handleDelete(card, e)}
                                             disabled={isDeleting === card.id}
+                                            aria-label={'Delete card'}
                                         >
                                             {isDeleting === card.id ? '...' : '✕'}
                                         </button>
+                                        {card.category && (
+                                            <div className={'tag category'}>{card.category}</div>
+                                        )}
+
+                                        <div className={'face-body'}>
+                                            <div className={'statement'}>{card.frontStatement}</div>
+                                        </div>
+
+                                        <div className={'face-footer'}>
+                                            <div className={'mastery'} title={`Difficulty ${card.difficulty}/${MAX_DIFFICULTY}`}>
+                                                {Array.from({ length: MAX_DIFFICULTY }).map((_, i) => (
+                                                    <span key={i} className={`mastery-tick ${i < masteryTicks ? 'filled' : ''}`} />
+                                                ))}
+                                            </div>
+                                            <div className={'stat-row'}>
+                                                <span className={'stat'}>
+                                                    {card.reviewCount} {card.reviewCount === 1 ? 'review' : 'reviews'}
+                                                </span>
+                                                {card.streak > 0 && (
+                                                    <span className={'stat stat-streak'}>🔥 {card.streak}</span>
+                                                )}
+                                            </div>
+                                        </div>
                                     </div>
+
                                     <div className={'flashcard-face flashcard-back'}>
-                                        <div className={'statement'}>{card.backStatement}</div>
-                                        {card.pronunciation && (
-                                            <div className={'pronunciation'}>{card.pronunciation}</div>
-                                        )}
-                                        {card.notes && (
-                                            <div className={'notes'}>{card.notes}</div>
-                                        )}
-                                        {card.tags && (
-                                            <div className={'tag tags'}>{card.tags}</div>
-                                        )}
-                                        <div className={'difficulty'}>
-                                            {'Difficulty: '}{card.difficulty}
+                                        <div className={'face-body'}>
+                                            <div className={'statement'}>{card.backStatement}</div>
+                                            {card.pronunciation && (
+                                                <div className={'pronunciation'}>{card.pronunciation}</div>
+                                            )}
+                                            {card.notes && (
+                                                <div className={'notes'}>{card.notes}</div>
+                                            )}
+                                            {card.tags && (
+                                                <div className={'tag tags'}>{card.tags}</div>
+                                            )}
+                                        </div>
+
+                                        <div className={'face-footer'}>
+                                            <span className={'stat'}>{formatLastReviewed(card.lastReviewedUtc)}</span>
+                                            {accuracy !== null && (
+                                                <span className={`stat stat-accuracy ${accuracy >= 70 ? 'good' : 'weak'}`}>
+                                                    {accuracy}% accurate
+                                                </span>
+                                            )}
                                         </div>
                                     </div>
                                 </div>

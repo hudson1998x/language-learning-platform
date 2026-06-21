@@ -22909,6 +22909,29 @@
 
   // App/Design/React/Components/Local/Pages/FlashCards/index.tsx
   var import_jsx_runtime16 = __toESM(require_jsx_runtime(), 1);
+  var MAX_DIFFICULTY = 5;
+  var SORT_OPTIONS = [
+    { value: "createTime", label: "Date created" },
+    { value: "frontStatement", label: "Front text" },
+    { value: "backStatement", label: "Back text" },
+    { value: "difficulty", label: "Difficulty" },
+    { value: "reviewCount", label: "Reviews" }
+  ];
+  var formatLastReviewed = (iso) => {
+    if (!iso) return "Not studied yet";
+    const date = new Date(iso);
+    const days = Math.floor((Date.now() - date.getTime()) / 864e5);
+    if (days <= 0) return "Studied today";
+    if (days === 1) return "Studied yesterday";
+    if (days < 30) return `Studied ${days}d ago`;
+    const months = Math.floor(days / 30);
+    return `Studied ${months}mo ago`;
+  };
+  var accuracyOf = (card) => {
+    const total = card.correctCount + card.incorrectCount;
+    if (total === 0) return null;
+    return Math.round(card.correctCount / total * 100);
+  };
   var FlashCards = () => {
     const { language } = useLanguage();
     const { session } = useSession();
@@ -22950,80 +22973,113 @@
       }
     };
     if (flashCardsLoading) {
-      return /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Spinner, {});
+      return /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "flashcards-status", children: /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Spinner, {}) });
     }
     if (flashCardsError) {
-      return /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "error", children: `An error occured loading your flash cards: ${flashCardsError}` });
+      return /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "flashcards-status", children: /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "error", children: `Couldn't load your flashcards: ${flashCardsError}` }) });
     }
     const cards = flashCards ?? [];
     const userId = session?.user?.id;
     const languageId = language?.id;
+    const mayHaveNextPage = cards.length === size;
     return /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "flashcards", children: [
       /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "card-actions", children: [
-        page <= 1 ? null : /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("button", { onClick: prevPage, disabled: page <= 1, children: "Previous" }),
-        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("span", { children: `Page ${page}` }),
-        cards.length > size ? /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("button", { onClick: nextPage, children: "Next" }) : null,
-        /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("select", { value: sortField ?? "", onChange: (e) => setSortField(e.target.value || void 0), children: [
-          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("option", { value: "", children: "Sort by..." }),
-          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("option", { value: "frontStatement", children: "Front" }),
-          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("option", { value: "backStatement", children: "Back" }),
-          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("option", { value: "difficulty", children: "Difficulty" }),
-          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("option", { value: "reviewCount", children: "Reviews" }),
-          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("option", { value: "createTime", children: "Created" })
+        /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "pagination", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("button", { onClick: prevPage, disabled: page <= 1, children: "Previous" }),
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("span", { children: `Page ${page}` }),
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("button", { onClick: nextPage, disabled: !mayHaveNextPage, children: "Next" })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("select", { value: sortDir ?? "asc", onChange: (e) => setSortDir(e.target.value), children: [
-          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("option", { value: "asc", children: "Asc" }),
-          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("option", { value: "desc", children: "Desc" })
+        /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "sort-controls", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("select", { value: sortField ?? "", onChange: (e) => setSortField(e.target.value || void 0), children: SORT_OPTIONS.map((opt) => /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("option", { value: opt.value, children: opt.label }, opt.value)) }),
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("select", { value: sortDir ?? "desc", onChange: (e) => setSortDir(e.target.value), children: [
+            /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("option", { value: "asc", children: "Asc" }),
+            /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("option", { value: "desc", children: "Desc" })
+          ] })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
-          "button",
-          {
-            className: "create-button",
-            onClick: () => setIsModalOpen(true),
-            disabled: !userId || !languageId,
-            children: "Create new"
-          }
-        ),
-        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
-          "button",
-          {
-            className: "study-button",
-            onClick: () => setIsStudyActive(true),
-            disabled: !userId || !languageId,
-            children: "Study"
-          }
-        )
+        /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "primary-actions", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
+            "button",
+            {
+              className: "create-button",
+              onClick: () => setIsModalOpen(true),
+              disabled: !userId || !languageId,
+              children: "Create new"
+            }
+          ),
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
+            "button",
+            {
+              className: "study-button",
+              onClick: () => setIsStudyActive(true),
+              disabled: !userId || !languageId || cards.length === 0,
+              children: "Study"
+            }
+          )
+        ] })
       ] }),
-      Boolean(!cards || cards.length === 0) && /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "notice", children: "You have no flashcards, click create new to begin" }),
-      cards && cards.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "card-grid", children: cards.map((card) => {
+      cards.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "notice", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "notice-title", children: "No flashcards yet" }),
+        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "notice-body", children: 'Click "Create new" to add your first card.' })
+      ] }),
+      cards.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "card-grid", children: cards.map((card) => {
         const isFlipped = flippedIds.has(card.id);
+        const masteryTicks = Math.max(0, Math.min(MAX_DIFFICULTY, MAX_DIFFICULTY - card.difficulty));
+        const accuracy = accuracyOf(card);
         return /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
           "div",
           {
             className: `flashcard ${isFlipped ? "flipped" : ""}`,
             onClick: () => toggleFlip(card.id),
+            role: "button",
+            tabIndex: 0,
+            onKeyDown: (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                toggleFlip(card.id);
+              }
+            },
             children: /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "flashcard-inner", children: [
               /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "flashcard-face flashcard-front", children: [
-                /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "statement", children: card.frontStatement }),
-                card.category && /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "tag category", children: card.category }),
                 /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
                   "button",
                   {
                     className: "delete-button",
                     onClick: (e) => handleDelete(card, e),
                     disabled: isDeleting === card.id,
+                    "aria-label": "Delete card",
                     children: isDeleting === card.id ? "..." : "\u2715"
                   }
-                )
+                ),
+                card.category && /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "tag category", children: card.category }),
+                /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "face-body", children: /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "statement", children: card.frontStatement }) }),
+                /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "face-footer", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "mastery", title: `Difficulty ${card.difficulty}/${MAX_DIFFICULTY}`, children: Array.from({ length: MAX_DIFFICULTY }).map((_, i) => /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("span", { className: `mastery-tick ${i < masteryTicks ? "filled" : ""}` }, i)) }),
+                  /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "stat-row", children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("span", { className: "stat", children: [
+                      card.reviewCount,
+                      " ",
+                      card.reviewCount === 1 ? "review" : "reviews"
+                    ] }),
+                    card.streak > 0 && /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("span", { className: "stat stat-streak", children: [
+                      "\u{1F525} ",
+                      card.streak
+                    ] })
+                  ] })
+                ] })
               ] }),
               /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "flashcard-face flashcard-back", children: [
-                /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "statement", children: card.backStatement }),
-                card.pronunciation && /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "pronunciation", children: card.pronunciation }),
-                card.notes && /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "notes", children: card.notes }),
-                card.tags && /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "tag tags", children: card.tags }),
-                /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "difficulty", children: [
-                  "Difficulty: ",
-                  card.difficulty
+                /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "face-body", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "statement", children: card.backStatement }),
+                  card.pronunciation && /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "pronunciation", children: card.pronunciation }),
+                  card.notes && /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "notes", children: card.notes }),
+                  card.tags && /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "tag tags", children: card.tags })
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "face-footer", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("span", { className: "stat", children: formatLastReviewed(card.lastReviewedUtc) }),
+                  accuracy !== null && /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("span", { className: `stat stat-accuracy ${accuracy >= 70 ? "good" : "weak"}`, children: [
+                    accuracy,
+                    "% accurate"
+                  ] })
                 ] })
               ] })
             ] })

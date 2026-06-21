@@ -1381,6 +1381,12 @@ body {
 }
 
 /* App/Design/React/Components/Local/Pages/FlashCards/style.scss */
+.flashcards-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 240px;
+}
 .flashcards {
   padding: 24px;
   color: #e5e5e5;
@@ -1388,8 +1394,28 @@ body {
 .flashcards .card-actions {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 12px;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
+}
+.flashcards .card-actions .pagination {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.flashcards .card-actions .pagination span {
+  font-size: 14px;
+  color: #999;
+  min-width: 52px;
+}
+.flashcards .card-actions .sort-controls {
+  display: flex;
+  gap: 8px;
+}
+.flashcards .card-actions .primary-actions {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
 }
 .flashcards .card-actions button {
   background: #1a1a1a;
@@ -1401,6 +1427,10 @@ body {
   font-size: 14px;
   transition: background 0.15s ease;
 }
+.flashcards .card-actions button:focus-visible {
+  outline: 2px solid #4f46e5;
+  outline-offset: 2px;
+}
 .flashcards .card-actions button:hover:not(:disabled) {
   background: #262626;
 }
@@ -1408,33 +1438,45 @@ body {
   opacity: 0.4;
   cursor: not-allowed;
 }
-.flashcards .card-actions .create-button {
-  background: #4f46e5;
-  border-color: #4f46e5;
+.flashcards .card-actions select {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  color: #e5e5e5;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
 }
-.flashcards .card-actions .create-button:hover:not(:disabled) {
-  background: #4338ca;
+.flashcards .card-actions select:focus-visible {
+  outline: 2px solid #4f46e5;
+  outline-offset: 2px;
 }
+.flashcards .card-actions .create-button,
 .flashcards .card-actions .study-button {
   background: #4f46e5;
   border-color: #4f46e5;
 }
+.flashcards .card-actions .create-button:hover:not(:disabled),
 .flashcards .card-actions .study-button:hover:not(:disabled) {
   background: #4338ca;
 }
-.flashcards .card-actions span {
-  font-size: 14px;
-  color: #999;
-}
 .flashcards .notice {
-  color: #888;
-  font-size: 14px;
-  padding: 40px 0;
   text-align: center;
+  padding: 64px 0;
+}
+.flashcards .notice .notice-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: #e5e5e5;
+  margin-bottom: 6px;
+}
+.flashcards .notice .notice-body {
+  font-size: 14px;
+  color: #777;
 }
 .flashcards .error {
   color: #f87171;
-  padding: 20px;
+  font-size: 14px;
 }
 .flashcards .card-grid {
   display: grid;
@@ -1443,8 +1485,12 @@ body {
 }
 .flashcards .flashcard {
   perspective: 1000px;
-  height: 160px;
+  height: 188px;
   cursor: pointer;
+}
+.flashcards .flashcard:focus-visible {
+  outline: 2px solid #4f46e5;
+  outline-offset: 2px;
 }
 .flashcards .flashcard .flashcard-inner {
   position: relative;
@@ -1463,50 +1509,99 @@ body {
   border-radius: 10px;
   border: 1px solid #2a2a2a;
   background: #161616;
-  padding: 16px;
+  padding: 14px 16px 12px;
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.15s ease;
+}
+.flashcards .flashcard:hover .flashcard-face {
+  border-color: #333;
+}
+.flashcards .flashcard .face-body {
+  flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
   gap: 8px;
+  min-height: 0;
+  padding-top: 8px;
 }
-.flashcards .flashcard .flashcard-face .statement {
+.flashcards .flashcard .face-body .statement {
   font-size: 16px;
   font-weight: 500;
   word-break: break-word;
+  line-height: 1.35;
 }
-.flashcards .flashcard .flashcard-face .pronunciation {
+.flashcards .flashcard .face-body .pronunciation {
   font-size: 13px;
   color: #999;
   font-style: italic;
 }
-.flashcards .flashcard .flashcard-face .notes {
+.flashcards .flashcard .face-body .notes {
   font-size: 13px;
   color: #aaa;
 }
-.flashcards .flashcard .flashcard-face .difficulty {
+.flashcards .flashcard .face-footer {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 10px;
+  margin-top: auto;
+  border-top: 1px solid #2a2a2a;
+}
+.flashcards .flashcard .stat-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.flashcards .flashcard .stat {
   font-size: 12px;
   color: #777;
-  margin-top: auto;
+  white-space: nowrap;
 }
-.flashcards .flashcard .flashcard-face .tag {
-  position: absolute;
-  top: 10px;
-  right: 10px;
+.flashcards .flashcard .stat-streak {
+  color: #fbbf24;
+}
+.flashcards .flashcard .stat-accuracy {
+  font-weight: 500;
+}
+.flashcards .flashcard .stat-accuracy.good {
+  color: #34d399;
+}
+.flashcards .flashcard .stat-accuracy.weak {
+  color: #f87171;
+}
+.flashcards .flashcard .mastery {
+  display: flex;
+  gap: 3px;
+}
+.flashcards .flashcard .mastery .mastery-tick {
+  width: 12px;
+  height: 4px;
+  border-radius: 2px;
+  background: #333;
+}
+.flashcards .flashcard .mastery .mastery-tick.filled {
+  background: #4f46e5;
+}
+.flashcards .flashcard .tag {
+  align-self: flex-start;
   font-size: 11px;
   padding: 2px 8px;
   border-radius: 999px;
-  background: #2a2a2a;
+  background: #1a1a1a;
   color: #ccc;
+  margin-top: 22px;
 }
-.flashcards .flashcard .flashcard-face .tag.tags {
-  top: auto;
-  bottom: 10px;
-  right: 10px;
+.flashcards .flashcard .tag.tags {
+  margin-top: 0;
 }
-.flashcards .flashcard .flashcard-face .delete-button {
+.flashcards .flashcard .delete-button {
   position: absolute;
   top: 10px;
-  left: 10px;
+  right: 10px;
   background: transparent;
   border: none;
   color: #666;
@@ -1515,12 +1610,25 @@ body {
   padding: 2px 6px;
   border-radius: 4px;
 }
-.flashcards .flashcard .flashcard-face .delete-button:hover:not(:disabled) {
+.flashcards .flashcard .delete-button:focus-visible {
+  outline: 2px solid #4f46e5;
+  outline-offset: 2px;
+}
+.flashcards .flashcard .delete-button:hover:not(:disabled) {
   color: #f87171;
   background: rgba(248, 113, 113, 0.1);
+}
+.flashcards .flashcard .delete-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 .flashcards .flashcard .flashcard-back {
   transform: rotateY(180deg);
   background: #1a1a2e;
+}
+@media (prefers-reduced-motion: reduce) {
+  .flashcard .flashcard-inner {
+    transition: none;
+  }
 }
 /*# sourceMappingURL=index.css.map */

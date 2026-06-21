@@ -118,6 +118,7 @@ public static class Features
                     card.CorrectCount--;
                 }
                 card.LastReviewedUtc = DateTime.UtcNow;
+                card.ReviewCount++;
                 
                 card = await repo.UpdateAsync(card, userContext, DataOptions.Default);
 
