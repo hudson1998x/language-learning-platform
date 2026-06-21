@@ -22103,10 +22103,30 @@
 
   // App/Design/React/Themes/Frontend/Local/Default/Blocks/UserCard/index.tsx
   var import_jsx_runtime6 = __toESM(require_jsx_runtime(), 1);
+  var getInitials = (name, email) => {
+    if (name && name.trim().length > 0) {
+      const parts = name.trim().split(/\s+/);
+      const first = parts[0]?.[0] ?? "";
+      const last = parts.length > 1 ? parts[parts.length - 1]?.[0] ?? "" : "";
+      return (first + last).toUpperCase();
+    }
+    if (email) {
+      return email[0]?.toUpperCase() ?? "?";
+    }
+    return "?";
+  };
   var UserCard = () => {
     const { session } = useSession();
     const { user } = session;
-    return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "user-card", children: user?.email });
+    const initials = getInitials(user?.fullName, user?.email);
+    const displayName = user?.fullName && user.fullName.trim().length > 0 ? user.fullName : user?.email;
+    return /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { onClick: () => location.pathname = "/account", className: "user-card", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "user-card__avatar", "aria-hidden": "true", children: initials }),
+      /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "user-card__meta", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("span", { className: "user-card__name", children: displayName }),
+        user?.fullName && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("span", { className: "user-card__email", children: user.email })
+      ] })
+    ] });
   };
 
   // App/Design/React/Themes/Frontend/Local/Default/Blocks/Navbar/index.tsx

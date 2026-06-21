@@ -355,6 +355,76 @@ body {
   background: #0b0c0e;
 }
 
+/* App/Design/React/Themes/Frontend/Local/Default/Blocks/UserCard/style.scss */
+.user-card {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px 6px 6px;
+  border-radius: 10px;
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+.user-card:hover {
+  background: #1c1c27;
+  border-color: #26262f;
+}
+.user-card:focus-visible {
+  outline: 2px solid #4f46e5;
+  outline-offset: 2px;
+}
+.user-card__avatar {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  font-family: system-ui;
+  color: #e7e7ec;
+  background:
+    linear-gradient(
+      135deg,
+      #4f46e5,
+      #6d28d9);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+}
+.user-card__meta {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+  min-width: 0;
+}
+.user-card__name {
+  font-size: 13px;
+  font-weight: 500;
+  color: #e7e7ec;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+  font-family: system-ui;
+}
+.user-card__email {
+  font-size: 11px;
+  font-weight: 400;
+  color: #8b8b97;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+  font-family: system-ui;
+}
+.user-card:not(:has(.user-card__email)) .user-card__meta {
+  justify-content: center;
+}
+
 /* App/Design/React/Themes/Frontend/Local/Default/Blocks/Navbar/style.scss */
 .navbar {
   --navbar-bg: transparent;

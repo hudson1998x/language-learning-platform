@@ -1,0 +1,87 @@
+// UserCard
+// Matches the LLE navbar: near-black surface, indigo accent (#4F46E5-ish),
+// quiet typography that recedes until hovered/focused.
+
+$lle-bg: #0b0b10;
+$lle-surface: #15151d;
+$lle-surface-hover: #1c1c27;
+$lle-border: #26262f;
+$lle-indigo: #4f46e5;
+$lle-indigo-soft: rgba(79, 70, 229, 0.18);
+$lle-text: #e7e7ec;
+$lle-text-muted: #8b8b97;
+$lle-radius: 10px;
+
+.user-card {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px 6px 6px;
+  border-radius: $lle-radius;
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+
+  &:hover {
+    background: $lle-surface-hover;
+    border-color: $lle-border;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $lle-indigo;
+    outline-offset: 2px;
+  }
+
+  &__avatar {
+    flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    font-family: system-ui;
+    color: $lle-text;
+    background: linear-gradient(135deg, $lle-indigo, #6d28d9);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+  }
+
+  &__meta {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+    min-width: 0;
+  }
+
+  &__name {
+    font-size: 13px;
+    font-weight: 500;
+    color: $lle-text;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 180px;
+    font-family: system-ui;
+  }
+
+  &__email {
+    font-size: 11px;
+    font-weight: 400;
+    color: $lle-text-muted;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 180px;
+    font-family: system-ui;
+  }
+
+  // When there's no fullName, the name slot renders the email alone —
+  // give it the same vertical centering as a two-line card.
+  &:not(:has(.user-card__email)) &__meta {
+    justify-content: center;
+  }
+}
