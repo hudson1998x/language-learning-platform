@@ -2,6 +2,7 @@ using LLE.Eventing;
 using LLE.Kernel.Contracts;
 using LLE.Kernel.DataQL.Ast;
 using LLE.Kernel.Events;
+using LLE.Kernel.Security;
 using LLE.SharedUtils.Threading;
 
 namespace LLE.Kernel.Builders;
@@ -82,8 +83,10 @@ public static class RepositoryProxyHelper
         return adapter;
     }
 
-    public static async Task<T> ExecuteAsync<T>(IDatabaseAdapter adapter, AstNode node)
+    public static async Task<T> ExecuteAsync<T>(IDatabaseAdapter adapter, AstNode node, UserContext context, DataOptions options)
     {
+        PolicyEnforcer.Enforce(node, context, options);
+
         var events = Eventing.Eventing.Of<EntityEvents<T>>();
 
         switch (node)

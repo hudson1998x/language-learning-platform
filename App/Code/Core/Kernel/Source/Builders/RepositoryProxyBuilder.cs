@@ -5,6 +5,7 @@ using LLE.Kernel.Contracts;
 using LLE.Kernel.DataQL.Ast;
 using LLE.Kernel.DataQL.Attributes;
 using LLE.Kernel.DataQL.Tokeniser;
+using LLE.Kernel.Security;
 
 namespace LLE.Kernel.Builders;
 
@@ -460,7 +461,10 @@ public static class RepositoryProxyBuilder
                     $"Unknown CRUD method '{method.Name}' on IEntityRepository<{entityType.Name}>.");
         }
 
-        // stack: [adapter, node] → ExecuteAsync<TResult>(adapter, node)
+        // stack: [adapter, node]
+        EmitContextAndOptions(il, method);
+
+        // stack: [adapter, node, context, options] → ExecuteAsync<TResult>(adapter, node, context, options)
         var resultType = method.ReturnType.IsGenericType
             ? method.ReturnType.GetGenericArguments()[0]
             : typeof(object);
@@ -692,13 +696,27 @@ public static class RepositoryProxyBuilder
         il.Emit(OpCodes.Call, GetTypeFromHandleMethod);
         il.Emit(OpCodes.Callvirt, AstNodeSetEntityType);
 
-        // stack: [adapter, node] → ExecuteAsync<TResult>(adapter, node)
+        // stack: [adapter, node]
+        EmitContextAndOptions(il, method);
+
+        // stack: [adapter, node, context, options] → ExecuteAsync<TResult>(adapter, node, context, options)
         var resultType = method.ReturnType.IsGenericType
             ? method.ReturnType.GetGenericArguments()[0]
             : typeof(object);
 
         il.Emit(OpCodes.Call, ExecuteAsyncMethod.MakeGenericMethod(resultType));
         il.Emit(OpCodes.Ret);
+    }
+
+    private static void EmitContextAndOptions(ILGenerator il, MethodInfo method)
+    {
+        var parameters = method.GetParameters();
+        for (var i = 0; i < parameters.Length; i++)
+        {
+            var paramType = parameters[i].ParameterType;
+            if (paramType == typeof(UserContext) || paramType == typeof(DataOptions))
+                EmitLoadArg(il, i + 1);
+        }
     }
 
     /// <summary>
@@ -771,7 +789,10 @@ public static class RepositoryProxyBuilder
     private static readonly MethodInfo ExecuteAsyncMethod =
         typeof(RepositoryProxyHelper).GetMethod(
             nameof(RepositoryProxyHelper.ExecuteAsync),
-            BindingFlags.Public | BindingFlags.Static)!;
+            BindingFlags.Public | BindingFlags.Static,
+            null,
+            [typeof(IDatabaseAdapter), typeof(AstNode), typeof(UserContext), typeof(DataOptions)],
+            null)!;
 
     // --- AstParser ---
     private static readonly MethodInfo AstParserParseMethod =

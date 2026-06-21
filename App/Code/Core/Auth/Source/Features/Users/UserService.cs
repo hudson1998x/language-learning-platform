@@ -3,6 +3,7 @@ using LLE.Auth.Exceptions;
 using LLE.Auth.Features.Roles;
 using LLE.Auth.Utilities;
 using LLE.Kernel.Attributes;
+using LLE.Kernel.Security;
 using Microsoft.AspNetCore.Http;
 
 namespace LLE.Auth.Features.Users;
@@ -17,7 +18,8 @@ public class UserService(IUserRepository userRepository)
             throw new LoginException("User is already logged in.");
         }
         
-        var user = await userRepository.GetByEmailAsync(body.Email);
+        var uc = UserContext.FromHttpContext(context);
+        var user = await userRepository.GetByEmailAsync(body.Email, uc, DataOptions.Bypass);
 
         if (user is null)
         {
@@ -30,6 +32,8 @@ public class UserService(IUserRepository userRepository)
         }
         
         context.Session.SetString("UserId", user.Id.ToString());
+        if (user.RoleId.HasValue)
+            context.Session.SetString("RoleId", user.RoleId.Value.ToString());
 
         return user;
     }
@@ -42,14 +46,17 @@ public class UserService(IUserRepository userRepository)
             throw new RegistrationException("An account already exists with this email");
         }
         
-        user = await userRepository.CreateAsync(user);
+        var uc = UserContext.FromHttpContext(context);
+        user = await userRepository.CreateAsync(user, uc, DataOptions.Bypass);
         context.Session.SetString("UserId", user.Id.ToString());
+        if (user.RoleId.HasValue)
+            context.Session.SetString("RoleId", user.RoleId.Value.ToString());
         return user;
     }
 
     public async Task<bool> AccountExistsWithEmail(string email)
     {
-        var user = await userRepository.GetByEmailAsync(email);
+        var user = await userRepository.GetByEmailAsync(email, UserContext.Guest, DataOptions.Bypass);
         
         return user != null;
     }
@@ -69,7 +76,7 @@ public class UserService(IUserRepository userRepository)
         }
 
         var userId = Guid.Parse(userIdStr);
-        
-        return await userRepository.FindByIdAsync(userId);
+        var uc = UserContext.FromHttpContext(context);
+        return await userRepository.FindByIdAsync(userId, uc, DataOptions.Bypass);
     }
 }

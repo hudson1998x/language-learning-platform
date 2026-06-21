@@ -4,6 +4,7 @@ using LLE.Kernel.AutoEntity;
 using LLE.Kernel.Contracts;
 using LLE.Kernel.Events;
 using LLE.Kernel.Registry;
+using LLE.Kernel.Security;
 using LLE.Sockets.Events;
 using LLE.UiIR;
 using Microsoft.AspNetCore.Builder;
@@ -21,7 +22,7 @@ public class PagesModule : IModuleLoader
         {
             var pageRepository = RepositoryCatalog.GetRepository<IPageRepository>();
 
-            var allPages = await pageRepository.FindAllAsync();
+            var allPages = await pageRepository.FindAllAsync(UserContext.Guest, DataOptions.Bypass);
 
             foreach (var page in allPages)
             {
@@ -52,7 +53,7 @@ public class PagesModule : IModuleLoader
 
         Eventing.Eventing.Of<DatabaseEvents>().Seeding<IPageRepository>().Concurrent(async (repository) =>
         {
-            var existingPages = await repository.FindAllAsync();
+            var existingPages = await repository.FindAllAsync(UserContext.Guest, DataOptions.Bypass);
             var existing = existingPages.FirstOrDefault(p => p.Key == "test");
 
             var seedPage = new Page()
@@ -82,12 +83,12 @@ public class PagesModule : IModuleLoader
                     seedPage.Id = existing.Id;
                     seedPage.CreateTime = existing.CreateTime;
                     seedPage.UpdateTime = DateTime.UtcNow;
-                    await repository.UpdateAsync(seedPage);
+                    await repository.UpdateAsync(seedPage, UserContext.Guest, DataOptions.Bypass);
                 }
             }
             else
             {
-                await repository.CreateAsync(seedPage);
+                await repository.CreateAsync(seedPage, UserContext.Guest, DataOptions.Bypass);
             }
 
             return repository;

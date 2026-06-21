@@ -2,6 +2,7 @@ using LLE.Kernel.Contracts;
 using LLE.Kernel.Dto;
 using LLE.Kernel.Exceptions;
 using LLE.Kernel.Registry;
+using LLE.Kernel.Security;
 
 namespace LLE.Kernel.AutoEntity;
 
@@ -19,11 +20,12 @@ public static class AutoEntityFeature
             Method = HttpMethod.Put,
             Handler = async (entity, context) =>
             {
+                var uc = UserContext.FromHttpContext(context);
                 var repository = (T1) RepositoryCatalog.GetRepository(typeof(T1));
                 return new()
                 {
                     Success = true,
-                    Data = await repository.CreateAsync(entity)
+                    Data = await repository.CreateAsync(entity, uc, DataOptions.Default)
                 };
             }
         });
@@ -35,11 +37,12 @@ public static class AutoEntityFeature
             Method = HttpMethod.Patch,
             Handler = async (entity, context) =>
             {
+                var uc = UserContext.FromHttpContext(context);
                 var repository = (T1) RepositoryCatalog.GetRepository(typeof(T1));
                 return new()
                 {
                     Success = true,
-                    Data = await repository.UpdateAsync(entity)
+                    Data = await repository.UpdateAsync(entity, uc, DataOptions.Default)
                 };
             }
         });
@@ -51,11 +54,12 @@ public static class AutoEntityFeature
             Method = HttpMethod.Delete,
             Handler = async (entity, context) =>
             {
+                var uc = UserContext.FromHttpContext(context);
                 var repository = (T1) RepositoryCatalog.GetRepository(typeof(T1));
                 return new()
                 {
                     Success = true,
-                    Data = await repository.DeleteAsync(entity)
+                    Data = await repository.DeleteAsync(entity, uc, DataOptions.Default)
                 };
             }
         });
@@ -67,11 +71,12 @@ public static class AutoEntityFeature
             Method = HttpMethod.Get,
             Handler = async (entity, context) =>
             {
+                var uc = UserContext.FromHttpContext(context);
                 var repository = (T1) RepositoryCatalog.GetRepository(typeof(T1));
                 return new()
                 {
                     Success = true,
-                    Data = await repository.FindAllAsync()
+                    Data = await repository.FindAllAsync(uc, DataOptions.Default)
                 };
             }
         });
@@ -95,11 +100,12 @@ public static class AutoEntityFeature
                 
                 var objectId = Guid.Parse(id.ToString()!);
                 
+                var uc = UserContext.FromHttpContext(context);
                 var repository = (T1) RepositoryCatalog.GetRepository(typeof(T1));
                 return new()
                 {
                     Success = true,
-                    Data = await repository.FindByIdAsync(objectId)
+                    Data = await repository.FindByIdAsync(objectId, uc, DataOptions.Default)
                 };
             }
         });

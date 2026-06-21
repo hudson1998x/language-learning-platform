@@ -6,7 +6,7 @@ public class WriteQueryNode : AstNode
     
     public required object Payload { get; set; }
     
-    public AstNode? Where { get; init; }
+    public AstNode? Where { get; set; }
 
     public override TResult Accept<TResult>(IAstVisitor<TResult> visitor)
         => visitor.Visit(this);
