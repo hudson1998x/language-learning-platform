@@ -354,6 +354,11 @@ body {
   inset: 0;
   background: #0b0c0e;
 }
+.lle-default-page-content {
+  width: 1320px;
+  margin: 0 auto;
+  margin-top: 50px;
+}
 
 /* App/Design/React/Themes/Frontend/Local/Default/Blocks/UserCard/style.scss */
 .user-card {
