@@ -102,6 +102,18 @@ export const listUserPaged = (pageNum: string, size: string): Promise<ApiRespons
     });
 };
 
+export const listUserPagedSorted = (pageNum: string, size: string, sortField: string, sortDir: string): Promise<ApiResponse<User[]>> => {
+    return fetch(`/api/user/list/${pageNum}/${size}/${sortField}/${sortDir}`, {
+        method: "GET",
+    })
+    .then((response: Response) => {
+        if (!response.ok) {
+            throw new Error(`Request failed with status ${response.status}`);
+        }
+        return response.json();
+    });
+};
+
 export const loadUser = (id: string): Promise<ApiResponse<User>> => {
     return fetch(`/api/user/${id}`, {
         method: "GET",

@@ -112,6 +112,18 @@ export const listFlashCardPaged = (pageNum: string, size: string): Promise<ApiRe
     });
 };
 
+export const listFlashCardPagedSorted = (pageNum: string, size: string, sortField: string, sortDir: string): Promise<ApiResponse<FlashCard[]>> => {
+    return fetch(`/api/flashcard/list/${pageNum}/${size}/${sortField}/${sortDir}`, {
+        method: "GET",
+    })
+    .then((response: Response) => {
+        if (!response.ok) {
+            throw new Error(`Request failed with status ${response.status}`);
+        }
+        return response.json();
+    });
+};
+
 export const loadFlashCard = (id: string): Promise<ApiResponse<FlashCard>> => {
     return fetch(`/api/flashcard/${id}`, {
         method: "GET",

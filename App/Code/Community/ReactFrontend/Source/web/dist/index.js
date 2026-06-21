@@ -22380,14 +22380,20 @@
   var usePagination = (callable, deps) => {
     const [page, setPage] = (0, import_react10.useState)(1);
     const [size, setSize] = (0, import_react10.useState)(20);
+    const [sortField, setSortField] = (0, import_react10.useState)("createTime");
+    const [sortDir, setSortDir] = (0, import_react10.useState)("desc");
     const [results, isLoading, error] = usePromise(
-      () => callable(String(page), String(size)),
-      [...deps, page, size]
+      () => callable(String(page), String(size), sortField, sortDir),
+      [...deps, page, size, sortField, sortDir]
     );
     return {
       page,
       size,
       setSize,
+      sortField,
+      sortDir,
+      setSortField,
+      setSortDir,
       nextPage: () => setPage((prev) => prev + 1),
       prevPage: () => setPage((prev) => prev <= 1 ? 1 : prev - 1),
       results: results?.data ?? [],
@@ -22425,8 +22431,8 @@
       return response.json();
     });
   };
-  var listFlashCardPaged = (pageNum, size) => {
-    return fetch(`/api/flashcard/list/${pageNum}/${size}`, {
+  var listFlashCardPagedSorted = (pageNum, size, sortField, sortDir) => {
+    return fetch(`/api/flashcard/list/${pageNum}/${size}/${sortField}/${sortDir}`, {
       method: "GET"
     }).then((response) => {
       if (!response.ok) {
@@ -22624,8 +22630,12 @@
       prevPage,
       results: flashCards,
       isLoading: flashCardsLoading,
-      error: flashCardsError
-    } = usePagination(listFlashCardPaged, [language, isModalOpen, isDeleting]);
+      error: flashCardsError,
+      sortField,
+      sortDir,
+      setSortField,
+      setSortDir
+    } = usePagination(listFlashCardPagedSorted, [language, isModalOpen, isDeleting]);
     const [flippedIds, setFlippedIds] = (0, import_react12.useState)(/* @__PURE__ */ new Set());
     const toggleFlip = (id) => {
       setFlippedIds((prev) => {
@@ -22661,6 +22671,18 @@
         page <= 1 ? null : /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("button", { onClick: prevPage, disabled: page <= 1, children: "Previous" }),
         /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("span", { children: `Page ${page}` }),
         cards.length > size ? /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("button", { onClick: nextPage, children: "Next" }) : null,
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("select", { value: sortField ?? "", onChange: (e) => setSortField(e.target.value || void 0), children: [
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("option", { value: "", children: "Sort by..." }),
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("option", { value: "frontStatement", children: "Front" }),
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("option", { value: "backStatement", children: "Back" }),
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("option", { value: "difficulty", children: "Difficulty" }),
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("option", { value: "reviewCount", children: "Reviews" }),
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("option", { value: "createTime", children: "Created" })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("select", { value: sortDir ?? "asc", onChange: (e) => setSortDir(e.target.value), children: [
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("option", { value: "asc", children: "Asc" }),
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("option", { value: "desc", children: "Desc" })
+        ] }),
         /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
           "button",
           {

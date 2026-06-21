@@ -3,7 +3,7 @@ import { useLanguage } from '@hook/language-provider'
 import { useSession } from '@hook/session-provider'
 import { usePagination } from '@hook/usePagination'
 import {
-    listFlashCardPaged,
+    listFlashCardPagedSorted,
     createFlashCard,
     deleteFlashCard,
     FlashCard
@@ -27,8 +27,12 @@ export const FlashCards = () => {
         prevPage,
         results: flashCards,
         isLoading: flashCardsLoading,
-        error: flashCardsError
-    } = usePagination<FlashCard[]>(listFlashCardPaged, [language, isModalOpen, isDeleting])
+        error: flashCardsError,
+        sortField,
+        sortDir,
+        setSortField,
+        setSortDir,
+    } = usePagination<FlashCard[]>(listFlashCardPagedSorted, [language, isModalOpen, isDeleting])
 
     const [flippedIds, setFlippedIds] = useState<Set<string>>(new Set())
 
@@ -74,6 +78,18 @@ export const FlashCards = () => {
                 {page <= 1 ? null : <button onClick={prevPage} disabled={page <= 1}>Previous</button>}
                 <span>{`Page ${page}`}</span>
                 {cards.length > size ? <button onClick={nextPage}>Next</button> : null}
+                <select value={sortField ?? ''} onChange={(e) => setSortField(e.target.value || undefined)}>
+                    <option value="">Sort by...</option>
+                    <option value="frontStatement">Front</option>
+                    <option value="backStatement">Back</option>
+                    <option value="difficulty">Difficulty</option>
+                    <option value="reviewCount">Reviews</option>
+                    <option value="createTime">Created</option>
+                </select>
+                <select value={sortDir ?? 'asc'} onChange={(e) => setSortDir(e.target.value)}>
+                    <option value="asc">Asc</option>
+                    <option value="desc">Desc</option>
+                </select>
                 <button
                     className={'create-button'}
                     onClick={() => setIsModalOpen(true)}

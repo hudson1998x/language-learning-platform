@@ -144,6 +144,37 @@ public static class AutoEntityFeature
                 };
             }
         });
+        FeatureRegistry.Add(new Feature<object, ApiResponse<List<T>>>()
+        {
+            FeatureName = $"list{type.Name}PagedSorted",
+            FeatureGroup = type.Name.ToLower(),
+            Route = $"/api/{type.Name.ToLower()}/list/{{pageNum}}/{{size}}/{{sortField}}/{{sortDir}}",
+            Method = HttpMethod.Get,
+            Handler = async (_, context) =>
+            {
+                if (!context.Request.RouteValues.TryGetValue("pageNum", out var pageNum) || pageNum is null)
+                    throw new MalformedUrlException("Invalid/Missing parameter pageNum from the URL");
+
+                if (!context.Request.RouteValues.TryGetValue("size", out var size) || size is null)
+                    throw new MalformedUrlException("Invalid/Missing parameter size from the URL");
+
+                if (!context.Request.RouteValues.TryGetValue("sortField", out var sortField) || sortField is null)
+                    throw new MalformedUrlException("Invalid/Missing parameter sortField from the URL");
+
+                if (!context.Request.RouteValues.TryGetValue("sortDir", out var sortDir) || sortDir is null)
+                    throw new MalformedUrlException("Invalid/Missing parameter sortDir from the URL");
+
+                var uc = UserContext.FromHttpContext(context);
+                var sortBy = new SortOption { Field = sortField.ToString()!, Ascending = sortDir.ToString() != "desc" };
+                var repository = (T1) RepositoryCatalog.GetRepository(typeof(T1));
+                var pagination = new Pagination { PageNo = int.Parse(pageNum.ToString()!), Limit = int.Parse(size.ToString()!) };
+                return new ApiResponse<List<T>>
+                {
+                    Success = true,
+                    Data = await repository.FindAllAsync(uc, DataOptions.Default, sortBy, pagination)
+                };
+            }
+        });
         FeatureRegistry.Add(new Feature<object, ApiResponse<T>>()
         {
             FeatureName = $"load{type.Name}",

@@ -101,6 +101,18 @@ export const listLanguagePaged = (pageNum: string, size: string): Promise<ApiRes
     });
 };
 
+export const listLanguagePagedSorted = (pageNum: string, size: string, sortField: string, sortDir: string): Promise<ApiResponse<Language[]>> => {
+    return fetch(`/api/language/list/${pageNum}/${size}/${sortField}/${sortDir}`, {
+        method: "GET",
+    })
+    .then((response: Response) => {
+        if (!response.ok) {
+            throw new Error(`Request failed with status ${response.status}`);
+        }
+        return response.json();
+    });
+};
+
 export const loadLanguage = (id: string): Promise<ApiResponse<Language>> => {
     return fetch(`/api/language/${id}`, {
         method: "GET",

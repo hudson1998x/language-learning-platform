@@ -102,6 +102,18 @@ export const listPagePaged = (pageNum: string, size: string): Promise<ApiRespons
     });
 };
 
+export const listPagePagedSorted = (pageNum: string, size: string, sortField: string, sortDir: string): Promise<ApiResponse<Page[]>> => {
+    return fetch(`/api/page/list/${pageNum}/${size}/${sortField}/${sortDir}`, {
+        method: "GET",
+    })
+    .then((response: Response) => {
+        if (!response.ok) {
+            throw new Error(`Request failed with status ${response.status}`);
+        }
+        return response.json();
+    });
+};
+
 export const loadPage = (id: string): Promise<ApiResponse<Page>> => {
     return fetch(`/api/page/${id}`, {
         method: "GET",

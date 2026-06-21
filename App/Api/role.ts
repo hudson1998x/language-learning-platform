@@ -101,6 +101,18 @@ export const listRolePaged = (pageNum: string, size: string): Promise<ApiRespons
     });
 };
 
+export const listRolePagedSorted = (pageNum: string, size: string, sortField: string, sortDir: string): Promise<ApiResponse<Role[]>> => {
+    return fetch(`/api/role/list/${pageNum}/${size}/${sortField}/${sortDir}`, {
+        method: "GET",
+    })
+    .then((response: Response) => {
+        if (!response.ok) {
+            throw new Error(`Request failed with status ${response.status}`);
+        }
+        return response.json();
+    });
+};
+
 export const loadRole = (id: string): Promise<ApiResponse<Role>> => {
     return fetch(`/api/role/${id}`, {
         method: "GET",
