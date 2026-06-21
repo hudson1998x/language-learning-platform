@@ -4,7 +4,7 @@ public class DeleteQueryNode : AstNode
 {
     public required string TableName { get; init; }
         
-    public required object Payload { get; init; }
+    public required object Payload { get; set; }
 
     public AstNode? Where;
 

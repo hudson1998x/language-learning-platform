@@ -84,6 +84,36 @@ public static class RepositoryProxyHelper
 
     public static async Task<T> ExecuteAsync<T>(IDatabaseAdapter adapter, AstNode node)
     {
-        return (T)(await adapter.ExecuteQuery(node).ConfigureAwait(false));
+        var events = Eventing.Eventing.Of<EntityEvents<T>>();
+
+        switch (node)
+        {
+            case WriteQueryNode write when write.Where is null:
+                write.Payload = (await events.BeforeCreate.DispatchAsync((T)write.Payload!))!;
+                break;
+            case WriteQueryNode write:
+                write.Payload = (await events.BeforeUpdate.DispatchAsync((T)write.Payload!))!;
+                break;
+            case DeleteQueryNode delete:
+                delete.Payload = (await events.BeforeDelete.DispatchAsync((T)delete.Payload!))!;
+                break;
+        }
+
+        var result = (T)(await adapter.ExecuteQuery(node).ConfigureAwait(false))!;
+
+        switch (node)
+        {
+            case WriteQueryNode write when write.Where is null:
+                await events.AfterCreate.DispatchAsync(result);
+                break;
+            case WriteQueryNode:
+                await events.AfterUpdate.DispatchAsync(result);
+                break;
+            case DeleteQueryNode:
+                await events.AfterDelete.DispatchAsync(result);
+                break;
+        }
+
+        return result;
     }
 }
