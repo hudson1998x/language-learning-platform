@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Reflection;
 using LLE.Eventing;
 using LLE.Kernel.Contracts;
 using LLE.Kernel.DataQL.Ast;
@@ -135,4 +137,157 @@ public static class RepositoryProxyHelper
 
         return result;
     }
+
+    public static async Task<T> ExecuteWithCacheOp<T>(
+        IDatabaseAdapter adapter, AstNode node, UserContext context, DataOptions options,
+        object[] cache, Type entityType, CacheOp op) where T : class
+    {
+        var result = await ExecuteAsync<T>(adapter, node, context, options).ConfigureAwait(false);
+
+        switch (op)
+        {
+            case CacheOp.Insert:
+                InsertIntoCache(cache, result!);
+                break;
+            case CacheOp.Update:
+                UpdateInCache(cache, result!, entityType);
+                break;
+            case CacheOp.Remove:
+                RemoveFromCache(cache, result!, entityType);
+                break;
+        }
+
+        return result;
+    }
+
+    // --- Cache helpers ---
+
+    public static object[] GetOrInitializeCache(ref object[]? cache, IDatabaseAdapter adapter, Type entityType, int cacheSize)
+    {
+        if (cache is not null)
+            return cache;
+
+        lock (entityType)
+        {
+            if (cache is not null)
+                return cache;
+
+            var node = new ReadQueryNode
+            {
+                TableName = entityType.Name,
+                EntityType = entityType
+            };
+
+            var result = AsyncUtils.Await(adapter.ExecuteQuery(node));
+            cache = new object[cacheSize];
+
+            if (result is IList list)
+            {
+                var count = Math.Min(list.Count, cacheSize);
+                for (var i = 0; i < count; i++)
+                    cache[i] = list[i]!;
+            }
+        }
+
+        return cache;
+    }
+
+    public static object? FindInCache(object[] cache, Type entityType, Guid id)
+    {
+        var idProp = entityType.GetProperty("Id", BindingFlags.Public | BindingFlags.Instance);
+        if (idProp is null)
+            return null;
+
+        var comparer = EqualityComparer<Guid>.Default;
+        for (var i = 0; i < cache.Length; i++)
+        {
+            if (cache[i] is not null && cache[i].GetType() == entityType)
+            {
+                var candidateId = idProp.GetValue(cache[i]);
+                if (candidateId is Guid g && comparer.Equals(g, id))
+                    return cache[i];
+            }
+        }
+
+        return null;
+    }
+
+    public static List<T> FindAllFromCache<T>(object[] cache) where T : class
+    {
+        var result = new List<T>(cache.Length);
+        for (var i = 0; i < cache.Length; i++)
+        {
+            if (cache[i] is T entity)
+                result.Add(entity);
+        }
+
+        return result;
+    }
+
+    public static void InsertIntoCache(object[] cache, object item)
+    {
+        for (var i = 0; i < cache.Length; i++)
+        {
+            if (cache[i] is null)
+            {
+                cache[i] = item;
+                return;
+            }
+        }
+    }
+
+    public static void UpdateInCache(object[] cache, object item, Type entityType)
+    {
+        var idProp = entityType.GetProperty("Id", BindingFlags.Public | BindingFlags.Instance);
+        if (idProp is null)
+            return;
+
+        var id = idProp.GetValue(item);
+        if (id is null)
+            return;
+
+        for (var i = 0; i < cache.Length; i++)
+        {
+            if (cache[i] is not null && cache[i].GetType() == entityType)
+            {
+                if (idProp.GetValue(cache[i])?.Equals(id) == true)
+                {
+                    cache[i] = item;
+                    return;
+                }
+            }
+        }
+
+        InsertIntoCache(cache, item);
+    }
+
+    public static void RemoveFromCache(object[] cache, object item, Type entityType)
+    {
+        var idProp = entityType.GetProperty("Id", BindingFlags.Public | BindingFlags.Instance);
+        if (idProp is null)
+            return;
+
+        var id = idProp.GetValue(item);
+        if (id is null)
+            return;
+
+        for (var i = 0; i < cache.Length; i++)
+        {
+            if (cache[i] is not null && cache[i].GetType() == entityType)
+            {
+                if (idProp.GetValue(cache[i])?.Equals(id) == true)
+                {
+                    cache[i] = null!;
+                    return;
+                }
+            }
+        }
+    }
+}
+
+public enum CacheOp
+{
+    Insert,
+    Update,
+    Remove
 }

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
+using LLE.Kernel.Attributes;
 using LLE.Kernel.Contracts;
 using LLE.Kernel.DataQL.Ast;
 using LLE.Kernel.DataQL.Attributes;
@@ -87,6 +88,11 @@ public static class RepositoryProxyBuilder
         // the repository is for, independent of which specific repository interface is being proxied.
         var entityType = ResolveEntityType(type);
 
+        // Read caching configuration from the [Repository] attribute, if present.
+        var repoAttr = type.GetCustomAttribute<RepositoryAttribute>();
+        var isCached = repoAttr?.IsCached ?? false;
+        var cacheSize = repoAttr?.CacheSize ?? 0;
+
         // Step 2: Determine the full set of interfaces the proxy type must declare.
         //
         // IMPORTANT: type.GetInterfaces() already returns the *entire transitive closure* of inherited
@@ -148,6 +154,15 @@ public static class RepositoryProxyBuilder
             typeof(Type),
             FieldAttributes.Private);
 
+        FieldBuilder? cacheField = null;
+        if (isCached)
+        {
+            cacheField = typeBuilder.DefineField(
+                "_cache",
+                typeof(object[]),
+                FieldAttributes.Private);
+        }
+
         // Step 5: Emit the parameterless constructor, which now just records the type info needed for
         // later lazy adapter resolution — it no longer resolves the adapter itself.
         CreateConstructor(typeBuilder, repositoryTypeField, entityTypeField, type, entityType);
@@ -178,7 +193,7 @@ public static class RepositoryProxyBuilder
                 continue;
             }
 
-            CreateMethodOnProxy(typeBuilder, method, adapterField, repositoryTypeField, entityTypeField, entityType);
+            CreateMethodOnProxy(typeBuilder, method, adapterField, repositoryTypeField, entityTypeField, entityType, cacheField, isCached, cacheSize);
         }
 
         // Step 8: Finalize the type. This is where the CLR validates that every interface member has a
@@ -333,7 +348,7 @@ public static class RepositoryProxyBuilder
     /// </exception>
     private static void CreateMethodOnProxy(TypeBuilder typeBuilder, MethodInfo method,
         FieldBuilder adapterField, FieldBuilder repositoryTypeField, FieldBuilder entityTypeField,
-        Type entityType)
+        Type entityType, FieldBuilder? cacheField, bool isCached, int cacheSize)
     {
         // Case 1: IDatabaseAdapter.ExecuteQuery itself — forward the caller-supplied AstNode directly
         // to the adapter, with no synthesized node. This is the one method where the proxy is purely a
@@ -350,7 +365,7 @@ public static class RepositoryProxyBuilder
         if (method.DeclaringType!.IsGenericType &&
             method.DeclaringType.GetGenericTypeDefinition() == typeof(IEntityRepository<>))
         {
-            CreateCrudMethod(typeBuilder, method, adapterField, repositoryTypeField, entityTypeField, entityType);
+            CreateCrudMethod(typeBuilder, method, adapterField, repositoryTypeField, entityTypeField, entityType, cacheField, isCached, cacheSize);
             return;
         }
 
@@ -413,7 +428,7 @@ public static class RepositoryProxyBuilder
     /// </summary>
     private static void CreateCrudMethod(TypeBuilder typeBuilder, MethodInfo method,
         FieldBuilder adapterField, FieldBuilder repositoryTypeField, FieldBuilder entityTypeField,
-        Type entityType)
+        Type entityType, FieldBuilder? cacheField, bool isCached, int cacheSize)
     {
         var paramTypes = method.GetParameters().Select(p => p.ParameterType).ToArray();
         var methodBuilder = typeBuilder.DefineMethod(method.Name, ImplAttributes, method.ReturnType, paramTypes);
@@ -431,46 +446,158 @@ public static class RepositoryProxyBuilder
         il.Emit(OpCodes.Call, GetOrInitializeAdapterMethod);
         il.Emit(OpCodes.Stloc, adapterLocal);
 
-        // Push adapter onto stack first, then emit the node on top
-        il.Emit(OpCodes.Ldloc, adapterLocal);
+        LocalBuilder? cacheLocal = null;
+        if (isCached)
+        {
+            cacheLocal = il.DeclareLocal(typeof(object[]));
+
+            // cache = GetOrInitializeCache(ref _cache, adapter, _entityType, cacheSize)
+            il.Emit(OpCodes.Ldarg_0);
+            il.Emit(OpCodes.Ldflda, cacheField!);
+            il.Emit(OpCodes.Ldloc, adapterLocal);
+            il.Emit(OpCodes.Ldarg_0);
+            il.Emit(OpCodes.Ldfld, entityTypeField);
+            il.Emit(OpCodes.Ldc_I4, cacheSize);
+            il.Emit(OpCodes.Call, GetOrInitializeCacheMethod);
+            il.Emit(OpCodes.Stloc, cacheLocal);
+        }
 
         switch (method.Name)
         {
             case "CreateAsync":
+            {
+                il.Emit(OpCodes.Ldloc, adapterLocal);
                 EmitWriteQueryNode(il, entityType);
-                break;
+                EmitContextAndOptions(il, method);
+
+                if (isCached)
+                {
+                    il.Emit(OpCodes.Ldloc, cacheLocal!);
+                    il.Emit(OpCodes.Ldtoken, entityType);
+                    il.Emit(OpCodes.Call, GetTypeFromHandleMethod);
+                    il.Emit(OpCodes.Ldc_I4, 0); // CacheOp.Insert
+
+                    var resultType = method.ReturnType.GetGenericArguments()[0];
+                    il.Emit(OpCodes.Call, ExecuteWithCacheOpMethod.MakeGenericMethod(resultType));
+                }
+                else
+                {
+                    var resultType = method.ReturnType.GetGenericArguments()[0];
+                    il.Emit(OpCodes.Call, ExecuteAsyncMethod.MakeGenericMethod(resultType));
+                }
+
+                il.Emit(OpCodes.Ret);
+                return;
+            }
 
             case "UpdateAsync":
+            {
+                il.Emit(OpCodes.Ldloc, adapterLocal);
                 EmitWriteQueryNodeWithFilter(il, entityType);
-                break;
+                EmitContextAndOptions(il, method);
+
+                if (isCached)
+                {
+                    il.Emit(OpCodes.Ldloc, cacheLocal!);
+                    il.Emit(OpCodes.Ldtoken, entityType);
+                    il.Emit(OpCodes.Call, GetTypeFromHandleMethod);
+                    il.Emit(OpCodes.Ldc_I4, 1); // CacheOp.Update
+
+                    var resultType = method.ReturnType.GetGenericArguments()[0];
+                    il.Emit(OpCodes.Call, ExecuteWithCacheOpMethod.MakeGenericMethod(resultType));
+                }
+                else
+                {
+                    var resultType = method.ReturnType.GetGenericArguments()[0];
+                    il.Emit(OpCodes.Call, ExecuteAsyncMethod.MakeGenericMethod(resultType));
+                }
+
+                il.Emit(OpCodes.Ret);
+                return;
+            }
 
             case "DeleteAsync":
+            {
+                il.Emit(OpCodes.Ldloc, adapterLocal);
                 EmitDeleteQueryNode(il, entityType);
-                break;
+                EmitContextAndOptions(il, method);
+
+                if (isCached)
+                {
+                    il.Emit(OpCodes.Ldloc, cacheLocal!);
+                    il.Emit(OpCodes.Ldtoken, entityType);
+                    il.Emit(OpCodes.Call, GetTypeFromHandleMethod);
+                    il.Emit(OpCodes.Ldc_I4, 2); // CacheOp.Remove
+
+                    var resultType = method.ReturnType.GetGenericArguments()[0];
+                    il.Emit(OpCodes.Call, ExecuteWithCacheOpMethod.MakeGenericMethod(resultType));
+                }
+                else
+                {
+                    var resultType = method.ReturnType.GetGenericArguments()[0];
+                    il.Emit(OpCodes.Call, ExecuteAsyncMethod.MakeGenericMethod(resultType));
+                }
+
+                il.Emit(OpCodes.Ret);
+                return;
+            }
+
+            case "FindByIdAsync" when isCached:
+            {
+                // return Task.FromResult(FindInCache(cache, _entityType, id) as T)
+                il.Emit(OpCodes.Ldloc, cacheLocal!);
+                il.Emit(OpCodes.Ldarg_0);
+                il.Emit(OpCodes.Ldfld, entityTypeField);
+                il.Emit(OpCodes.Ldarg_1);                           // id
+                il.Emit(OpCodes.Call, FindInCacheMethod);
+                il.Emit(OpCodes.Isinst, entityType);
+
+                var resultType = method.ReturnType.GetGenericArguments()[0];
+                il.Emit(OpCodes.Call, TaskFromResultMethod.MakeGenericMethod(resultType));
+                il.Emit(OpCodes.Ret);
+                return;
+            }
 
             case "FindByIdAsync":
+            {
+                il.Emit(OpCodes.Ldloc, adapterLocal);
                 EmitReadQueryNodeWithFilter(il, entityType);
-                break;
+                EmitContextAndOptions(il, method);
+
+                var resultType = method.ReturnType.GetGenericArguments()[0];
+                il.Emit(OpCodes.Call, ExecuteAsyncMethod.MakeGenericMethod(resultType));
+                il.Emit(OpCodes.Ret);
+                return;
+            }
+
+            case "FindAllAsync" when isCached:
+            {
+                // return Task.FromResult(FindAllFromCache<T>(cache))
+                il.Emit(OpCodes.Ldloc, cacheLocal!);
+                il.Emit(OpCodes.Call, FindAllFromCacheMethod.MakeGenericMethod(entityType));
+
+                var resultType = method.ReturnType.GetGenericArguments()[0];
+                il.Emit(OpCodes.Call, TaskFromResultMethod.MakeGenericMethod(resultType));
+                il.Emit(OpCodes.Ret);
+                return;
+            }
 
             case "FindAllAsync":
+            {
+                il.Emit(OpCodes.Ldloc, adapterLocal);
                 EmitReadQueryNode(il, entityType);
-                break;
+                EmitContextAndOptions(il, method);
+
+                var resultType = method.ReturnType.GetGenericArguments()[0];
+                il.Emit(OpCodes.Call, ExecuteAsyncMethod.MakeGenericMethod(resultType));
+                il.Emit(OpCodes.Ret);
+                return;
+            }
 
             default:
                 throw new NotSupportedException(
                     $"Unknown CRUD method '{method.Name}' on IEntityRepository<{entityType.Name}>.");
         }
-
-        // stack: [adapter, node]
-        EmitContextAndOptions(il, method);
-
-        // stack: [adapter, node, context, options] → ExecuteAsync<TResult>(adapter, node, context, options)
-        var resultType = method.ReturnType.IsGenericType
-            ? method.ReturnType.GetGenericArguments()[0]
-            : typeof(object);
-
-        il.Emit(OpCodes.Call, ExecuteAsyncMethod.MakeGenericMethod(resultType));
-        il.Emit(OpCodes.Ret);
     }
 
     private static void EmitWriteQueryNode(ILGenerator il, Type entityType)
@@ -873,4 +1000,30 @@ public static class RepositoryProxyBuilder
 
     private static readonly MethodInfo FilterNodeSetValue =
         typeof(FilterNode).GetMethod("set_Value")!;
+
+    // --- Cache helpers ---
+    private static readonly MethodInfo GetOrInitializeCacheMethod =
+        typeof(RepositoryProxyHelper).GetMethod(
+            nameof(RepositoryProxyHelper.GetOrInitializeCache),
+            BindingFlags.Public | BindingFlags.Static)!;
+
+    private static readonly MethodInfo FindInCacheMethod =
+        typeof(RepositoryProxyHelper).GetMethod(
+            nameof(RepositoryProxyHelper.FindInCache),
+            BindingFlags.Public | BindingFlags.Static)!;
+
+    private static readonly MethodInfo FindAllFromCacheMethod =
+        typeof(RepositoryProxyHelper).GetMethod(
+            nameof(RepositoryProxyHelper.FindAllFromCache),
+            BindingFlags.Public | BindingFlags.Static)!;
+
+    private static readonly MethodInfo ExecuteWithCacheOpMethod =
+        typeof(RepositoryProxyHelper).GetMethod(
+            nameof(RepositoryProxyHelper.ExecuteWithCacheOp),
+            BindingFlags.Public | BindingFlags.Static)!;
+
+    private static readonly MethodInfo TaskFromResultMethod =
+        typeof(Task).GetMethod(
+            nameof(Task.FromResult),
+            BindingFlags.Public | BindingFlags.Static)!;
 }

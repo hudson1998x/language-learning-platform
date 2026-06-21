@@ -3,7 +3,7 @@ using LLE.Kernel.Contracts;
 
 namespace LLE.Auth.Features.Roles;
 
-[Repository(typeof(Role))]
+[Repository(typeof(Role), IsCached = true, CacheSize = 10)]
 public interface IRoleRepository : IEntityRepository<Role>
 {
     
