@@ -62,6 +62,22 @@ export const deletePage = (payload: Page): Promise<ApiResponse<Page>> => {
     });
 };
 
+export const deletePageById = (id: string): Promise<ApiResponse<Page>> => {
+    return fetch(`/api/page/deleteById/${id}`, {
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+    })
+    .then((response: Response) => {
+        if (!response.ok) {
+            throw new Error(`Request failed with status ${response.status}`);
+        }
+        return response.json();
+    });
+};
+
 export const listAllPage = (): Promise<ApiResponse<Page[]>> => {
     return fetch('/api/page/list', {
         method: "GET",
@@ -74,8 +90,8 @@ export const listAllPage = (): Promise<ApiResponse<Page[]>> => {
     });
 };
 
-export const listPagePaged = (): Promise<ApiResponse<Page[]>> => {
-    return fetch('/api/page/list/{pageNum}/{size}', {
+export const listPagePaged = (pageNum: string, size: string): Promise<ApiResponse<Page[]>> => {
+    return fetch(`/api/page/list/${pageNum}/${size}`, {
         method: "GET",
     })
     .then((response: Response) => {
@@ -86,8 +102,8 @@ export const listPagePaged = (): Promise<ApiResponse<Page[]>> => {
     });
 };
 
-export const loadPage = (): Promise<ApiResponse<Page>> => {
-    return fetch('/api/page/{id}', {
+export const loadPage = (id: string): Promise<ApiResponse<Page>> => {
+    return fetch(`/api/page/${id}`, {
         method: "GET",
     })
     .then((response: Response) => {

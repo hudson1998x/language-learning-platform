@@ -433,6 +433,8 @@ public static class RepositoryProxyBuilder
         var methodBuilder = typeBuilder.DefineMethod(method.Name, ImplAttributes, method.ReturnType, paramTypes);
         var il = methodBuilder.GetILGenerator();
 
+        ValidateContextAndOptions(method);
+
         var adapterLocal = il.DeclareLocal(typeof(IDatabaseAdapter));
 
         // adapter = GetOrInitializeAdapter(ref _adapter, _repositoryType, _entityType)
@@ -518,7 +520,13 @@ public static class RepositoryProxyBuilder
             case "DeleteAsync":
             {
                 il.Emit(OpCodes.Ldloc, adapterLocal);
-                EmitDeleteQueryNode(il, entityType);
+
+                var firstParamType = method.GetParameters()[0].ParameterType;
+                if (firstParamType == typeof(Guid))
+                    EmitDeleteQueryNodeById(il, entityType);
+                else
+                    EmitDeleteQueryNode(il, entityType);
+
                 EmitContextAndOptions(il, method);
 
                 if (isCached)
@@ -757,6 +765,64 @@ public static class RepositoryProxyBuilder
         il.Emit(OpCodes.Callvirt, AstNodeSetEntityType);
     }
 
+    private static void EmitDeleteQueryNodeById(ILGenerator il, Type entityType)
+    {
+        var idGetter = entityType.GetProperty("Id", BindingFlags.Public | BindingFlags.Instance)?.GetGetMethod()
+            ?? throw new InvalidOperationException(
+                $"Entity type '{entityType.Name}' must have a public 'Id' property.");
+
+        var idSetter = entityType.GetProperty("Id", BindingFlags.Public | BindingFlags.Instance)?.GetSetMethod()
+            ?? throw new InvalidOperationException(
+                $"Entity type '{entityType.Name}' must have a public 'Id' property with a setter.");
+
+        var filterLocal = il.DeclareLocal(typeof(FilterNode));
+        var entityLocal = il.DeclareLocal(entityType);
+
+        var ctor = entityType.GetConstructor(Type.EmptyTypes)
+            ?? throw new InvalidOperationException(
+                $"Entity type '{entityType.Name}' must have a parameterless constructor.");
+
+        // var entity = new T();
+        il.Emit(OpCodes.Newobj, ctor);
+        il.Emit(OpCodes.Stloc, entityLocal);
+
+        // entity.Id = id_arg;
+        il.Emit(OpCodes.Ldloc, entityLocal);
+        il.Emit(OpCodes.Ldarg_1);
+        il.Emit(OpCodes.Callvirt, idSetter);
+
+        // var filter = new FilterNode { ColumnName = "Id", Operator = Equals, Value = entity.Id }
+        il.Emit(OpCodes.Newobj, FilterNodeConstructor);
+        il.Emit(OpCodes.Stloc, filterLocal);
+        il.Emit(OpCodes.Ldloc, filterLocal);
+        il.Emit(OpCodes.Ldstr, "Id");
+        il.Emit(OpCodes.Callvirt, FilterNodeSetColumnName);
+        il.Emit(OpCodes.Ldloc, filterLocal);
+        il.Emit(OpCodes.Ldc_I4_0);
+        il.Emit(OpCodes.Callvirt, FilterNodeSetOperator);
+        il.Emit(OpCodes.Ldloc, filterLocal);
+        il.Emit(OpCodes.Ldloc, entityLocal);
+        il.Emit(OpCodes.Callvirt, idGetter);
+        il.Emit(OpCodes.Box, typeof(Guid));
+        il.Emit(OpCodes.Callvirt, FilterNodeSetValue);
+
+        // new DeleteQueryNode { TableName = entityType.Name, Where = filter, Payload = entity, EntityType = entityType }
+        il.Emit(OpCodes.Newobj, DeleteQueryNodeConstructor);
+        il.Emit(OpCodes.Dup);
+        il.Emit(OpCodes.Ldstr, entityType.Name);
+        il.Emit(OpCodes.Callvirt, DeleteQueryNodeSetTableName);
+        il.Emit(OpCodes.Dup);
+        il.Emit(OpCodes.Ldloc, filterLocal);
+        il.Emit(OpCodes.Stfld, DeleteQueryNodeWhereField);
+        il.Emit(OpCodes.Dup);
+        il.Emit(OpCodes.Ldloc, entityLocal);
+        il.Emit(OpCodes.Callvirt, DeleteQueryNodeSetPayload);
+        il.Emit(OpCodes.Dup);
+        il.Emit(OpCodes.Ldtoken, entityType);
+        il.Emit(OpCodes.Call, GetTypeFromHandleMethod);
+        il.Emit(OpCodes.Callvirt, AstNodeSetEntityType);
+    }
+
     private static void EmitReadQueryNodeWithFilter(ILGenerator il, Type entityType)
     {
         var filterLocal = il.DeclareLocal(typeof(FilterNode));
@@ -814,6 +880,8 @@ public static class RepositoryProxyBuilder
         var paramTypes = method.GetParameters().Select(p => p.ParameterType).ToArray();
         var methodBuilder = typeBuilder.DefineMethod(method.Name, ImplAttributes, method.ReturnType, paramTypes);
         var il = methodBuilder.GetILGenerator();
+
+        ValidateContextAndOptions(method);
 
         var adapterLocal = il.DeclareLocal(typeof(IDatabaseAdapter));
 
@@ -984,6 +1052,20 @@ public static class RepositoryProxyBuilder
             case 2: il.Emit(OpCodes.Ldarg_2); break;
             case 3: il.Emit(OpCodes.Ldarg_3); break;
             default: il.Emit(OpCodes.Ldarg_S, (byte)index); break;
+        }
+    }
+
+    private static void ValidateContextAndOptions(MethodInfo method)
+    {
+        var parameters = method.GetParameters();
+        var hasContext = parameters.Any(p => p.ParameterType == typeof(UserContext));
+        var hasOptions = parameters.Any(p => p.ParameterType == typeof(DataOptions));
+
+        if (!hasContext || !hasOptions)
+        {
+            throw new InvalidOperationException(
+                $"Method '{method.Name}' on repository '{method.DeclaringType?.Name}' requires " +
+                $"parameters of type '{nameof(UserContext)}' and '{nameof(DataOptions)}'.");
         }
     }
 

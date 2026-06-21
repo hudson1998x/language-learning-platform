@@ -641,49 +641,49 @@
           });
           return result;
         }
-        function lazyInitializer(payload) {
-          if (-1 === payload._status) {
-            var ioInfo = payload._ioInfo;
+        function lazyInitializer(payload2) {
+          if (-1 === payload2._status) {
+            var ioInfo = payload2._ioInfo;
             null != ioInfo && (ioInfo.start = ioInfo.end = performance.now());
-            ioInfo = payload._result;
+            ioInfo = payload2._result;
             var thenable = ioInfo();
             thenable.then(
               function(moduleObject) {
-                if (0 === payload._status || -1 === payload._status) {
-                  payload._status = 1;
-                  payload._result = moduleObject;
-                  var _ioInfo = payload._ioInfo;
+                if (0 === payload2._status || -1 === payload2._status) {
+                  payload2._status = 1;
+                  payload2._result = moduleObject;
+                  var _ioInfo = payload2._ioInfo;
                   null != _ioInfo && (_ioInfo.end = performance.now());
                   void 0 === thenable.status && (thenable.status = "fulfilled", thenable.value = moduleObject);
                 }
               },
               function(error) {
-                if (0 === payload._status || -1 === payload._status) {
-                  payload._status = 2;
-                  payload._result = error;
-                  var _ioInfo2 = payload._ioInfo;
+                if (0 === payload2._status || -1 === payload2._status) {
+                  payload2._status = 2;
+                  payload2._result = error;
+                  var _ioInfo2 = payload2._ioInfo;
                   null != _ioInfo2 && (_ioInfo2.end = performance.now());
                   void 0 === thenable.status && (thenable.status = "rejected", thenable.reason = error);
                 }
               }
             );
-            ioInfo = payload._ioInfo;
+            ioInfo = payload2._ioInfo;
             if (null != ioInfo) {
               ioInfo.value = thenable;
               var displayName = thenable.displayName;
               "string" === typeof displayName && (ioInfo.name = displayName);
             }
-            -1 === payload._status && (payload._status = 0, payload._result = thenable);
+            -1 === payload2._status && (payload2._status = 0, payload2._result = thenable);
           }
-          if (1 === payload._status)
-            return ioInfo = payload._result, void 0 === ioInfo && console.error(
+          if (1 === payload2._status)
+            return ioInfo = payload2._result, void 0 === ioInfo && console.error(
               "lazy: Expected the result of a dynamic import() call. Instead received: %s\n\nYour code should look like: \n  const MyComponent = lazy(() => import('./MyComponent'))\n\nDid you accidentally put curly braces around the import?",
               ioInfo
             ), "default" in ioInfo || console.error(
               "lazy: Expected the result of a dynamic import() call. Instead received: %s\n\nYour code should look like: \n  const MyComponent = lazy(() => import('./MyComponent'))",
               ioInfo
             ), ioInfo.default;
-          throw payload._result;
+          throw payload2._result;
         }
         function resolveDispatcher() {
           var dispatcher = ReactSharedInternals.H;
@@ -7435,13 +7435,13 @@
           hook.baseState = passthrough;
           return [passthrough, hook.queue.dispatch];
         }
-        function dispatchActionState(fiber, actionQueue, setPendingState, setState, payload) {
+        function dispatchActionState(fiber, actionQueue, setPendingState, setState, payload2) {
           if (isRenderPhaseUpdate(fiber))
             throw Error("Cannot update form state while rendering.");
           fiber = actionQueue.action;
           if (null !== fiber) {
             var actionNode = {
-              payload,
+              payload: payload2,
               action: fiber,
               next: null,
               isTransition: true,
@@ -7460,13 +7460,13 @@
           }
         }
         function runActionStateAction(actionQueue, node) {
-          var action = node.action, payload = node.payload, prevState = actionQueue.state;
+          var action = node.action, payload2 = node.payload, prevState = actionQueue.state;
           if (node.isTransition) {
             var prevTransition = ReactSharedInternals.T, currentTransition = {};
             currentTransition._updatedFibers = /* @__PURE__ */ new Set();
             ReactSharedInternals.T = currentTransition;
             try {
-              var returnValue = action(prevState, payload), onStartTransitionFinish = ReactSharedInternals.S;
+              var returnValue = action(prevState, payload2), onStartTransitionFinish = ReactSharedInternals.S;
               null !== onStartTransitionFinish && onStartTransitionFinish(currentTransition, returnValue);
               handleActionReturnValue(actionQueue, node, returnValue);
             } catch (error) {
@@ -7480,7 +7480,7 @@
             }
           } else
             try {
-              currentTransition = action(prevState, payload), handleActionReturnValue(actionQueue, node, currentTransition);
+              currentTransition = action(prevState, payload2), handleActionReturnValue(actionQueue, node, currentTransition);
             } catch (error$4) {
               onActionError(actionQueue, node, error$4);
             }
@@ -7686,14 +7686,14 @@
         function mountEffect(create, deps) {
           (currentlyRenderingFiber.mode & StrictEffectsMode) !== NoMode ? mountEffectImpl(276826112, Passive, create, deps) : mountEffectImpl(8390656, Passive, create, deps);
         }
-        function useEffectEventImpl(payload) {
+        function useEffectEventImpl(payload2) {
           currentlyRenderingFiber.flags |= 4;
           var componentUpdateQueue = currentlyRenderingFiber.updateQueue;
           if (null === componentUpdateQueue)
-            componentUpdateQueue = createFunctionComponentUpdateQueue(), currentlyRenderingFiber.updateQueue = componentUpdateQueue, componentUpdateQueue.events = [payload];
+            componentUpdateQueue = createFunctionComponentUpdateQueue(), currentlyRenderingFiber.updateQueue = componentUpdateQueue, componentUpdateQueue.events = [payload2];
           else {
             var events = componentUpdateQueue.events;
-            null === events ? componentUpdateQueue.events = [payload] : events.push(payload);
+            null === events ? componentUpdateQueue.events = [payload2] : events.push(payload2);
           }
         }
         function mountEvent(callback) {
@@ -20925,22 +20925,22 @@
         var didWarnOnInvalidCallback = /* @__PURE__ */ new Set();
         Object.freeze(fakeInternalInstance);
         var classComponentUpdater = {
-          enqueueSetState: function(inst, payload, callback) {
+          enqueueSetState: function(inst, payload2, callback) {
             inst = inst._reactInternals;
             var lane = requestUpdateLane(inst), update = createUpdate(lane);
-            update.payload = payload;
+            update.payload = payload2;
             void 0 !== callback && null !== callback && (warnOnInvalidCallback(callback), update.callback = callback);
-            payload = enqueueUpdate(inst, update, lane);
-            null !== payload && (startUpdateTimerByLane(lane, "this.setState()", inst), scheduleUpdateOnFiber(payload, inst, lane), entangleTransitions(payload, inst, lane));
+            payload2 = enqueueUpdate(inst, update, lane);
+            null !== payload2 && (startUpdateTimerByLane(lane, "this.setState()", inst), scheduleUpdateOnFiber(payload2, inst, lane), entangleTransitions(payload2, inst, lane));
           },
-          enqueueReplaceState: function(inst, payload, callback) {
+          enqueueReplaceState: function(inst, payload2, callback) {
             inst = inst._reactInternals;
             var lane = requestUpdateLane(inst), update = createUpdate(lane);
             update.tag = ReplaceState;
-            update.payload = payload;
+            update.payload = payload2;
             void 0 !== callback && null !== callback && (warnOnInvalidCallback(callback), update.callback = callback);
-            payload = enqueueUpdate(inst, update, lane);
-            null !== payload && (startUpdateTimerByLane(lane, "this.replaceState()", inst), scheduleUpdateOnFiber(payload, inst, lane), entangleTransitions(payload, inst, lane));
+            payload2 = enqueueUpdate(inst, update, lane);
+            null !== payload2 && (startUpdateTimerByLane(lane, "this.replaceState()", inst), scheduleUpdateOnFiber(payload2, inst, lane), entangleTransitions(payload2, inst, lane));
           },
           enqueueForceUpdate: function(inst, callback) {
             inst = inst._reactInternals;
@@ -21766,13 +21766,13 @@
   var import_react4 = __toESM(require_react(), 1);
 
   // App/Api/auth.ts
-  var userLogin = (payload) => {
+  var userLogin = (payload2) => {
     return fetch("/api/auth/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload2)
     }).then((response) => {
       if (!response.ok) {
         throw new Error(`Request failed with status ${response.status}`);
@@ -21790,13 +21790,13 @@
       return response.json();
     });
   };
-  var register2 = (payload) => {
+  var register2 = (payload2) => {
     return fetch("/api/auth/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload2)
     }).then((response) => {
       if (!response.ok) {
         throw new Error(`Request failed with status ${response.status}`);
@@ -22372,21 +22372,371 @@
   // App/Design/React/Themes/Admin/Core/Default/index.tsx
   var import_jsx_runtime12 = __toESM(require_jsx_runtime(), 1);
 
-  // App/Design/React/Components/Core/Text/index.tsx
+  // App/Design/React/Components/Local/Pages/FlashCards/index.tsx
+  var import_react12 = __toESM(require_react(), 1);
+
+  // App/Design/React/Hooks/Core/usePagination.tsx
+  var import_react10 = __toESM(require_react(), 1);
+  var usePagination = (callable, deps) => {
+    const [page, setPage] = (0, import_react10.useState)(1);
+    const [size, setSize] = (0, import_react10.useState)(20);
+    const [results, isLoading, error] = usePromise(
+      () => callable(String(page), String(size)),
+      [...deps, page, size]
+    );
+    return {
+      page,
+      size,
+      setSize,
+      nextPage: () => setPage((prev) => prev + 1),
+      prevPage: () => setPage((prev) => prev <= 1 ? 1 : prev - 1),
+      results: results?.data ?? [],
+      isLoading,
+      error
+    };
+  };
+
+  // App/Api/flashcard.ts
+  var createFlashCard = (payload2) => {
+    return fetch("/api/flashcard/create", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload2)
+    }).then((response) => {
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+      return response.json();
+    });
+  };
+  var deleteFlashCard = (payload2) => {
+    return fetch("/api/flashcard/delete", {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload2)
+    }).then((response) => {
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+      return response.json();
+    });
+  };
+  var listFlashCardPaged = (pageNum, size) => {
+    return fetch(`/api/flashcard/list/${pageNum}/${size}`, {
+      method: "GET"
+    }).then((response) => {
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+      return response.json();
+    });
+  };
+
+  // App/Design/React/Components/Core/Spinner/index.tsx
   var import_jsx_runtime13 = __toESM(require_jsx_runtime(), 1);
+  var Spinner = ({ size = "md", color, label = "Loading" }) => {
+    const style = color ? { "--spinner-color": color } : void 0;
+    return /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(
+      "div",
+      {
+        className: `spinner spinner--${size}`,
+        style,
+        role: "status",
+        "aria-label": label,
+        children: [
+          /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("span", { className: "spinner__circle" }),
+          /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("span", { className: "spinner__sr-only", children: [
+            label,
+            "\u2026"
+          ] })
+        ]
+      }
+    );
+  };
+
+  // App/Design/React/Components/Local/Pages/FlashCards/CreateFlashCardModal.tsx
+  var import_react11 = __toESM(require_react(), 1);
+  var import_jsx_runtime14 = __toESM(require_jsx_runtime(), 1);
+  var emptyForm = {
+    frontStatement: "",
+    backStatement: "",
+    pronunciation: "",
+    notes: "",
+    category: "",
+    tags: "",
+    difficulty: 1
+  };
+  var DIFFICULTY_OPTIONS = [
+    { value: 1, label: "Easy" },
+    { value: 2, label: "Mid" },
+    { value: 3, label: "Hard" }
+  ];
+  var CreateFlashCardModal = ({ userId, languageId, onClose, onCreated }) => {
+    const [form, setForm] = (0, import_react11.useState)(emptyForm);
+    const [isSubmitting, setIsSubmitting] = (0, import_react11.useState)(false);
+    const [error, setError] = (0, import_react11.useState)(null);
+    const updateField = (field, value) => {
+      setForm((prev) => ({ ...prev, [field]: value }));
+    };
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      if (!form.frontStatement.trim() || !form.backStatement.trim()) {
+        setError("Front and back statements are required");
+        return;
+      }
+      setIsSubmitting(true);
+      setError(null);
+      try {
+        const payload2 = {
+          userId,
+          languageId,
+          frontStatement: form.frontStatement,
+          backStatement: form.backStatement,
+          pronunciation: form.pronunciation || null,
+          notes: form.notes || null,
+          category: form.category || null,
+          tags: form.tags || null,
+          difficulty: form.difficulty,
+          reviewCount: 0,
+          correctCount: 0,
+          incorrectCount: 0,
+          streak: 0
+        };
+        const response = await createFlashCard(payload2);
+        if (!response.success) {
+          setError(response.message ?? "Failed to create flash card");
+          return;
+        }
+        onCreated();
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to create flash card");
+      } finally {
+        setIsSubmitting(false);
+      }
+    };
+    return /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("div", { className: "modal-overlay", onClick: onClose, children: /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("div", { className: "modal", onClick: (e) => e.stopPropagation(), children: [
+      /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("div", { className: "modal-header", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("h2", { children: "Create flash card" }),
+        /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("button", { className: "modal-close", onClick: onClose, children: "\u2715" })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("form", { onSubmit: handleSubmit, className: "modal-body", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("label", { children: [
+          "Front statement",
+          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(
+            "textarea",
+            {
+              value: form.frontStatement,
+              onChange: (e) => updateField("frontStatement", e.target.value),
+              required: true
+            }
+          )
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("label", { children: [
+          "Back statement",
+          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(
+            "textarea",
+            {
+              value: form.backStatement,
+              onChange: (e) => updateField("backStatement", e.target.value),
+              required: true
+            }
+          )
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("label", { children: [
+          "Pronunciation",
+          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(
+            "input",
+            {
+              type: "text",
+              value: form.pronunciation,
+              onChange: (e) => updateField("pronunciation", e.target.value)
+            }
+          )
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("label", { children: [
+          "Notes",
+          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(
+            "textarea",
+            {
+              value: form.notes,
+              onChange: (e) => updateField("notes", e.target.value)
+            }
+          )
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("label", { children: [
+          "Category",
+          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(
+            "input",
+            {
+              type: "text",
+              value: form.category,
+              onChange: (e) => updateField("category", e.target.value)
+            }
+          )
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("label", { children: [
+          "Tags",
+          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(
+            "input",
+            {
+              type: "text",
+              placeholder: "comma, separated, tags",
+              value: form.tags,
+              onChange: (e) => updateField("tags", e.target.value)
+            }
+          )
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("label", { children: [
+          "Difficulty",
+          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(
+            "select",
+            {
+              value: form.difficulty,
+              onChange: (e) => updateField("difficulty", Number(e.target.value)),
+              children: DIFFICULTY_OPTIONS.map((option) => /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("option", { value: option.value, children: option.label }, option.value))
+            }
+          )
+        ] }),
+        error && /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("div", { className: "modal-error", children: error }),
+        /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("div", { className: "modal-actions", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("button", { type: "button", onClick: onClose, disabled: isSubmitting, children: "Cancel" }),
+          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("button", { type: "submit", disabled: isSubmitting, children: isSubmitting ? "Creating..." : "Create" })
+        ] })
+      ] })
+    ] }) });
+  };
+
+  // App/Design/React/Components/Local/Pages/FlashCards/index.tsx
+  var import_jsx_runtime15 = __toESM(require_jsx_runtime(), 1);
+  var FlashCards = () => {
+    const { language } = useLanguage();
+    const { session } = useSession();
+    const [isModalOpen, setIsModalOpen] = (0, import_react12.useState)(false);
+    const [isDeleting, setIsDeleting] = (0, import_react12.useState)(null);
+    const {
+      page,
+      size,
+      nextPage,
+      prevPage,
+      results: flashCards,
+      isLoading: flashCardsLoading,
+      error: flashCardsError
+    } = usePagination(listFlashCardPaged, [language, isModalOpen, isDeleting]);
+    const [flippedIds, setFlippedIds] = (0, import_react12.useState)(/* @__PURE__ */ new Set());
+    const toggleFlip = (id) => {
+      setFlippedIds((prev) => {
+        const next = new Set(prev);
+        if (next.has(id)) {
+          next.delete(id);
+        } else {
+          next.add(id);
+        }
+        return next;
+      });
+    };
+    const handleDelete = async (card, e) => {
+      e.stopPropagation();
+      setIsDeleting(card.id);
+      try {
+        await deleteFlashCard(card);
+      } finally {
+        setIsDeleting(null);
+      }
+    };
+    if (flashCardsLoading) {
+      return /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Spinner, {});
+    }
+    if (flashCardsError) {
+      return /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "error", children: `An error occured loading your flash cards: ${flashCardsError}` });
+    }
+    const cards = flashCards ?? [];
+    const userId = session?.user?.id;
+    const languageId = language?.id;
+    return /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "flashcards", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "card-actions", children: [
+        page <= 1 ? null : /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("button", { onClick: prevPage, disabled: page <= 1, children: "Previous" }),
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("span", { children: `Page ${page}` }),
+        cards.length > size ? /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("button", { onClick: nextPage, children: "Next" }) : null,
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
+          "button",
+          {
+            className: "create-button",
+            onClick: () => setIsModalOpen(true),
+            disabled: !userId || !languageId,
+            children: "Create new"
+          }
+        )
+      ] }),
+      Boolean(!cards || cards.length === 0) && /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "notice", children: "You have no flashcards, click create new to begin" }),
+      cards && cards.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "card-grid", children: cards.map((card) => {
+        const isFlipped = flippedIds.has(card.id);
+        return /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
+          "div",
+          {
+            className: `flashcard ${isFlipped ? "flipped" : ""}`,
+            onClick: () => toggleFlip(card.id),
+            children: /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "flashcard-inner", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "flashcard-face flashcard-front", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "statement", children: card.frontStatement }),
+                card.category && /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "tag category", children: card.category }),
+                /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
+                  "button",
+                  {
+                    className: "delete-button",
+                    onClick: (e) => handleDelete(card, e),
+                    disabled: isDeleting === card.id,
+                    children: isDeleting === card.id ? "..." : "\u2715"
+                  }
+                )
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "flashcard-face flashcard-back", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "statement", children: card.backStatement }),
+                card.pronunciation && /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "pronunciation", children: card.pronunciation }),
+                card.notes && /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "notes", children: card.notes }),
+                card.tags && /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "tag tags", children: card.tags }),
+                /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "difficulty", children: [
+                  "Difficulty: ",
+                  card.difficulty
+                ] })
+              ] })
+            ] })
+          },
+          card.id
+        );
+      }) }),
+      isModalOpen && userId && languageId && /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
+        CreateFlashCardModal,
+        {
+          userId,
+          languageId,
+          onClose: () => setIsModalOpen(false),
+          onCreated: () => setIsModalOpen(false)
+        }
+      )
+    ] });
+  };
+
+  // App/Design/React/Components/Core/Text/index.tsx
+  var import_jsx_runtime16 = __toESM(require_jsx_runtime(), 1);
   var Text = (props) => {
-    return /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("p", { children: props.text });
+    return /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("p", { children: props.text });
   };
 
   // App/Code/Community/ReactFrontend/Source/web/generated.registry.tsx
+  register("@component/Pages/FlashCards", FlashCards);
   register("@component/LanguageSelector", LanguageSelector);
   register("@component/Text", Text);
+  register("@component/Spinner", Spinner);
 
   // App/Code/Community/ReactFrontend/Source/web/index.tsx
-  var import_jsx_runtime14 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime17 = __toESM(require_jsx_runtime(), 1);
   var root = (0, import_client.createRoot)(document.getElementById("app"));
   root.render(
-    /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Default_default, { children: /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Canvas, { children: window.canvasState }) })
+    /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Default_default, { children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Canvas, { children: window.canvasState }) })
   );
 })();
 /*! Bundled license information:

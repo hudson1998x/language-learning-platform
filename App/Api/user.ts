@@ -62,6 +62,22 @@ export const deleteUser = (payload: User): Promise<ApiResponse<User>> => {
     });
 };
 
+export const deleteUserById = (id: string): Promise<ApiResponse<User>> => {
+    return fetch(`/api/user/deleteById/${id}`, {
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+    })
+    .then((response: Response) => {
+        if (!response.ok) {
+            throw new Error(`Request failed with status ${response.status}`);
+        }
+        return response.json();
+    });
+};
+
 export const listAllUser = (): Promise<ApiResponse<User[]>> => {
     return fetch('/api/user/list', {
         method: "GET",
@@ -74,8 +90,8 @@ export const listAllUser = (): Promise<ApiResponse<User[]>> => {
     });
 };
 
-export const listUserPaged = (): Promise<ApiResponse<User[]>> => {
-    return fetch('/api/user/list/{pageNum}/{size}', {
+export const listUserPaged = (pageNum: string, size: string): Promise<ApiResponse<User[]>> => {
+    return fetch(`/api/user/list/${pageNum}/${size}`, {
         method: "GET",
     })
     .then((response: Response) => {
@@ -86,8 +102,8 @@ export const listUserPaged = (): Promise<ApiResponse<User[]>> => {
     });
 };
 
-export const loadUser = (): Promise<ApiResponse<User>> => {
-    return fetch('/api/user/{id}', {
+export const loadUser = (id: string): Promise<ApiResponse<User>> => {
+    return fetch(`/api/user/${id}`, {
         method: "GET",
     })
     .then((response: Response) => {

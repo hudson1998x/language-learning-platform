@@ -4,12 +4,13 @@
         <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <RootNamespace>LLE.LocalAppRegistry</RootNamespace>
+        <RootNamespace>LLE.FlashCards</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\..\Community\Pages\Source\Pages.csproj" />
+      <ProjectReference Include="..\..\..\Core\Auth\Source\Auth.csproj" />
       <ProjectReference Include="..\..\..\Core\Kernel\Source\Kernel.csproj" />
-      <ProjectReference Include="..\..\FlashCards\Source\FlashCards.csproj" />
     </ItemGroup>
 
 </Project>

@@ -64,6 +64,29 @@ public static class AutoEntityFeature
                 };
             }
         });
+        FeatureRegistry.Add(new Feature<object, ApiResponse<T>>()
+        {
+            FeatureName = $"delete{type.Name}ById",
+            FeatureGroup = type.Name.ToLower(),
+            Route = $"/api/{type.Name.ToLower()}/deleteById/{{id}}",
+            Method = HttpMethod.Delete,
+            Handler = async (_, context) =>
+            {
+                if (!context.Request.RouteValues.TryGetValue("id", out var id))
+                    throw new MalformedUrlException("Invalid/Missing parameter id from the URL");
+                if (id is null)
+                    throw new MalformedUrlException("Invalid/Missing parameter id from the URL");
+
+                var objectId = Guid.Parse(id.ToString()!);
+                var uc = UserContext.FromHttpContext(context);
+                var repository = (T1) RepositoryCatalog.GetRepository(typeof(T1));
+                return new()
+                {
+                    Success = true,
+                    Data = await repository.DeleteAsync(objectId, uc, DataOptions.Default)
+                };
+            }
+        });
         FeatureRegistry.Add(new Feature<object, ApiResponse<List<T>>>()
         {
             FeatureName = $"listAll{type.Name}",

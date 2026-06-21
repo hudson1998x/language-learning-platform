@@ -66,7 +66,7 @@ public sealed partial class HttpSocket
         {
             object? input = null;
 
-            if (definition.Method != HttpMethod.Get && definition.Method != HttpMethod.Delete)
+            if (definition.Method != HttpMethod.Get)
             {
                 input = await ctx.Request.ReadFromJsonAsync(definition.InputType, ctx.RequestAborted);
             }

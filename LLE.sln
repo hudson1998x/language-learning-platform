@@ -34,9 +34,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TypeScriptTests", "App\Code
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KernelTests", "App\Code\Core\Kernel\Tests\KernelTests.csproj", "{F8D52D42-D1D0-494A-AA2C-84E1D8C0B21C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlashCards", "App\Code\Local\FlashCards\Source\FlashCards.csproj", "{9B952056-ACFD-4D45-87B8-89278141A14E}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Languages", "App\Code\Community\Languages\Source\Languages.csproj", "{E8B12B6C-AA0D-46FB-AF88-33443C553BD2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlashCards", "App\Code\Local\FlashCards\Source\FlashCards.csproj", "{F761A42A-93E2-41DD-8A9C-F76C1A12A350}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -148,5 +148,9 @@ Global
 		{E8B12B6C-AA0D-46FB-AF88-33443C553BD2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E8B12B6C-AA0D-46FB-AF88-33443C553BD2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E8B12B6C-AA0D-46FB-AF88-33443C553BD2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F761A42A-93E2-41DD-8A9C-F76C1A12A350}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F761A42A-93E2-41DD-8A9C-F76C1A12A350}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F761A42A-93E2-41DD-8A9C-F76C1A12A350}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F761A42A-93E2-41DD-8A9C-F76C1A12A350}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

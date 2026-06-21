@@ -61,6 +61,22 @@ export const deleteLanguage = (payload: Language): Promise<ApiResponse<Language>
     });
 };
 
+export const deleteLanguageById = (id: string): Promise<ApiResponse<Language>> => {
+    return fetch(`/api/language/deleteById/${id}`, {
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+    })
+    .then((response: Response) => {
+        if (!response.ok) {
+            throw new Error(`Request failed with status ${response.status}`);
+        }
+        return response.json();
+    });
+};
+
 export const listAllLanguage = (): Promise<ApiResponse<Language[]>> => {
     return fetch('/api/language/list', {
         method: "GET",
@@ -73,8 +89,8 @@ export const listAllLanguage = (): Promise<ApiResponse<Language[]>> => {
     });
 };
 
-export const listLanguagePaged = (): Promise<ApiResponse<Language[]>> => {
-    return fetch('/api/language/list/{pageNum}/{size}', {
+export const listLanguagePaged = (pageNum: string, size: string): Promise<ApiResponse<Language[]>> => {
+    return fetch(`/api/language/list/${pageNum}/${size}`, {
         method: "GET",
     })
     .then((response: Response) => {
@@ -85,8 +101,8 @@ export const listLanguagePaged = (): Promise<ApiResponse<Language[]>> => {
     });
 };
 
-export const loadLanguage = (): Promise<ApiResponse<Language>> => {
-    return fetch('/api/language/{id}', {
+export const loadLanguage = (id: string): Promise<ApiResponse<Language>> => {
+    return fetch(`/api/language/${id}`, {
         method: "GET",
     })
     .then((response: Response) => {

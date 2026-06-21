@@ -1,7 +1,18 @@
-export interface Role {
-    key: string;
-    name: string;
-    description: string;
+export interface FlashCard {
+    userId: string;
+    languageId: string;
+    frontStatement: string;
+    backStatement: string;
+    pronunciation?: string | null;
+    notes?: string | null;
+    category?: string | null;
+    tags?: string | null;
+    difficulty: number;
+    lastReviewedUtc?: string | null;
+    reviewCount: number;
+    correctCount: number;
+    incorrectCount: number;
+    streak: number;
     id: string;
     createTime: string;
     updateTime: string;
@@ -13,8 +24,8 @@ export interface ApiResponse<T> {
     data?: T | null;
 }
 
-export const createRole = (payload: Role): Promise<ApiResponse<Role>> => {
-    return fetch('/api/role/create', {
+export const createFlashCard = (payload: FlashCard): Promise<ApiResponse<FlashCard>> => {
+    return fetch('/api/flashcard/create', {
         method: "PUT",
         headers: {
             "Content-Type": "application/json"
@@ -29,8 +40,8 @@ export const createRole = (payload: Role): Promise<ApiResponse<Role>> => {
     });
 };
 
-export const updateRole = (payload: Role): Promise<ApiResponse<Role>> => {
-    return fetch('/api/role/update', {
+export const updateFlashCard = (payload: FlashCard): Promise<ApiResponse<FlashCard>> => {
+    return fetch('/api/flashcard/update', {
         method: "PATCH",
         headers: {
             "Content-Type": "application/json"
@@ -45,8 +56,8 @@ export const updateRole = (payload: Role): Promise<ApiResponse<Role>> => {
     });
 };
 
-export const deleteRole = (payload: Role): Promise<ApiResponse<Role>> => {
-    return fetch('/api/role/delete', {
+export const deleteFlashCard = (payload: FlashCard): Promise<ApiResponse<FlashCard>> => {
+    return fetch('/api/flashcard/delete', {
         method: "DELETE",
         headers: {
             "Content-Type": "application/json"
@@ -61,8 +72,8 @@ export const deleteRole = (payload: Role): Promise<ApiResponse<Role>> => {
     });
 };
 
-export const deleteRoleById = (id: string): Promise<ApiResponse<Role>> => {
-    return fetch(`/api/role/deleteById/${id}`, {
+export const deleteFlashCardById = (id: string): Promise<ApiResponse<FlashCard>> => {
+    return fetch(`/api/flashcard/deleteById/${id}`, {
         method: "DELETE",
         headers: {
             "Content-Type": "application/json"
@@ -77,8 +88,8 @@ export const deleteRoleById = (id: string): Promise<ApiResponse<Role>> => {
     });
 };
 
-export const listAllRole = (): Promise<ApiResponse<Role[]>> => {
-    return fetch('/api/role/list', {
+export const listAllFlashCard = (): Promise<ApiResponse<FlashCard[]>> => {
+    return fetch('/api/flashcard/list', {
         method: "GET",
     })
     .then((response: Response) => {
@@ -89,8 +100,8 @@ export const listAllRole = (): Promise<ApiResponse<Role[]>> => {
     });
 };
 
-export const listRolePaged = (pageNum: string, size: string): Promise<ApiResponse<Role[]>> => {
-    return fetch(`/api/role/list/${pageNum}/${size}`, {
+export const listFlashCardPaged = (pageNum: string, size: string): Promise<ApiResponse<FlashCard[]>> => {
+    return fetch(`/api/flashcard/list/${pageNum}/${size}`, {
         method: "GET",
     })
     .then((response: Response) => {
@@ -101,8 +112,8 @@ export const listRolePaged = (pageNum: string, size: string): Promise<ApiRespons
     });
 };
 
-export const loadRole = (id: string): Promise<ApiResponse<Role>> => {
-    return fetch(`/api/role/${id}`, {
+export const loadFlashCard = (id: string): Promise<ApiResponse<FlashCard>> => {
+    return fetch(`/api/flashcard/${id}`, {
         method: "GET",
     })
     .then((response: Response) => {

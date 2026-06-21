@@ -1,4 +1,8 @@
 {
+  "LLE.FlashCards.FlashCardsModule": {
+    "IsEnabled": true,
+    "IsInstalled": true
+  },
   "LLE.ReactFrontend.ReactFrontendModule": {
     "IsEnabled": true,
     "IsInstalled": true

@@ -1,3 +1,4 @@
+using LLE.Auth.Events;
 using LLE.Auth.Features.Roles;
 using LLE.Auth.Features.Users;
 using LLE.Kernel.Contracts;
@@ -41,6 +42,10 @@ public class AuthModule : IModuleLoader
                 Name = "User",
                 Description = "Standard user"
             }, UserContext.Guest, DataOptions.Bypass);
+            
+            await Eventing.Eventing.Of<RolesEventTable>().Setup.DispatchAsync(repo);
+            await Eventing.Eventing.Of<RolesEventTable>().Ready.DispatchAsync(repo);
+            
             return repo;
         });
     }

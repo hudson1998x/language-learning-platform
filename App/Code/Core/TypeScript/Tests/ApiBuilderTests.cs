@@ -148,4 +148,47 @@ public sealed class ApiBuilderTests
         Assert.Contains("export interface TestOutput {", source);
         Assert.DoesNotContain("export interface TestInput", source);
     }
+
+    [Fact]
+    public void AddFeature_Get_WithPathParams_Should_Generate_Function_WithPathParams()
+    {
+        using var builder = new ApiBuilder();
+        var feature = CreateFeature(
+            "/api/items/list/{pageNum}/{size}",
+            HttpMethod.Get,
+            typeof(object),
+            typeof(TestOutput),
+            "listItemsPaged",
+            "items");
+
+        builder.AddFeature(feature);
+        var source = builder.Build()["items"];
+
+        Assert.Contains("listItemsPaged = (pageNum: string, size: string)", source);
+        Assert.Contains("fetch(`/api/items/list/${pageNum}/${size}`", source);
+        Assert.Contains("method: \"GET\"", source);
+        Assert.DoesNotContain("payload", source);
+        Assert.DoesNotContain("Content-Type", source);
+    }
+
+    [Fact]
+    public void AddFeature_Get_WithSinglePathParam_Should_Generate_Function_WithPathParam()
+    {
+        using var builder = new ApiBuilder();
+        var feature = CreateFeature(
+            "/api/items/{id}",
+            HttpMethod.Get,
+            typeof(object),
+            typeof(TestOutput),
+            "loadItem",
+            "items");
+
+        builder.AddFeature(feature);
+        var source = builder.Build()["items"];
+
+        Assert.Contains("loadItem = (id: string)", source);
+        Assert.Contains("fetch(`/api/items/${id}`", source);
+        Assert.Contains("method: \"GET\"", source);
+        Assert.DoesNotContain("payload", source);
+    }
 }
