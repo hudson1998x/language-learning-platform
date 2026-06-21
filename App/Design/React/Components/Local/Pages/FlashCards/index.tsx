@@ -10,6 +10,7 @@ import {
 } from '@api/flashcard'
 import { Spinner } from '@component/Spinner'
 import { CreateFlashCardModal } from './CreateFlashCardModal'
+import { Study } from './Study'
 import './style.scss'
 
 export const FlashCards = () => {
@@ -19,6 +20,7 @@ export const FlashCards = () => {
 
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [isDeleting, setIsDeleting] = useState<string | null>(null)
+    const [isStudyActive, setIsStudyActive] = useState(false)
     
     const {
         page,
@@ -97,6 +99,13 @@ export const FlashCards = () => {
                 >
                     Create new
                 </button>
+                <button
+                    className={'study-button'}
+                    onClick={() => setIsStudyActive(true)}
+                    disabled={!userId || !languageId}
+                >
+                    Study
+                </button>
             </div>
 
             {Boolean(!cards || cards.length === 0) && (
@@ -156,6 +165,10 @@ export const FlashCards = () => {
                     onClose={() => setIsModalOpen(false)}
                     onCreated={() => setIsModalOpen(false)}
                 />
+            )}
+
+            {isStudyActive && (
+                <StudySession onClose={() => setIsStudyActive(false)} />
             )}
         </div>
     )

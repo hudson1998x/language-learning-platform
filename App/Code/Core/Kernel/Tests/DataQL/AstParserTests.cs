@@ -100,6 +100,20 @@ public sealed class AstParserTests
         Assert.Equal(100, filter.Value);
     }
 
+    // ─── Field-to-Field Comparison ──────────────────────────────────────
+
+    [Fact]
+    public void Parse_FieldToFieldComparison_ReturnsFilterNodeWithFieldReference()
+    {
+        var result = Parse("CorrectCount <= IncorrectCount");
+
+        var filter = Assert.IsType<FilterNode>(result.Where);
+        Assert.Equal("CorrectCount", filter.ColumnName);
+        Assert.Equal(FilterOperator.LessThanOrEquals, filter.Operator);
+        var fieldRef = Assert.IsType<FieldReference>(filter.Value);
+        Assert.Equal("IncorrectCount", fieldRef.FieldName);
+    }
+
     // ─── In / Not In / Like / Not Like ─────────────────────────────────
 
     [Fact]

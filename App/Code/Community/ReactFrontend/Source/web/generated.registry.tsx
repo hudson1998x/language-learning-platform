@@ -7,11 +7,13 @@ import AdminTheme from '@theme:admin/Default'
 export { FrontendTheme, AdminTheme } 
 
 import { FlashCards } from '@component/Pages/FlashCards'
+import { Study } from '@component/Pages/FlashCards/Study'
 import { LanguageSelector } from '@component/LanguageSelector'
 import { Text } from '@component/Text'
 import { Spinner } from '@component/Spinner'
 
 register('@component/Pages/FlashCards', FlashCards)
+register('@component/Pages/FlashCards/Study', Study)
 register('@component/LanguageSelector', LanguageSelector)
 register('@component/Text', Text)
 register('@component/Spinner', Spinner)

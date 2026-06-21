@@ -1,6 +1,6 @@
-using System.Collections;
 using System.Data;
 using System.Reflection;
+using System.Text;
 using LLE.Kernel.DataQL.Ast;
 using Microsoft.Data.Sqlite;
 
@@ -23,6 +23,31 @@ internal sealed class SqliteQueryBuilder : IAstVisitor<SqlQueryResult>
         if (node.Where is { } filter)
             sql += $" WHERE {BuildWhereClause(filter)}";
 
+        var orderObj = (object?)node.OrderBy;
+        switch (orderObj)
+        {
+            case List<SortOption> list when list.Count > 0:
+                var sb = new StringBuilder();
+                for (var i = 0; i < list.Count; i++)
+                {
+                    if (i > 0) sb.Append(", ");
+                    sb.Append(QuoteName(list[i].Field));
+                    sb.Append(list[i].Ascending ? " ASC" : " DESC");
+                }
+                sql += $" ORDER BY {sb}";
+                break;
+
+            case SortOption opt:
+                sql += $" ORDER BY {QuoteName(opt.Field)} {(opt.Ascending ? "ASC" : "DESC")}";
+                break;
+        }
+
+        if (node.Pagination is { } pagination)
+        {
+            var offset = (pagination.PageNo - 1) * pagination.Limit;
+            sql += $" LIMIT {pagination.Limit} OFFSET {offset}";
+        }
+
         sql += ';';
         return new SqlQueryResult(sql, [.. _parameters]);
     }
@@ -36,14 +61,14 @@ internal sealed class SqliteQueryBuilder : IAstVisitor<SqlQueryResult>
 
         if (node.Where is null)
         {
-            var cols = string.Join(", ", columns.Select(QuoteName));
-            var prms = string.Join(", ", columns.Select((_, i) => AddParameter(values[i])));
+            var cols = JoinColumnNames(columns);
+            var prms = JoinParameters(values);
             var sql = $"INSERT OR IGNORE INTO [{node.TableName}] ({cols}) VALUES ({prms});";
             return new SqlQueryResult(sql, [.. _parameters]);
         }
 
-        var setClauses = string.Join(", ", columns.Select((c, i) => $"{QuoteName(c)} = {AddParameter(values[i])}"));
-        var updateSql = $"UPDATE [{node.TableName}] SET {setClauses} WHERE {BuildWhereClause(node.Where)};";
+        var setSql = BuildSetClause(columns, values);
+        var updateSql = $"UPDATE [{node.TableName}] SET {setSql} WHERE {BuildWhereClause(node.Where)};";
         return new SqlQueryResult(updateSql, [.. _parameters]);
     }
 
@@ -119,18 +144,61 @@ internal sealed class SqliteQueryBuilder : IAstVisitor<SqlQueryResult>
             return BuildInClause(node);
 
         var op = MapOperator(node.Operator);
-        return $"{QuoteName(node.ColumnName)} {op} {AddParameter(node.Value)}";
+        var value = node.Value is FieldReference fieldRef
+            ? QuoteName(fieldRef.FieldName)
+            : AddParameter(node.Value);
+        return $"{QuoteName(node.ColumnName)} {op} {value}";
     }
 
     private string BuildInClause(FilterNode node)
     {
         var op = node.Operator == FilterOperator.In ? "IN" : "NOT IN";
 
-        if (node.Value is not IEnumerable values)
+        if (node.Value is not System.Collections.IEnumerable values)
             throw new InvalidOperationException($"Value for {op} filter must be a collection.");
 
-        var prms = values.Cast<object?>().Select(AddParameter);
-        return $"{QuoteName(node.ColumnName)} {op} ({string.Join(", ", prms)})";
+        var sb = new StringBuilder();
+        foreach (var v in values)
+        {
+            if (sb.Length > 0) sb.Append(", ");
+            sb.Append(AddParameter(v));
+        }
+        return $"{QuoteName(node.ColumnName)} {op} ({sb})";
+    }
+
+    private static string JoinColumnNames(List<string> columns)
+    {
+        var sb = new StringBuilder();
+        for (var i = 0; i < columns.Count; i++)
+        {
+            if (i > 0) sb.Append(", ");
+            sb.Append(QuoteName(columns[i]));
+        }
+        return sb.ToString();
+    }
+
+    private string JoinParameters(List<object?> values)
+    {
+        var sb = new StringBuilder();
+        for (var i = 0; i < values.Count; i++)
+        {
+            if (i > 0) sb.Append(", ");
+            sb.Append(AddParameter(values[i]));
+        }
+        return sb.ToString();
+    }
+
+    private string BuildSetClause(List<string> columns, List<object?> values)
+    {
+        var sb = new StringBuilder();
+        for (var i = 0; i < columns.Count; i++)
+        {
+            if (i > 0) sb.Append(", ");
+            sb.Append(QuoteName(columns[i]));
+            sb.Append(" = ");
+            sb.Append(AddParameter(values[i]));
+        }
+        return sb.ToString();
     }
 
     private string AddParameter(object? value)
@@ -161,7 +229,13 @@ internal sealed class SqliteQueryBuilder : IAstVisitor<SqlQueryResult>
             return ([.. dict.Keys], [.. dict.Values]);
 
         var props = payload.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);
-        return (props.Select(static p => p.Name).ToList(),
-                props.Select(p => p.GetValue(payload)).ToList());
+        var cols = new List<string>(props.Length);
+        var vals = new List<object?>(props.Length);
+        foreach (var p in props)
+        {
+            cols.Add(p.Name);
+            vals.Add(p.GetValue(payload));
+        }
+        return (cols, vals);
     }
 }

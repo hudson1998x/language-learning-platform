@@ -22441,6 +22441,34 @@
       return response.json();
     });
   };
+  var getStudySession = (payload2) => {
+    return fetch("/api/flashcard/studysession/start", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload2)
+    }).then((response) => {
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+      return response.json();
+    });
+  };
+  var updateFlashCardScore = (payload2) => {
+    return fetch("/api/flashcard/studysession/answer", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload2)
+    }).then((response) => {
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+      return response.json();
+    });
+  };
 
   // App/Design/React/Components/Core/Spinner/index.tsx
   var import_jsx_runtime13 = __toESM(require_jsx_runtime(), 1);
@@ -22623,6 +22651,7 @@
     const { session } = useSession();
     const [isModalOpen, setIsModalOpen] = (0, import_react12.useState)(false);
     const [isDeleting, setIsDeleting] = (0, import_react12.useState)(null);
+    const [isStudyActive, setIsStudyActive] = (0, import_react12.useState)(false);
     const {
       page,
       size,
@@ -22691,6 +22720,15 @@
             disabled: !userId || !languageId,
             children: "Create new"
           }
+        ),
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
+          "button",
+          {
+            className: "study-button",
+            onClick: () => setIsStudyActive(true),
+            disabled: !userId || !languageId,
+            children: "Study"
+          }
         )
       ] }),
       Boolean(!cards || cards.length === 0) && /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "notice", children: "You have no flashcards, click create new to begin" }),
@@ -22738,27 +22776,209 @@
           onClose: () => setIsModalOpen(false),
           onCreated: () => setIsModalOpen(false)
         }
-      )
+      ),
+      isStudyActive && /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(StudySession, { onClose: () => setIsStudyActive(false) })
+    ] });
+  };
+
+  // App/Design/React/Components/Local/Pages/FlashCards/Study/index.tsx
+  var import_react13 = __toESM(require_react(), 1);
+  var import_jsx_runtime16 = __toESM(require_jsx_runtime(), 1);
+  var PRESETS = [5, 10, 20, 50, 100];
+  var Study = ({ onClose }) => {
+    const [phase, setPhase] = (0, import_react13.useState)("pick");
+    const [cardCount, setCardCount] = (0, import_react13.useState)(10);
+    const [customCount, setCustomCount] = (0, import_react13.useState)("");
+    const [cards, setCards] = (0, import_react13.useState)([]);
+    const [currentIndex, setCurrentIndex] = (0, import_react13.useState)(0);
+    const [showFront, setShowFront] = (0, import_react13.useState)(true);
+    const [userAnswer, setUserAnswer] = (0, import_react13.useState)("");
+    const [results, setResults] = (0, import_react13.useState)([]);
+    const [isLoading, setIsLoading] = (0, import_react13.useState)(false);
+    const [error, setError] = (0, import_react13.useState)(null);
+    const handleStart = async (count) => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const response = await getStudySession({ cardCount: count });
+        if (!response.success) {
+          setError(response.message ?? "Failed to start study session");
+          setIsLoading(false);
+          return;
+        }
+        const fetched = response.data ?? [];
+        if (fetched.length === 0) {
+          setError("No cards available for studying");
+          setIsLoading(false);
+          return;
+        }
+        setCards(fetched);
+        setCurrentIndex(0);
+        setShowFront(Math.random() < 0.5);
+        setUserAnswer("");
+        setResults([]);
+        setPhase("session");
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to start study session");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    const handleGrade = async (wasCorrect) => {
+      const card2 = cards[currentIndex];
+      try {
+        await updateFlashCardScore({ cardId: card2.id, isCorrect: wasCorrect });
+      } catch {
+      }
+      setResults((prev) => [...prev, { card: card2, wasCorrect }]);
+      const nextIndex = currentIndex + 1;
+      if (nextIndex >= cards.length) {
+        setPhase("results");
+      } else {
+        setCurrentIndex(nextIndex);
+        setShowFront(Math.random() < 0.5);
+        setUserAnswer("");
+      }
+    };
+    if (phase === "pick") {
+      return /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "modal-overlay", onClick: onClose, children: /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "modal study-pick", onClick: (e) => e.stopPropagation(), children: [
+        /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "modal-header", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("h2", { children: "How many cards?" }),
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("button", { className: "modal-close", onClick: onClose, children: "\u2715" })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "modal-body", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "preset-grid", children: PRESETS.map((n) => /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
+            "button",
+            {
+              className: `preset-btn ${cardCount === n && !customCount ? "active" : ""}`,
+              onClick: () => {
+                setCardCount(n);
+                setCustomCount("");
+              },
+              children: n
+            },
+            n
+          )) }),
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "custom-row", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
+              "input",
+              {
+                type: "number",
+                min: 1,
+                max: 200,
+                placeholder: "Custom",
+                value: customCount,
+                onChange: (e) => {
+                  setCustomCount(e.target.value);
+                  setCardCount(Number(e.target.value) || 10);
+                }
+              }
+            ),
+            /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
+              "button",
+              {
+                className: "start-btn",
+                onClick: () => handleStart(cardCount),
+                disabled: isLoading,
+                children: isLoading ? "Starting..." : "Start"
+              }
+            )
+          ] }),
+          error && /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "modal-error", children: error })
+        ] })
+      ] }) });
+    }
+    if (phase === "results") {
+      const correctCount = results.filter((r) => r.wasCorrect).length;
+      return /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "modal-overlay", children: /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "modal study-results", onClick: (e) => e.stopPropagation(), children: [
+        /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "modal-header", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("h2", { children: "Study Results" }),
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("button", { className: "modal-close", onClick: onClose, children: "\u2715" })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "modal-body", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "results-summary", children: [
+            correctCount,
+            " of ",
+            results.length,
+            " correct (",
+            Math.round(correctCount / results.length * 100),
+            "%)"
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "results-list", children: results.map((r, i) => /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: `result-item ${r.wasCorrect ? "correct" : "incorrect"}`, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("span", { className: "result-icon", children: r.wasCorrect ? "\u2713" : "\u2717" }),
+            /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("span", { className: "result-front", children: r.card.frontStatement }),
+            /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("span", { className: "result-arrow", children: "\u2192" }),
+            /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("span", { className: "result-back", children: r.card.backStatement })
+          ] }, i)) })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "modal-actions", children: /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("button", { onClick: onClose, children: "Close" }) })
+      ] }) });
+    }
+    if (isLoading) {
+      return /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Spinner, {});
+    }
+    if (error) {
+      return /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "modal-overlay", children: /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "modal", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "modal-body", children: /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "modal-error", children: error }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "modal-actions", children: /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("button", { onClick: onClose, children: "Close" }) })
+      ] }) });
+    }
+    const card = cards[currentIndex];
+    const shown = showFront ? card.frontStatement : card.backStatement;
+    return /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "study-session", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "session-header", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("span", { className: "progress", children: [
+          currentIndex + 1,
+          " / ",
+          cards.length
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("button", { className: "end-btn", onClick: () => setPhase("results"), children: "End Session" })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "session-card", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "card-label", children: showFront ? "Front" : "Back" }),
+        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "card-text", children: shown })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "session-input-area", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("label", { children: [
+          "Type the ",
+          showFront ? "back" : "front",
+          ":"
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
+          "input",
+          {
+            type: "text",
+            value: userAnswer,
+            onChange: (e) => setUserAnswer(e.target.value),
+            placeholder: `Enter ${showFront ? "back" : "front"} statement...`
+          }
+        )
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "grade-buttons", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("button", { className: "incorrect-btn", onClick: () => handleGrade(false), children: "Incorrect" }),
+        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("button", { className: "correct-btn", onClick: () => handleGrade(true), children: "Correct" })
+      ] })
     ] });
   };
 
   // App/Design/React/Components/Core/Text/index.tsx
-  var import_jsx_runtime16 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime17 = __toESM(require_jsx_runtime(), 1);
   var Text = (props) => {
-    return /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("p", { children: props.text });
+    return /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("p", { children: props.text });
   };
 
   // App/Code/Community/ReactFrontend/Source/web/generated.registry.tsx
   register("@component/Pages/FlashCards", FlashCards);
+  register("@component/Pages/FlashCards/Study", Study);
   register("@component/LanguageSelector", LanguageSelector);
   register("@component/Text", Text);
   register("@component/Spinner", Spinner);
 
   // App/Code/Community/ReactFrontend/Source/web/index.tsx
-  var import_jsx_runtime17 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime18 = __toESM(require_jsx_runtime(), 1);
   var root = (0, import_client.createRoot)(document.getElementById("app"));
   root.render(
-    /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Default_default, { children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Canvas, { children: window.canvasState }) })
+    /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Default_default, { children: /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Canvas, { children: window.canvasState }) })
   );
 })();
 /*! Bundled license information:

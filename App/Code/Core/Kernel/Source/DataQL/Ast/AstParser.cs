@@ -241,6 +241,9 @@ public static class AstParser
                     Consume();
                     return null;
                 }
+
+                Consume();
+                return new FieldReference(text);
             }
 
             throw new Exception($"Expected value at position {Current.StartPosition}");

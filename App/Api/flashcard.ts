@@ -136,3 +136,44 @@ export const loadFlashCard = (id: string): Promise<ApiResponse<FlashCard>> => {
     });
 };
 
+export interface StudySessionInitRequest {
+    cardCount: number;
+}
+
+export const getStudySession = (payload: StudySessionInitRequest): Promise<ApiResponse<FlashCard[]>> => {
+    return fetch('/api/flashcard/studysession/start', {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+    })
+    .then((response: Response) => {
+        if (!response.ok) {
+            throw new Error(`Request failed with status ${response.status}`);
+        }
+        return response.json();
+    });
+};
+
+export interface StudySessionCardAnswerRequest {
+    cardId: string;
+    isCorrect: boolean;
+}
+
+export const updateFlashCardScore = (payload: StudySessionCardAnswerRequest): Promise<ApiResponse<FlashCard>> => {
+    return fetch('/api/flashcard/studysession/answer', {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+    })
+    .then((response: Response) => {
+        if (!response.ok) {
+            throw new Error(`Request failed with status ${response.status}`);
+        }
+        return response.json();
+    });
+};
+

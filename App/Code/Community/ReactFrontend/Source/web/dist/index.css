@@ -938,11 +938,17 @@ body {
   cursor: not-allowed;
 }
 .flashcards .card-actions .create-button {
-  margin-left: auto;
   background: #4f46e5;
   border-color: #4f46e5;
 }
 .flashcards .card-actions .create-button:hover:not(:disabled) {
+  background: #4338ca;
+}
+.flashcards .card-actions .study-button {
+  background: #4f46e5;
+  border-color: #4f46e5;
+}
+.flashcards .card-actions .study-button:hover:not(:disabled) {
   background: #4338ca;
 }
 .flashcards .card-actions span {
@@ -1045,5 +1051,248 @@ body {
 .flashcards .flashcard .flashcard-back {
   transform: rotateY(180deg);
   background: #1a1a2e;
+}
+
+/* App/Design/React/Components/Local/Pages/FlashCards/Study/study.scss */
+.study-pick {
+  max-width: 380px;
+}
+.study-pick .preset-grid {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.study-pick .preset-grid .preset-btn {
+  flex: 1;
+  min-width: 56px;
+  padding: 10px 0;
+  border: 1px solid #333;
+  border-radius: 6px;
+  background: #1a1a1a;
+  color: #e5e5e5;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.study-pick .preset-grid .preset-btn:hover {
+  background: #262626;
+}
+.study-pick .preset-grid .preset-btn.active {
+  background: #4f46e5;
+  border-color: #4f46e5;
+}
+.study-pick .custom-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.study-pick .custom-row input {
+  flex: 1;
+  background: #0e0e0e;
+  border: 1px solid #333;
+  border-radius: 6px;
+  padding: 8px 10px;
+  color: #e5e5e5;
+  font-size: 14px;
+  font-family: inherit;
+}
+.study-pick .custom-row input:focus {
+  outline: none;
+  border-color: #4f46e5;
+}
+.study-pick .custom-row .start-btn {
+  background: #4f46e5;
+  border: 1px solid #4f46e5;
+  color: #e5e5e5;
+  padding: 8px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+.study-pick .custom-row .start-btn:hover:not(:disabled) {
+  background: #4338ca;
+}
+.study-pick .custom-row .start-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.study-session {
+  padding: 24px;
+  max-width: 600px;
+  margin: 0 auto;
+  color: #e5e5e5;
+}
+.study-session .session-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+.study-session .session-header .progress {
+  font-size: 15px;
+  color: #aaa;
+}
+.study-session .session-header .end-btn {
+  background: transparent;
+  border: 1px solid #555;
+  color: #aaa;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}
+.study-session .session-header .end-btn:hover {
+  color: #f87171;
+  border-color: #f87171;
+}
+.study-session .session-card {
+  background: #161616;
+  border: 1px solid #2a2a2a;
+  border-radius: 10px;
+  padding: 32px 24px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+.study-session .session-card .card-label {
+  font-size: 12px;
+  color: #777;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+}
+.study-session .session-card .card-text {
+  font-size: 22px;
+  font-weight: 500;
+  word-break: break-word;
+  line-height: 1.4;
+}
+.study-session .session-input-area {
+  margin-bottom: 20px;
+}
+.study-session .session-input-area label {
+  display: block;
+  font-size: 13px;
+  color: #aaa;
+  margin-bottom: 6px;
+}
+.study-session .session-input-area input {
+  width: 100%;
+  box-sizing: border-box;
+  background: #0e0e0e;
+  border: 1px solid #333;
+  border-radius: 6px;
+  padding: 10px 12px;
+  color: #e5e5e5;
+  font-size: 15px;
+  font-family: inherit;
+}
+.study-session .session-input-area input:focus {
+  outline: none;
+  border-color: #4f46e5;
+}
+.study-session .grade-buttons {
+  display: flex;
+  gap: 12px;
+}
+.study-session .grade-buttons button {
+  flex: 1;
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #333;
+  font-size: 15px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s ease;
+}
+.study-session .grade-buttons .correct-btn {
+  background: #065f46;
+  border-color: #065f46;
+  color: #e5e5e5;
+}
+.study-session .grade-buttons .correct-btn:hover {
+  background: #047857;
+}
+.study-session .grade-buttons .incorrect-btn {
+  background: #7f1d1d;
+  border-color: #7f1d1d;
+  color: #e5e5e5;
+}
+.study-session .grade-buttons .incorrect-btn:hover {
+  background: #991b1b;
+}
+.study-results {
+  max-width: 560px;
+}
+.study-results .results-summary {
+  text-align: center;
+  font-size: 16px;
+  font-weight: 500;
+  padding: 8px 0 16px;
+}
+.study-results .results-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+.study-results .results-list .result-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  background: #0e0e0e;
+}
+.study-results .results-list .result-item.correct {
+  border-left: 3px solid #059669;
+}
+.study-results .results-list .result-item.incorrect {
+  border-left: 3px solid #dc2626;
+}
+.study-results .results-list .result-item .result-icon {
+  flex-shrink: 0;
+  font-size: 14px;
+  width: 18px;
+  text-align: center;
+}
+.correct .study-results .results-list .result-item .result-icon {
+  color: #34d399;
+}
+.incorrect .study-results .results-list .result-item .result-icon {
+  color: #f87171;
+}
+.study-results .results-list .result-item .result-front,
+.study-results .results-list .result-item .result-back {
+  word-break: break-word;
+  max-width: 40%;
+}
+.study-results .results-list .result-item .result-front {
+  color: #e5e5e5;
+}
+.study-results .results-list .result-item .result-arrow {
+  color: #555;
+  flex-shrink: 0;
+}
+.study-results .results-list .result-item .result-back {
+  color: #aaa;
+}
+.study-results .modal-actions {
+  padding: 0 20px 20px;
+  display: flex;
+  justify-content: flex-end;
+}
+.study-results .modal-actions button {
+  padding: 8px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  border: 1px solid #333;
+  background: #1a1a1a;
+  color: #e5e5e5;
+}
+.study-results .modal-actions button:hover {
+  background: #262626;
 }
 /*# sourceMappingURL=index.css.map */
