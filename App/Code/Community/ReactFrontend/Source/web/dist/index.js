@@ -22101,43 +22101,49 @@
     ] }) });
   };
 
-  // App/Design/React/Themes/Frontend/Local/Default/index.tsx
+  // App/Design/React/Themes/Frontend/Local/Default/Blocks/Topbar/index.tsx
   var import_jsx_runtime6 = __toESM(require_jsx_runtime(), 1);
+  var Topbar = () => {
+    return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "lle-topbar" });
+  };
+
+  // App/Design/React/Themes/Frontend/Local/Default/index.tsx
+  var import_jsx_runtime7 = __toESM(require_jsx_runtime(), 1);
   var LLEThemeWrapper = (props) => {
-    return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(SessionProvider, { children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(LLETheme, { ...props }) });
+    return /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(SessionProvider, { children: /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(LLETheme, { ...props }) });
   };
   var LLETheme = (props) => {
     const { session } = useSession();
     const [page, setPage] = (0, import_react7.useState)(0 /* SignIn */);
     if (!session?.user) {
       if (page == 0 /* SignIn */) {
-        return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(AppSignin, { onSwitchToRegister: () => setPage(1 /* Register */) });
+        return /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(AppSignin, { onSwitchToRegister: () => setPage(1 /* Register */) });
       }
       if (page == 1 /* Register */) {
-        return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(AppRegister, { onSwitchToSignIn: () => setPage(0 /* SignIn */) });
+        return /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(AppRegister, { onSwitchToSignIn: () => setPage(0 /* SignIn */) });
       }
     }
-    return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "lle-default-theme" });
+    return /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("div", { className: "lle-default-theme", children: /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(Topbar, {}) });
   };
   var Default_default = LLEThemeWrapper;
 
   // App/Design/React/Themes/Admin/Core/Default/index.tsx
-  var import_jsx_runtime7 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime8 = __toESM(require_jsx_runtime(), 1);
 
   // App/Design/React/Components/Core/Text/index.tsx
-  var import_jsx_runtime8 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime9 = __toESM(require_jsx_runtime(), 1);
   var Text = (props) => {
-    return /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("p", { children: props.text });
+    return /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("p", { children: props.text });
   };
 
   // App/Code/Community/ReactFrontend/Source/web/generated.registry.tsx
   register("@component/Text", Text);
 
   // App/Code/Community/ReactFrontend/Source/web/index.tsx
-  var import_jsx_runtime9 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime10 = __toESM(require_jsx_runtime(), 1);
   var root = (0, import_client.createRoot)(document.getElementById("app"));
   root.render(
-    /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Default_default, { children: /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Canvas, { children: window.canvasState }) })
+    /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Default_default, { children: /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Canvas, { children: window.canvasState }) })
   );
 })();
 /*! Bundled license information:

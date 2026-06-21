@@ -2,6 +2,8 @@ import {FC, PropsWithChildren, useState} from "react";
 import { SessionProvider, useSession } from '@hook/session-provider'
 import { AppSignin } from './DefaultPages/SignIn'
 import { AppRegister } from './DefaultPages/SignUp'
+import './style.scss'
+import { Topbar } from './Blocks/Topbar'
 
 const LLEThemeWrapper: FC<PropsWithChildren> = (props) => {
 
@@ -39,10 +41,10 @@ const LLETheme: FC<PropsWithChildren> = (props) => {
             )
         }
     }
-
+    
     return (
         <div className={'lle-default-theme'}>
-            
+            <Topbar />
         </div>
     )
 }

@@ -1,4 +1,5 @@
 using System.Reflection;
+using LLE.Kernel.Attributes;
 using LLE.Kernel.Contracts;
 using LLE.Kernel.DataQL.Ast;
 using LLE.Kernel.Registry;
@@ -64,6 +65,18 @@ public class SQLiteAdapter : IDatabaseAdapter
             using var alterCmd = new SqliteCommand(
                 $"ALTER TABLE [{tableName}] ADD COLUMN {colDef};", conn);
             alterCmd.ExecuteNonQuery();
+        }
+
+        // Step 3: create unique indexes for [Unique] properties
+        foreach (var prop in entityType.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+        {
+            if (prop.GetCustomAttribute<UniqueAttribute>() is null)
+                continue;
+
+            var indexName = $"IX_{tableName}_{prop.Name}";
+            using var idxCmd = new SqliteCommand(
+                $"CREATE UNIQUE INDEX IF NOT EXISTS [{indexName}] ON [{tableName}]([{prop.Name}]);", conn);
+            idxCmd.ExecuteNonQuery();
         }
     }
 

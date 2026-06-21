@@ -18,6 +18,8 @@ namespace LLE.Application
             var webServer = new HttpSocket(8080);
 
             await ApplicationLoader.StartLifecycle();
+            
+            await Eventing.Eventing.Of<DatabaseEvents>().SeedAllAsync();
 
             await webServer.StartAsync();
             apiBuilder.WriteToDisk("App/Api");

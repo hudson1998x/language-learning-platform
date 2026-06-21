@@ -53,6 +53,8 @@ public sealed class EventCollection<T>
         return this;
     }
 
+
+
     /// <summary>
     /// Dispatches <paramref name="item"/> through every pipeline handler in order (each one's
     /// output becomes the next input), then through every concurrent handler in parallel via

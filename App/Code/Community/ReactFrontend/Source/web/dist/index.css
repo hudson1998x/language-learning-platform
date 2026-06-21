@@ -347,4 +347,11 @@ body {
 .lle-register-page__form-submit--link {
   margin-top: 20px;
 }
+
+/* App/Design/React/Themes/Frontend/Local/Default/style.scss */
+.lle-default-theme {
+  position: absolute;
+  inset: 0;
+  background: #0b0c0e;
+}
 /*# sourceMappingURL=index.css.map */

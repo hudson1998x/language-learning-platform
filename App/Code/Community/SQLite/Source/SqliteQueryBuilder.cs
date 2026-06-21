@@ -38,7 +38,7 @@ internal sealed class SqliteQueryBuilder : IAstVisitor<SqlQueryResult>
         {
             var cols = string.Join(", ", columns.Select(QuoteName));
             var prms = string.Join(", ", columns.Select((_, i) => AddParameter(values[i])));
-            var sql = $"INSERT INTO [{node.TableName}] ({cols}) VALUES ({prms});";
+            var sql = $"INSERT OR IGNORE INTO [{node.TableName}] ({cols}) VALUES ({prms});";
             return new SqlQueryResult(sql, [.. _parameters]);
         }
 

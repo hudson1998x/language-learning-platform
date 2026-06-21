@@ -6,6 +6,7 @@ namespace LLE.Auth.Features.Users;
 [Entity]
 public class User : ContentWithId
 {
+    [Unique]
     public required string Email { get; set; }
     
     public required string Password { get; set; }

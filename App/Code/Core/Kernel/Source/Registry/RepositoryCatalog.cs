@@ -11,7 +11,7 @@ namespace LLE.Kernel.Registry;
 /// Repositories are interface-based abstractions that will later be backed by
 /// runtime-generated proxy implementations.
 /// </summary>
-internal static class RepositoryCatalog
+public static class RepositoryCatalog
 {
     /// <summary>
     /// Cached repository interface types mapped to their resolved proxy instances.
@@ -26,7 +26,7 @@ internal static class RepositoryCatalog
     /// <exception cref="InvalidOperationException">
     /// Thrown if the type is not a valid repository interface or cannot be resolved.
     /// </exception>
-    internal static object GetRepository(Type repositoryType)
+    public static object GetRepository(Type repositoryType)
     {
         // =========================
         // 1. FAST PATH: CACHE HIT
@@ -69,6 +69,9 @@ internal static class RepositoryCatalog
 
         return proxy;
     }
+
+    public static T GetRepository<T>() where T : class
+        => (T)GetRepository(typeof(T));
 
     /// <summary>
     /// Placeholder for future proxy generation system.

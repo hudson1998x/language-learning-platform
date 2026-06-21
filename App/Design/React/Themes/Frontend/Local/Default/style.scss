@@ -1,0 +1,26 @@
+
+
+$color-bg: #0b0c0e;
+$color-surface: #16181c;
+$color-surface-raised: #1c1f24;
+$color-border: #2a2d33;
+$color-border-strong: #383c44;
+
+$color-text-primary: #f2f3f5;
+$color-text-secondary: #9aa0a8;
+$color-text-tertiary: #6b7078;
+
+$color-accent: #5b8def;
+$color-accent-hover: #4878d9;
+$color-accent-soft: rgba(91, 141, 239, 0.12);
+
+$color-error: #e5594f;
+$color-error-soft: rgba(229, 89, 79, 0.12);
+
+$font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+
+.lle-default-theme {
+  position: absolute;
+  inset: 0;
+  background:$color-bg;
+}
