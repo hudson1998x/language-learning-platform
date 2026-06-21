@@ -73,6 +73,18 @@ export const listAllLanguage = (): Promise<ApiResponse<Language[]>> => {
     });
 };
 
+export const listLanguagePaged = (): Promise<ApiResponse<Language[]>> => {
+    return fetch('/api/language/list/{pageNum}/{size}', {
+        method: "GET",
+    })
+    .then((response: Response) => {
+        if (!response.ok) {
+            throw new Error(`Request failed with status ${response.status}`);
+        }
+        return response.json();
+    });
+};
+
 export const loadLanguage = (): Promise<ApiResponse<Language>> => {
     return fetch('/api/language/{id}', {
         method: "GET",

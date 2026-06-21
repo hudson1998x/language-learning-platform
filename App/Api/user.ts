@@ -74,6 +74,18 @@ export const listAllUser = (): Promise<ApiResponse<User[]>> => {
     });
 };
 
+export const listUserPaged = (): Promise<ApiResponse<User[]>> => {
+    return fetch('/api/user/list/{pageNum}/{size}', {
+        method: "GET",
+    })
+    .then((response: Response) => {
+        if (!response.ok) {
+            throw new Error(`Request failed with status ${response.status}`);
+        }
+        return response.json();
+    });
+};
+
 export const loadUser = (): Promise<ApiResponse<User>> => {
     return fetch('/api/user/{id}', {
         method: "GET",

@@ -73,6 +73,18 @@ export const listAllRole = (): Promise<ApiResponse<Role[]>> => {
     });
 };
 
+export const listRolePaged = (): Promise<ApiResponse<Role[]>> => {
+    return fetch('/api/role/list/{pageNum}/{size}', {
+        method: "GET",
+    })
+    .then((response: Response) => {
+        if (!response.ok) {
+            throw new Error(`Request failed with status ${response.status}`);
+        }
+        return response.json();
+    });
+};
+
 export const loadRole = (): Promise<ApiResponse<Role>> => {
     return fetch('/api/role/{id}', {
         method: "GET",

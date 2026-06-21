@@ -74,6 +74,18 @@ export const listAllPage = (): Promise<ApiResponse<Page[]>> => {
     });
 };
 
+export const listPagePaged = (): Promise<ApiResponse<Page[]>> => {
+    return fetch('/api/page/list/{pageNum}/{size}', {
+        method: "GET",
+    })
+    .then((response: Response) => {
+        if (!response.ok) {
+            throw new Error(`Request failed with status ${response.status}`);
+        }
+        return response.json();
+    });
+};
+
 export const loadPage = (): Promise<ApiResponse<Page>> => {
     return fetch('/api/page/{id}', {
         method: "GET",

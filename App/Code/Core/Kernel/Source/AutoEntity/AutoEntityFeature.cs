@@ -1,4 +1,5 @@
 using LLE.Kernel.Contracts;
+using LLE.Kernel.DataQL.Ast;
 using LLE.Kernel.Dto;
 using LLE.Kernel.Exceptions;
 using LLE.Kernel.Registry;
@@ -69,14 +70,54 @@ public static class AutoEntityFeature
             FeatureGroup = type.Name.ToLower(),
             Route = $"/api/{type.Name.ToLower()}/list",
             Method = HttpMethod.Get,
-            Handler = async (entity, context) =>
+            Handler = async (_, context) =>
             {
                 var uc = UserContext.FromHttpContext(context);
+
+                SortOption? sortBy = null;
+                if (context.Request.Query.TryGetValue("sortBy", out var sortField) && !string.IsNullOrWhiteSpace(sortField))
+                {
+                    var ascending = !context.Request.Query.TryGetValue("sortAsc", out var sortAsc) || sortAsc != "false";
+                    sortBy = new SortOption { Field = sortField!, Ascending = ascending };
+                }
+
                 var repository = (T1) RepositoryCatalog.GetRepository(typeof(T1));
-                return new()
+                return new ApiResponse<List<T>>
                 {
                     Success = true,
-                    Data = await repository.FindAllAsync(uc, DataOptions.Default)
+                    Data = await repository.FindAllAsync(uc, DataOptions.Default, sortBy)
+                };
+            }
+        });
+        FeatureRegistry.Add(new Feature<object, ApiResponse<List<T>>>()
+        {
+            FeatureName = $"list{type.Name}Paged",
+            FeatureGroup = type.Name.ToLower(),
+            Route = $"/api/{type.Name.ToLower()}/list/{{pageNum}}/{{size}}",
+            Method = HttpMethod.Get,
+            Handler = async (_, context) =>
+            {
+                if (!context.Request.RouteValues.TryGetValue("pageNum", out var pageNum) || pageNum is null)
+                    throw new MalformedUrlException("Invalid/Missing parameter pageNum from the URL");
+
+                if (!context.Request.RouteValues.TryGetValue("size", out var size) || size is null)
+                    throw new MalformedUrlException("Invalid/Missing parameter size from the URL");
+
+                var uc = UserContext.FromHttpContext(context);
+
+                SortOption? sortBy = null;
+                if (context.Request.Query.TryGetValue("sortBy", out var sortField) && !string.IsNullOrWhiteSpace(sortField))
+                {
+                    var ascending = !context.Request.Query.TryGetValue("sortAsc", out var sortAsc) || sortAsc != "false";
+                    sortBy = new SortOption { Field = sortField!, Ascending = ascending };
+                }
+
+                var repository = (T1) RepositoryCatalog.GetRepository(typeof(T1));
+                var pagination = new Pagination { PageNo = int.Parse(pageNum.ToString()!), Limit = int.Parse(size.ToString()!) };
+                return new ApiResponse<List<T>>
+                {
+                    Success = true,
+                    Data = await repository.FindAllAsync(uc, DataOptions.Default, sortBy, pagination)
                 };
             }
         });
