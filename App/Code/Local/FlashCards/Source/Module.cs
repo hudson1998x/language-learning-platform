@@ -50,6 +50,8 @@ public class FlashCardsModule : IModuleLoader
             
             return roleRepository;
         });
+        
+        Features.LoadFeatures();
 
         return Noop();
     }
