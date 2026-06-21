@@ -1,6 +1,6 @@
 .navbar {
-  --navbar-bg: #1c1c1e;
-  --navbar-border: #38383a;
+  --navbar-bg: transparent;
+  --navbar-border: transparent;
   --navbar-text: #98989d;
   --navbar-text-active: #f5f5f7;
   --navbar-active-bg: #241786;
@@ -36,9 +36,9 @@
     align-items: center;
     justify-content: center;
     height: 100%;
-    padding: 0 10px;
-    border-radius: 2px;
-    font-size: 11px;
+    padding: 5px 15px;
+    border-radius: 24px;
+    font-size: 13px;
     font-weight: 500;
     color: var(--navbar-text);
     text-decoration: none;
