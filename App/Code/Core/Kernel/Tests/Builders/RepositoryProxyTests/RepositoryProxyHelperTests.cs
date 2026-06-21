@@ -108,7 +108,7 @@ public sealed class RepositoryProxyHelperTests
         var cache = new object[] { new TestEntity(), null!, null! };
         var item = new TestEntity { Name = "Inserted" };
 
-        RepositoryProxyHelper.InsertIntoCache(cache, item);
+        RepositoryProxyHelper.InsertIntoCache(cache, item, typeof(TestEntity));
 
         Assert.Same(item, cache[1]);
     }
@@ -120,7 +120,7 @@ public sealed class RepositoryProxyHelperTests
         var cache = new object[] { existing, null! };
         var item = new TestEntity { Name = "Inserted" };
 
-        RepositoryProxyHelper.InsertIntoCache(cache, item);
+        RepositoryProxyHelper.InsertIntoCache(cache, item, typeof(TestEntity));
 
         Assert.Same(existing, cache[0]);
         Assert.Same(item, cache[1]);
@@ -132,7 +132,7 @@ public sealed class RepositoryProxyHelperTests
         var cache = new object[] { new TestEntity(), new TestEntity() };
         var item = new TestEntity { Name = "Overflow" };
 
-        RepositoryProxyHelper.InsertIntoCache(cache, item);
+        RepositoryProxyHelper.InsertIntoCache(cache, item, typeof(TestEntity));
 
         Assert.DoesNotContain(item, cache);
     }

@@ -1,6 +1,8 @@
+using System.Collections.Concurrent;
 using System.Collections;
 using System.Reflection;
 using LLE.Eventing;
+using LLE.Kernel.Attributes;
 using LLE.Kernel.Contracts;
 using LLE.Kernel.DataQL.Ast;
 using LLE.Kernel.Events;
@@ -11,6 +13,7 @@ namespace LLE.Kernel.Builders;
 
 public static class RepositoryProxyHelper
 {
+    private static readonly ConcurrentDictionary<Type, PropertyInfo[]> _uniqueProperties = new();
     public static IDatabaseAdapter InitializeAdapter(Type repositoryType, Type entityType)
     {
         var ctx = new RepositoryConstructionContext
@@ -147,7 +150,7 @@ public static class RepositoryProxyHelper
         switch (op)
         {
             case CacheOp.Insert:
-                InsertIntoCache(cache, result!);
+                InsertIntoCache(cache, result!, entityType);
                 break;
             case CacheOp.Update:
                 UpdateInCache(cache, result!, entityType);
@@ -224,8 +227,59 @@ public static class RepositoryProxyHelper
         return result;
     }
 
-    public static void InsertIntoCache(object[] cache, object item)
+    private static PropertyInfo[] GetUniqueProperties(Type entityType)
     {
+        return _uniqueProperties.GetOrAdd(entityType, static t =>
+            t.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .Where(p => p.GetCustomAttribute<UniqueAttribute>() is not null)
+                .ToArray());
+    }
+
+    private static bool IsDuplicateInCache(object[] cache, object item)
+    {
+        var entityType = item.GetType();
+        var uniqueProps = GetUniqueProperties(entityType);
+        if (uniqueProps.Length == 0)
+            return false;
+
+        for (var i = 0; i < cache.Length; i++)
+        {
+            if (cache[i] is null || cache[i].GetType() != entityType)
+                continue;
+
+            var match = true;
+            foreach (var prop in uniqueProps)
+            {
+                var existingVal = prop.GetValue(cache[i]);
+                var newVal = prop.GetValue(item);
+
+                if (existingVal is null || newVal is null)
+                {
+                    if (existingVal != newVal)
+                    {
+                        match = false;
+                        break;
+                    }
+                }
+                else if (!existingVal.Equals(newVal))
+                {
+                    match = false;
+                    break;
+                }
+            }
+
+            if (match)
+                return true;
+        }
+
+        return false;
+    }
+
+    public static void InsertIntoCache(object[] cache, object item, Type entityType)
+    {
+        if (IsDuplicateInCache(cache, item))
+            return;
+
         for (var i = 0; i < cache.Length; i++)
         {
             if (cache[i] is null)
@@ -258,7 +312,7 @@ public static class RepositoryProxyHelper
             }
         }
 
-        InsertIntoCache(cache, item);
+        InsertIntoCache(cache, item, entityType);
     }
 
     public static void RemoveFromCache(object[] cache, object item, Type entityType)
