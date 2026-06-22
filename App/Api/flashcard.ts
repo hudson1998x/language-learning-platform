@@ -177,3 +177,15 @@ export const updateFlashCardScore = (payload: StudySessionCardAnswerRequest): Pr
     });
 };
 
+export const listFlashCardsForLanguage = (pageNum: string, size: string, sortField: string, sortDir: string): Promise<ApiResponse<FlashCard[]>> => {
+    return fetch(`/api/flashcard/for-language/${pageNum}/${size}/${sortField}/${sortDir}`, {
+        method: "GET",
+    })
+    .then((response: Response) => {
+        if (!response.ok) {
+            throw new Error(`Request failed with status ${response.status}`);
+        }
+        return response.json();
+    });
+};
+

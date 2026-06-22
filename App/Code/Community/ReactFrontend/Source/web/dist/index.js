@@ -21864,6 +21864,16 @@
       return response.json();
     });
   };
+  var changeLanguage = (id) => {
+    return fetch(`/api/language/change/${id}`, {
+      method: "GET"
+    }).then((response) => {
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+      return response.json();
+    });
+  };
 
   // App/Design/React/Hooks/Core/language-provider.tsx
   var import_jsx_runtime4 = __toESM(require_jsx_runtime(), 1);
@@ -21883,9 +21893,11 @@
     });
     const language = availableLanguages.find((l) => l.id === selectedId);
     const setLanguage = (0, import_react5.useCallback)((lang) => {
-      setSelectedId(lang.id);
       try {
         localStorage.setItem(LS_KEY, lang.id);
+        changeLanguage(lang.id).then(() => {
+          setSelectedId(lang.id);
+        });
       } catch {
       }
     }, []);
@@ -22431,16 +22443,6 @@
       return response.json();
     });
   };
-  var listFlashCardPagedSorted = (pageNum, size, sortField, sortDir) => {
-    return fetch(`/api/flashcard/list/${pageNum}/${size}/${sortField}/${sortDir}`, {
-      method: "GET"
-    }).then((response) => {
-      if (!response.ok) {
-        throw new Error(`Request failed with status ${response.status}`);
-      }
-      return response.json();
-    });
-  };
   var getStudySession = (payload2) => {
     return fetch("/api/flashcard/studysession/start", {
       method: "POST",
@@ -22462,6 +22464,16 @@
         "Content-Type": "application/json"
       },
       body: JSON.stringify(payload2)
+    }).then((response) => {
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+      return response.json();
+    });
+  };
+  var listFlashCardsForLanguage = (pageNum, size, sortField, sortDir) => {
+    return fetch(`/api/flashcard/for-language/${pageNum}/${size}/${sortField}/${sortDir}`, {
+      method: "GET"
     }).then((response) => {
       if (!response.ok) {
         throw new Error(`Request failed with status ${response.status}`);
@@ -22950,7 +22962,7 @@
       sortDir,
       setSortField,
       setSortDir
-    } = usePagination(listFlashCardPagedSorted, [language, isModalOpen, isDeleting]);
+    } = usePagination(listFlashCardsForLanguage, [language, isModalOpen, isDeleting]);
     const [flippedIds, setFlippedIds] = (0, import_react13.useState)(/* @__PURE__ */ new Set());
     const toggleFlip = (id) => {
       setFlippedIds((prev) => {

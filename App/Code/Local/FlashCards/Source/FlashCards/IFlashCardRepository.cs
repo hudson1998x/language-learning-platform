@@ -9,6 +9,9 @@ namespace LLE.FlashCards.FlashCards;
 [Repository(typeof(FlashCard))]
 public interface IFlashCardRepository : IEntityRepository<FlashCard>
 {
-    [Query("CorrectCount <= IncorrectCount")]
-    public Task<List<FlashCard>> GetStudySessionFlashCards(UserContext context, DataOptions dataOptions, Pagination pagination, SortOption sort);
+    [Query("CorrectCount <= IncorrectCount and LanguageId = :language")]
+    public Task<List<FlashCard>> GetStudySessionFlashCards(Guid language, UserContext context, DataOptions dataOptions, Pagination pagination, SortOption sort);
+    
+    [Query("LanguageId = :language")]
+    public Task<List<FlashCard>> GetPaginatedForLanguage(Guid language, UserContext context, DataOptions dataOptions, SortOption sortOption, Pagination pagination);
 }

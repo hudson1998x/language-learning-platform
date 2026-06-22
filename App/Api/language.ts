@@ -125,3 +125,15 @@ export const loadLanguage = (id: string): Promise<ApiResponse<Language>> => {
     });
 };
 
+export const changeLanguage = (id: string): Promise<ApiResponse<unknown>> => {
+    return fetch(`/api/language/change/${id}`, {
+        method: "GET",
+    })
+    .then((response: Response) => {
+        if (!response.ok) {
+            throw new Error(`Request failed with status ${response.status}`);
+        }
+        return response.json();
+    });
+};
+

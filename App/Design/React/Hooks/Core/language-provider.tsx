@@ -4,9 +4,9 @@ import {
     createContext,
     useContext,
     useState,
-    useCallback,
+    useCallback, useEffect,
 } from "react";
-import { Language, listAllLanguage } from "@api/language";
+import { Language, listAllLanguage, changeLanguage } from "@api/language";
 import { usePromise } from "@hook/usePromise";
 
 const LS_KEY = 'lle-language';
@@ -38,9 +38,11 @@ export const LanguageProvider: FC<PropsWithChildren> = ({ children }) => {
     const language = availableLanguages.find((l) => l.id === selectedId);
 
     const setLanguage = useCallback((lang: Language) => {
-        setSelectedId(lang.id);
         try {
             localStorage.setItem(LS_KEY, lang.id);
+            changeLanguage(lang.id).then(() => {
+                setSelectedId(lang.id);
+            })
         } catch { /* noop */ }
     }, []);
 

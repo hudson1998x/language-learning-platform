@@ -3,7 +3,7 @@ import { useLanguage } from '@hook/language-provider'
 import { useSession } from '@hook/session-provider'
 import { usePagination } from '@hook/usePagination'
 import {
-    listFlashCardPagedSorted,
+    listFlashCardsForLanguage,
     deleteFlashCard,
     FlashCard
 } from '@api/flashcard'
@@ -60,7 +60,7 @@ export const FlashCards = () => {
         sortDir,
         setSortField,
         setSortDir,
-    } = usePagination<FlashCard[]>(listFlashCardPagedSorted, [language, isModalOpen, isDeleting])
+    } = usePagination<FlashCard[]>(listFlashCardsForLanguage, [language, isModalOpen, isDeleting])
 
     const [flippedIds, setFlippedIds] = useState<Set<string>>(new Set())
 

@@ -1,10 +1,13 @@
 using LLE.Kernel.AutoEntity;
 using LLE.Kernel.Contracts;
+using LLE.Kernel.Dto;
 using LLE.Kernel.Events;
+using LLE.Kernel.Registry;
 using LLE.Kernel.Security;
 using LLE.Sockets.Events;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 
@@ -113,6 +116,49 @@ public class LanguageModule : IModuleLoader
                     Path.Combine(env.ContentRootPath, "App/Code/Community/Languages/Source/web")),
                 RequestPath = "/media/languages"
             });
+        });
+        
+        FeatureRegistry.Add(new Feature<object, ApiResponse<object?>>
+        {
+            FeatureName = "changeLanguage",
+            FeatureGroup = "language",
+            Route = "/api/language/change/{id}",
+            Method = HttpMethod.Get,
+            Handler = async (o, context) =>
+            {
+                var id = context.Request.RouteValues["id"];
+
+                if (id is null)
+                {
+                    return new ApiResponse<object?>()
+                    {
+                        Success = false,
+                        Message = "Invalid language",
+                        Data = null
+                    };
+                }
+                
+                var idStr = id.ToString();
+
+                if (idStr is null)
+                {
+                    return new ApiResponse<object?>()
+                    {
+                        Success = false,
+                        Message = "Invalid language",
+                        Data = null
+                    };
+                }
+                
+                context.Session.SetString("Language", idStr);
+
+                return new ApiResponse<object?>()
+                {
+                    Success = true,
+                    Data = idStr,
+                    Message = "Changed Language"
+                };
+            }
         });
 
         return Task.CompletedTask;
