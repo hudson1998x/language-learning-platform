@@ -21874,32 +21874,37 @@
       return response.json();
     });
   };
+  var getCurrentLanguage = () => {
+    return fetch("/api/language/current", {
+      method: "GET"
+    }).then((response) => {
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+      return response.json();
+    });
+  };
 
   // App/Design/React/Hooks/Core/language-provider.tsx
   var import_jsx_runtime4 = __toESM(require_jsx_runtime(), 1);
-  var LS_KEY = "lle-language";
   var LanguageContext = (0, import_react5.createContext)(
     void 0
   );
   var LanguageProvider = ({ children }) => {
     const [response, isLoading, error] = usePromise(listAllLanguage, []);
     const availableLanguages = response?.data ?? [];
-    const [selectedId, setSelectedId] = (0, import_react5.useState)(() => {
-      try {
-        return localStorage.getItem(LS_KEY);
-      } catch {
-        return null;
-      }
-    });
+    const [selectedId, setSelectedId] = (0, import_react5.useState)(null);
+    (0, import_react5.useEffect)(() => {
+      getCurrentLanguage().then((response2) => {
+        if (response2?.data?.id) {
+          setSelectedId(response2.data.id);
+        }
+      });
+    }, []);
     const language = availableLanguages.find((l) => l.id === selectedId);
     const setLanguage = (0, import_react5.useCallback)((lang) => {
-      try {
-        localStorage.setItem(LS_KEY, lang.id);
-        changeLanguage(lang.id).then(() => {
-          setSelectedId(lang.id);
-        });
-      } catch {
-      }
+      setSelectedId(lang.id);
+      changeLanguage(lang.id);
     }, []);
     return /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
       LanguageContext.Provider,

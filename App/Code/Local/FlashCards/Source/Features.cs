@@ -51,10 +51,10 @@ public static class Features
                     }
                 );
 
-                if (items.Count == 0)
+                if (items.Count < payload.CardCount)
                 {
-                    // pull some random items. 
-                    items = await flashCards.GetPaginatedForLanguage(
+                    var remaining = payload.CardCount - items.Count;
+                    var supplementalItems = await flashCards.GetPaginatedForLanguage(
                         language.Value,
                         context,
                         DataOptions.Default,
@@ -66,8 +66,10 @@ public static class Features
                         new Pagination()
                         {
                             PageNo = 1,
-                            Limit = payload.CardCount
+                            Limit = remaining
                         });
+
+                    items.AddRange(supplementalItems.Where(s => !items.Any(i => i.Id == s.Id)));
                 }
                 
                 return new ApiResponse<List<FlashCard>>()

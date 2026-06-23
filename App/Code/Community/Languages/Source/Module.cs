@@ -161,6 +161,24 @@ public class LanguageModule : IModuleLoader
             }
         });
 
+        FeatureRegistry.Add(new Feature<object, ApiResponse<Language?>>
+        {
+            FeatureName = "getCurrentLanguage",
+            FeatureGroup = "language",
+            Route = "/api/language/current",
+            Method = HttpMethod.Get,
+            Handler = async (o, context) =>
+            {
+                var languageService = ServiceCatalog.GetService<LanguageService>();
+                var language = await languageService.GetCurrentLanguage(context);
+                return new ApiResponse<Language?>()
+                {
+                    Success = true,
+                    Data = language
+                };
+            }
+        });
+
         return Task.CompletedTask;
     }
 
