@@ -6,10 +6,8 @@ import {
     useState,
     useCallback, useEffect,
 } from "react";
-import { Language, listAllLanguage, changeLanguage } from "@api/language";
+import { Language, listAllLanguage, getCurrentLanguage, changeLanguage } from "@api/language";
 import { usePromise } from "@hook/usePromise";
-
-const LS_KEY = 'lle-language';
 
 interface LanguageContextValue {
     language: Language | undefined;
@@ -27,23 +25,22 @@ export const LanguageProvider: FC<PropsWithChildren> = ({ children }) => {
     const [response, isLoading, error] = usePromise(listAllLanguage, []);
     const availableLanguages: Language[] = (response as any)?.data ?? [];
 
-    const [selectedId, setSelectedId] = useState<string | null>(() => {
-        try {
-            return localStorage.getItem(LS_KEY);
-        } catch {
-            return null;
-        }
-    });
+    const [selectedId, setSelectedId] = useState<string | null>(null);
+
+    useEffect(() => {
+        getCurrentLanguage().then((response) => {
+            if (response?.data?.id) {
+                setSelectedId(response.data.id);
+            }
+        });
+    }, []);
 
     const language = availableLanguages.find((l) => l.id === selectedId);
 
     const setLanguage = useCallback((lang: Language) => {
-        try {
-            localStorage.setItem(LS_KEY, lang.id);
-            changeLanguage(lang.id).then(() => {
-                setSelectedId(lang.id);
-            })
-        } catch { /* noop */ }
+        changeLanguage(lang.id).then(() => {
+            setSelectedId(lang.id);
+        });
     }, []);
 
     return (
