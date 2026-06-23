@@ -7,26 +7,31 @@ namespace LLE.LLMFramework.Services;
 [Service]
 public class LLMService
 {
-    private readonly ILLMProvider _provider;
-    private readonly PromptComposer _composer;
+    private static readonly Dictionary<string, ILLMProvider> _providers = new();
 
-    public LLMService(ILLMProvider provider, PromptComposer composer)
+    public static void Register<T>(string name) where T : ILLMProvider, new()
     {
-        _provider = provider;
-        _composer = composer;
+        _providers[name] = new T();
     }
 
-    public async Task<LLMResponse> AskAsync(string prompt, Action<LLMRequest>? configure = null)
+    public static IReadOnlyDictionary<string, ILLMProvider> GetRegisteredProviders()
     {
-        var request = new LLMRequest
-        {
-            Prompt = prompt
-        };
+        return _providers;
+    }
 
+    public async Task<LLMResponse> SendMessageAsync(
+        string providerName,
+        string prompt,
+        Action<LLMRequest>? configure = null)
+    {
+        if (!_providers.TryGetValue(providerName, out var provider))
+            throw new InvalidOperationException($"Provider '{providerName}' is not registered.");
+
+        var composer = new PromptComposer();
+        var request = new LLMRequest { Prompt = prompt };
         configure?.Invoke(request);
+        request.Prompt = composer.Compose(request);
 
-        request.Prompt = _composer.Compose(request);
-
-        return await _provider.GenerateAsync(request);
+        return await provider.GenerateAsync(request);
     }
 }

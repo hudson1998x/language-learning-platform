@@ -40,6 +40,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlashCards", "App\Code\Loca
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LLMFramework", "App\Code\Community\LLMFramework\Source\LLMFramework.csproj", "{FFCAD96D-A758-43F5-80CF-32445D4FDD2D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ollama", "App\Code\Community\LLMProviders\Ollama\Source\Ollama.csproj", "{5D9B30C3-5CED-4D4A-851F-3694C3614E76}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -158,5 +160,9 @@ Global
 		{FFCAD96D-A758-43F5-80CF-32445D4FDD2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FFCAD96D-A758-43F5-80CF-32445D4FDD2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FFCAD96D-A758-43F5-80CF-32445D4FDD2D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5D9B30C3-5CED-4D4A-851F-3694C3614E76}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D9B30C3-5CED-4D4A-851F-3694C3614E76}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D9B30C3-5CED-4D4A-851F-3694C3614E76}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D9B30C3-5CED-4D4A-851F-3694C3614E76}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
