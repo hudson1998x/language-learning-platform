@@ -4,7 +4,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application", "App\Code\Cor
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eventing", "App\Code\Core\Eventing\Source\Eventing.csproj", "{D7559292-D30E-47B7-9C39-EB5C47650C46}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "App\Code\Core\Eventing\Tests\Tests.csproj", "{26DB4F90-83D3-4E0A-9C72-771FFCD954FE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventingTests", "App\Code\Core\Eventing\Tests\EventingTests.csproj", "{26DB4F90-83D3-4E0A-9C72-771FFCD954FE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sockets", "App\Code\Core\Sockets\Source\Sockets.csproj", "{359FAF34-2050-4313-BB27-8DDF0D4596E3}"
 EndProject
@@ -37,6 +37,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Languages", "App\Code\Community\Languages\Source\Languages.csproj", "{E8B12B6C-AA0D-46FB-AF88-33443C553BD2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlashCards", "App\Code\Local\FlashCards\Source\FlashCards.csproj", "{F761A42A-93E2-41DD-8A9C-F76C1A12A350}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LLMFramework", "App\Code\Community\LLMFramework\Source\LLMFramework.csproj", "{FFCAD96D-A758-43F5-80CF-32445D4FDD2D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -152,5 +154,9 @@ Global
 		{F761A42A-93E2-41DD-8A9C-F76C1A12A350}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F761A42A-93E2-41DD-8A9C-F76C1A12A350}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F761A42A-93E2-41DD-8A9C-F76C1A12A350}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FFCAD96D-A758-43F5-80CF-32445D4FDD2D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FFCAD96D-A758-43F5-80CF-32445D4FDD2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FFCAD96D-A758-43F5-80CF-32445D4FDD2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FFCAD96D-A758-43F5-80CF-32445D4FDD2D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
