@@ -349,6 +349,11 @@ namespace LLE.TypeScript.Builders
 
         /// <summary>Mimics the Node.js CommonJS module resolution strategy.</summary>
         Node10,
+        
+        /// <summary>
+        /// Node.
+        /// </summary>
+        Node,
 
         /// <summary>Mimics the Node.js 16 module resolution strategy, supporting both ESM and CommonJS.</summary>
         Node16,

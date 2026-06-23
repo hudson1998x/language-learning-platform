@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "target": "eS2015",
+    "moduleResolution": "node",
     "jsx": "react-jsx",
     "allowJs": true,
     "paths": {

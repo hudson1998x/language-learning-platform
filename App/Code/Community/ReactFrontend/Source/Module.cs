@@ -68,6 +68,7 @@ public class ReactFrontendModule : IModuleLoader
                 tsconfig.Exclude.Add(
                     "./App/Code/Community/ReactFrontend/Source/web/dist/*"
                 );
+                tsconfig.CompilerOptions.ModuleResolution = TsModuleResolution.Node;
 
                 tsconfig.CompilerOptions.Target = TsTarget.ES2015;
             }
