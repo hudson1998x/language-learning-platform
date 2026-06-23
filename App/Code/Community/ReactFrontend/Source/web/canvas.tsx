@@ -22,7 +22,7 @@ const renderNode = (node: CanvasNode, key?: React.Key): React.ReactNode => {
 
     const { t, p, c } = node;
 
-    const isHtmlElement = t === t.toLowerCase();
+    const isHtmlElement = t === t.toLowerCase() && !t.startsWith('@');
 
     const children = c.map((child, index) => renderNode(child, index));
 

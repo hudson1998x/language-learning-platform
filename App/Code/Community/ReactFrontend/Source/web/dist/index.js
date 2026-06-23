@@ -21746,7 +21746,7 @@
   var import_react2 = __toESM(require_react(), 1);
   var renderNode = (node, key) => {
     const { t, p, c } = node;
-    const isHtmlElement = t === t.toLowerCase();
+    const isHtmlElement = t === t.toLowerCase() && !t.startsWith("@");
     const children = c.map((child, index) => renderNode(child, index));
     if (isHtmlElement) {
       return (0, import_react.createElement)(t, { ...p, key }, ...children);
@@ -23118,6 +23118,461 @@
     return /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("p", { children: props.text });
   };
 
+  // App/Code/Community/MusicTranslation/Source/web/TranslationPage/index.tsx
+  var import_react16 = __toESM(require_react(), 1);
+
+  // App/Api/track.ts
+  var listTrackPagedSorted = (pageNum, size, sortField, sortDir) => {
+    return fetch(`/api/track/list/${pageNum}/${size}/${sortField}/${sortDir}`, {
+      method: "GET"
+    }).then((response) => {
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+      return response.json();
+    });
+  };
+  var loadTrack = (id) => {
+    return fetch(`/api/track/${id}`, {
+      method: "GET"
+    }).then((response) => {
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+      return response.json();
+    });
+  };
+
+  // App/Api/artist.ts
+  var listAllArtist = () => {
+    return fetch("/api/artist/list", {
+      method: "GET"
+    }).then((response) => {
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+      return response.json();
+    });
+  };
+  var loadArtist = (id) => {
+    return fetch(`/api/artist/${id}`, {
+      method: "GET"
+    }).then((response) => {
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+      return response.json();
+    });
+  };
+
+  // App/Api/album.ts
+  var listAllAlbum = () => {
+    return fetch("/api/album/list", {
+      method: "GET"
+    }).then((response) => {
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+      return response.json();
+    });
+  };
+  var loadAlbum = (id) => {
+    return fetch(`/api/album/${id}`, {
+      method: "GET"
+    }).then((response) => {
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+      return response.json();
+    });
+  };
+
+  // App/Code/Community/MusicTranslation/Source/web/TranslationPage/CreateSongModal.tsx
+  var import_react14 = __toESM(require_react(), 1);
+
+  // App/Api/musicTranslation.ts
+  var translateSong = (payload2) => {
+    return fetch("/api/music/translateSong", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload2)
+    }).then((response) => {
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+      return response.json();
+    });
+  };
+
+  // App/Code/Community/MusicTranslation/Source/web/TranslationPage/CreateSongModal.tsx
+  var import_jsx_runtime18 = __toESM(require_jsx_runtime(), 1);
+  var emptyForm2 = {
+    lyrics: "",
+    title: "",
+    artist: "",
+    album: ""
+  };
+  var CreateSongModal = ({ onClose, onCreated }) => {
+    const [form, setForm] = (0, import_react14.useState)(emptyForm2);
+    const [isSubmitting, setIsSubmitting] = (0, import_react14.useState)(false);
+    const [error, setError] = (0, import_react14.useState)(null);
+    const updateField = (field, value) => {
+      setForm((prev) => ({ ...prev, [field]: value }));
+    };
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      if (!form.lyrics.trim() || !form.title.trim() || !form.artist.trim() || !form.album.trim()) {
+        setError("All fields are required");
+        return;
+      }
+      setIsSubmitting(true);
+      setError(null);
+      try {
+        const response = await translateSong({
+          lyrics: form.lyrics,
+          title: form.title,
+          artist: form.artist,
+          album: form.album
+        });
+        if (!response.success || !response.data) {
+          setError(response.message ?? "Failed to translate song");
+          return;
+        }
+        onCreated(response.data.song.id);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to translate song");
+      } finally {
+        setIsSubmitting(false);
+      }
+    };
+    return /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("div", { className: "modal-overlay", onClick: onClose, children: /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)("div", { className: "modal", onClick: (e) => e.stopPropagation(), children: [
+      /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)("div", { className: "modal-header", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("h2", { children: "Translate a song" }),
+        /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("button", { className: "modal-close", onClick: onClose, children: "\u2715" })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)("form", { onSubmit: handleSubmit, className: "modal-body", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)("label", { children: [
+          "Song lyrics",
+          /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
+            "textarea",
+            {
+              value: form.lyrics,
+              onChange: (e) => updateField("lyrics", e.target.value),
+              placeholder: "Paste the song lyrics here...",
+              required: true
+            }
+          )
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)("label", { children: [
+          "Title",
+          /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
+            "input",
+            {
+              type: "text",
+              value: form.title,
+              onChange: (e) => updateField("title", e.target.value),
+              placeholder: "Song title",
+              required: true
+            }
+          )
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)("label", { children: [
+          "Artist",
+          /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
+            "input",
+            {
+              type: "text",
+              value: form.artist,
+              onChange: (e) => updateField("artist", e.target.value),
+              placeholder: "Artist name",
+              required: true
+            }
+          )
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)("label", { children: [
+          "Album",
+          /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
+            "input",
+            {
+              type: "text",
+              value: form.album,
+              onChange: (e) => updateField("album", e.target.value),
+              placeholder: "Album name",
+              required: true
+            }
+          )
+        ] }),
+        error && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("div", { className: "modal-error", children: error }),
+        /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)("div", { className: "modal-actions", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("button", { type: "button", onClick: onClose, disabled: isSubmitting, children: "Cancel" }),
+          /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("button", { type: "submit", disabled: isSubmitting, children: isSubmitting ? "Translating..." : "Translate" })
+        ] })
+      ] })
+    ] }) });
+  };
+
+  // App/Code/Community/MusicTranslation/Source/web/TranslationPage/SongDetailDialog.tsx
+  var import_react15 = __toESM(require_react(), 1);
+  var import_jsx_runtime19 = __toESM(require_jsx_runtime(), 1);
+  var SongDetailDialog = ({ trackId, onClose }) => {
+    const [track, setTrack] = (0, import_react15.useState)(null);
+    const [artist, setArtist] = (0, import_react15.useState)(null);
+    const [album, setAlbum] = (0, import_react15.useState)(null);
+    const [lines, setLines] = (0, import_react15.useState)([]);
+    const [expandedIndex, setExpandedIndex] = (0, import_react15.useState)(null);
+    const [isLoading, setIsLoading] = (0, import_react15.useState)(false);
+    const [error, setError] = (0, import_react15.useState)(null);
+    (0, import_react15.useEffect)(() => {
+      if (!trackId) return;
+      setIsLoading(true);
+      setError(null);
+      setExpandedIndex(null);
+      loadTrack(trackId).then((res) => {
+        if (!res.success || !res.data) {
+          throw new Error(res.message ?? "Failed to load track");
+        }
+        const t = res.data;
+        setTrack(t);
+        try {
+          const parsed = JSON.parse(t.songContents);
+          setLines(Array.isArray(parsed) ? parsed : []);
+        } catch {
+          setLines([]);
+        }
+        return Promise.all([
+          loadArtist(t.artistId),
+          loadAlbum(t.albumId)
+        ]);
+      }).then(([artistRes, albumRes]) => {
+        if (artistRes.success && artistRes.data) setArtist(artistRes.data);
+        if (albumRes.success && albumRes.data) setAlbum(albumRes.data);
+        setIsLoading(false);
+      }).catch((err) => {
+        setError(err instanceof Error ? err.message : "Failed to load song details");
+        setIsLoading(false);
+      });
+    }, [trackId]);
+    if (!trackId) return null;
+    const toggleLine = (index) => {
+      setExpandedIndex((prev) => prev === index ? null : index);
+    };
+    return /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("div", { className: "detail-overlay", onClick: onClose, children: /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "detail-dialog", onClick: (e) => e.stopPropagation(), children: [
+      /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "detail-header", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "detail-meta", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("h2", { children: track?.title ?? "Loading..." }),
+          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("div", { className: "detail-artist", children: artist?.name ?? "..." }),
+          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("div", { className: "detail-album", children: album?.title ?? "..." })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("button", { className: "detail-close", onClick: onClose, children: "\u2715" })
+      ] }),
+      isLoading && /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("div", { className: "detail-loading", children: /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(Spinner, {}) }),
+      error && /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("div", { className: "detail-loading", children: /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("div", { className: "error", children: error }) }),
+      !isLoading && !error && lines.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("div", { className: "detail-loading", children: /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("div", { className: "notice-body", children: "No lyrics available" }) }),
+      !isLoading && !error && lines.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("div", { className: "detail-lyrics", children: lines.map((line, i) => /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)(
+        "div",
+        {
+          className: `lyric-line ${expandedIndex === i ? "expanded" : ""}`,
+          onClick: () => toggleLine(i),
+          role: "button",
+          tabIndex: 0,
+          onKeyDown: (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              toggleLine(i);
+            }
+          },
+          children: [
+            /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("div", { className: "line-original", children: line.lineContents }),
+            expandedIndex === i && /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "line-details", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "detail-row translation", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("span", { className: "detail-label", children: "Translation:" }),
+                /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("span", { className: "detail-value", children: line.translationToUserLanguage })
+              ] }),
+              line.pronunciations.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "detail-row", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("span", { className: "detail-label", children: "Pronunciation:" }),
+                /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("span", { className: "detail-value", children: line.pronunciations.join(", ") })
+              ] }),
+              line.culturalMeaning && /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "detail-row", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("span", { className: "detail-label", children: "Cultural meaning:" }),
+                /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("span", { className: "detail-value", children: line.culturalMeaning })
+              ] })
+            ] })
+          ]
+        },
+        i
+      )) })
+    ] }) });
+  };
+
+  // App/Code/Community/MusicTranslation/Source/web/TranslationPage/index.tsx
+  var import_jsx_runtime20 = __toESM(require_jsx_runtime(), 1);
+  var SORT_OPTIONS2 = [
+    { value: "createTime", label: "Date added" },
+    { value: "title", label: "Title" }
+  ];
+  var MusicTranslationIndexPage = () => {
+    const [isCreateOpen, setIsCreateOpen] = (0, import_react16.useState)(false);
+    const [detailTrackId, setDetailTrackId] = (0, import_react16.useState)(null);
+    const [refreshKey, setRefreshKey] = (0, import_react16.useState)(0);
+    const [selectedArtist, setSelectedArtist] = (0, import_react16.useState)("");
+    const [selectedAlbum, setSelectedAlbum] = (0, import_react16.useState)("");
+    const [searchQuery, setSearchQuery] = (0, import_react16.useState)("");
+    const [allArtists] = usePromise(() => listAllArtist(), []);
+    const [allAlbums] = usePromise(() => listAllAlbum(), []);
+    const artistMap = (0, import_react16.useMemo)(() => {
+      const map = /* @__PURE__ */ new Map();
+      const data = allArtists?.data ?? [];
+      for (const a of data) map.set(a.id, a.name);
+      return map;
+    }, [allArtists]);
+    const albumMap = (0, import_react16.useMemo)(() => {
+      const map = /* @__PURE__ */ new Map();
+      const data = allAlbums?.data ?? [];
+      for (const a of data) map.set(a.id, a.title);
+      return map;
+    }, [allAlbums]);
+    const artistNames = (0, import_react16.useMemo)(() => {
+      const names = new Set(artistMap.values());
+      return Array.from(names).sort();
+    }, [artistMap]);
+    const albumNames = (0, import_react16.useMemo)(() => {
+      const names = new Set(albumMap.values());
+      return Array.from(names).sort();
+    }, [albumMap]);
+    const {
+      page,
+      size,
+      nextPage,
+      prevPage,
+      results: tracks,
+      isLoading: tracksLoading,
+      error: tracksError,
+      sortField,
+      sortDir,
+      setSortField,
+      setSortDir
+    } = usePagination(listTrackPagedSorted, [refreshKey]);
+    const filteredTracks = (0, import_react16.useMemo)(() => {
+      let list = tracks ?? [];
+      if (selectedArtist) {
+        list = list.filter((t) => artistMap.get(t.artistId) === selectedArtist);
+      }
+      if (selectedAlbum) {
+        list = list.filter((t) => albumMap.get(t.albumId) === selectedAlbum);
+      }
+      if (searchQuery.trim()) {
+        const q = searchQuery.trim().toLowerCase();
+        list = list.filter((t) => t.title.toLowerCase().includes(q));
+      }
+      return list;
+    }, [tracks, selectedArtist, selectedAlbum, searchQuery, artistMap, albumMap]);
+    const mayHaveNextPage = tracks?.length === size;
+    const handleCreated = (trackId) => {
+      setIsCreateOpen(false);
+      setRefreshKey((k) => k + 1);
+      setDetailTrackId(trackId);
+    };
+    if (tracksLoading) {
+      return /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("div", { className: "music-translation-status", children: /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(Spinner, {}) });
+    }
+    if (tracksError) {
+      return /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("div", { className: "music-translation-status", children: /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("div", { className: "error", children: `Couldn't load songs: ${tracksError}` }) });
+    }
+    const trackList = filteredTracks;
+    return /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "music-translation", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "library-actions", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "pagination", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("button", { onClick: prevPage, disabled: page <= 1, children: "Previous" }),
+          /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("span", { children: `Page ${page}` }),
+          /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("button", { onClick: nextPage, disabled: !mayHaveNextPage, children: "Next" })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "sort-controls", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("select", { value: sortField ?? "", onChange: (e) => setSortField(e.target.value || void 0), children: SORT_OPTIONS2.map((opt) => /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("option", { value: opt.value, children: opt.label }, opt.value)) }),
+          /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("select", { value: sortDir ?? "desc", onChange: (e) => setSortDir(e.target.value), children: [
+            /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("option", { value: "asc", children: "Asc" }),
+            /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("option", { value: "desc", children: "Desc" })
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "filter-controls", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("select", { value: selectedArtist, onChange: (e) => setSelectedArtist(e.target.value), children: [
+            /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("option", { value: "", children: "All artists" }),
+            artistNames.map((name) => /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("option", { value: name, children: name }, name))
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("select", { value: selectedAlbum, onChange: (e) => setSelectedAlbum(e.target.value), children: [
+            /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("option", { value: "", children: "All albums" }),
+            albumNames.map((name) => /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("option", { value: name, children: name }, name))
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(
+            "input",
+            {
+              type: "text",
+              placeholder: "Search tracks...",
+              value: searchQuery,
+              onChange: (e) => setSearchQuery(e.target.value)
+            }
+          )
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(
+          "button",
+          {
+            className: "create-button",
+            onClick: () => setIsCreateOpen(true),
+            children: "Add song"
+          }
+        )
+      ] }),
+      trackList.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "notice", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("div", { className: "notice-title", children: "No songs yet" }),
+        /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("div", { className: "notice-body", children: 'Click "Add song" to translate your first track.' })
+      ] }),
+      trackList.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("table", { className: "song-table", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("tr", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("th", { children: "Title" }),
+          /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("th", { children: "Artist" }),
+          /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("th", { children: "Album" })
+        ] }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("tbody", { children: trackList.map((track) => /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)(
+          "tr",
+          {
+            className: "song-row",
+            onClick: () => setDetailTrackId(track.id),
+            role: "button",
+            tabIndex: 0,
+            onKeyDown: (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                setDetailTrackId(track.id);
+              }
+            },
+            children: [
+              /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("td", { className: "song-title", children: track.title }),
+              /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("td", { className: "song-artist", children: artistMap.get(track.artistId) ?? "..." }),
+              /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("td", { className: "song-album", children: albumMap.get(track.albumId) ?? "..." })
+            ]
+          },
+          track.id
+        )) })
+      ] }),
+      isCreateOpen && /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(
+        CreateSongModal,
+        {
+          onClose: () => setIsCreateOpen(false),
+          onCreated: handleCreated
+        }
+      ),
+      detailTrackId && /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(
+        SongDetailDialog,
+        {
+          trackId: detailTrackId,
+          onClose: () => setDetailTrackId(null)
+        }
+      )
+    ] });
+  };
+  register("@page/music-translation-index", MusicTranslationIndexPage);
+
   // App/Code/Community/ReactFrontend/Source/web/generated.registry.tsx
   register("@component/Pages/FlashCards", FlashCards);
   register("@component/Pages/FlashCards/Study", Study);
@@ -23126,10 +23581,10 @@
   register("@component/Spinner", Spinner);
 
   // App/Code/Community/ReactFrontend/Source/web/index.tsx
-  var import_jsx_runtime18 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime21 = __toESM(require_jsx_runtime(), 1);
   var root = (0, import_client.createRoot)(document.getElementById("app"));
   root.render(
-    /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Default_default, { children: /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Canvas, { children: window.canvasState }) })
+    /* @__PURE__ */ (0, import_jsx_runtime21.jsx)(Default_default, { children: /* @__PURE__ */ (0, import_jsx_runtime21.jsx)(Canvas, { children: window.canvasState }) })
   );
 })();
 /*! Bundled license information:

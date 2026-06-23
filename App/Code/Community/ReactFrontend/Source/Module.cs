@@ -59,12 +59,17 @@ public class ReactFrontendModule : IModuleLoader
                         "./App/Design/React/Themes/Frontend/Core/*",
                     ]
                 );
+                tsconfig.CompilerOptions.Paths.TryAdd("@registry", [
+                    "./App/Code/Community/ReactFrontend/Source/web/registry"
+                ]);
                 tsconfig.Include.Add(
                     "./App/Code/Community/ReactFrontend/Source/web/index.tsx"
                 );
                 tsconfig.Exclude.Add(
                     "./App/Code/Community/ReactFrontend/Source/web/dist/*"
                 );
+
+                tsconfig.CompilerOptions.Target = TsTarget.ES2015;
             }
         );
 

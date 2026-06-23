@@ -1,4 +1,5 @@
 using LLE.Kernel.Contracts;
+using LLE.Kernel.Registry;
 using LLE.LLMFramework.Services;
 
 namespace LLE.LLMProviders.Ollama;
@@ -7,7 +8,8 @@ public class OllamaModule : IModuleLoader
 {
     public Task AppStart()
     {
-        LLMService.Register<OllamaProvider>("Ollama");
+        var llmService = ServiceCatalog.GetService<LLMService>();
+        llmService.Register<OllamaProvider>("Ollama");
         return Task.CompletedTask;
     }
 

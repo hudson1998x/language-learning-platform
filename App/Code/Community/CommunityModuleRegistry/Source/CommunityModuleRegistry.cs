@@ -1,5 +1,7 @@
 using LLE.Kernel;
 using LLE.Languages;
+using LLE.LLMProviders.Ollama;
+using LLE.MusicTranslation;
 using LLE.Pages;
 using LLE.ReactFrontend;
 using LLE.SQLiteAdapter;
@@ -14,5 +16,7 @@ public static class CommunityModuleRegistry
         ApplicationLoader.AddModule(new SQLiteModule());
         ApplicationLoader.AddModule(new PagesModule());
         ApplicationLoader.AddModule(new LanguageModule());
+        ApplicationLoader.AddModule(new OllamaModule());
+        ApplicationLoader.AddModule(new MusicTranslationModule());
     }
 }

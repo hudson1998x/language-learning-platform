@@ -1,6 +1,8 @@
 using System.Text;
 using LLE.Kernel.Registry;
 using LLE.ReactFrontend.Configurations;
+using LLE.ReactFrontend.Events;
+using LLE.SharedUtils.Threading;
 
 namespace LLE.ReactFrontend.Generators
 {
@@ -13,6 +15,8 @@ namespace LLE.ReactFrontend.Generators
     {
         private const string BasePath = "App/Design/React/Components";
         private static readonly string[] SourceDirs = ["Local", "Community", "Core"];
+
+        private readonly List<string> _autoImports = [];
 
         /// <summary>
         /// Entry point — scans all source dirs and writes the generated registry file.
@@ -32,6 +36,8 @@ namespace LLE.ReactFrontend.Generators
 
                 CollectComponents(fullPath, fullPath, components);
             }
+
+            AsyncUtils.Await(Eventing.Eventing.Of<ComponentRegistryGeneratorEvents>().BeforeWrite.DispatchAsync(this));
 
             WriteRegistry(components, "App/Code/Community/ReactFrontend/Source/web/generated.registry.tsx");
         }
@@ -62,6 +68,11 @@ namespace LLE.ReactFrontend.Generators
             {
                 CollectComponents(rootPath, subDir, results);
             }
+        }
+
+        public void AddAutoImport(string path)
+        {
+            _autoImports.Add(Path.Join("../../../../../../", path));
         }
 
         /// <summary>
@@ -103,6 +114,12 @@ namespace LLE.ReactFrontend.Generators
             }
 
             sb.AppendLine();
+
+            sb.AppendLine("// auto imports");
+            foreach (var autoImport in _autoImports)
+            {
+                sb.AppendLine($"import '{autoImport}';");
+            }
 
             var directory = Path.GetDirectoryName(outputPath);
             if (!string.IsNullOrEmpty(directory))

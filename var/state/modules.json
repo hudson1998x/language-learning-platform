@@ -1,13 +1,5 @@
 {
-  "LLE.FlashCards.FlashCardsModule": {
-    "IsEnabled": true,
-    "IsInstalled": true
-  },
-  "LLE.ReactFrontend.ReactFrontendModule": {
-    "IsEnabled": true,
-    "IsInstalled": true
-  },
-  "LLE.Languages.LanguageModule": {
+  "LLE.Auth.AuthModule": {
     "IsEnabled": true,
     "IsInstalled": true
   },
@@ -15,11 +7,11 @@
     "IsEnabled": true,
     "IsInstalled": true
   },
-  "LLE.Auth.AuthModule": {
+  "LLE.Languages.LanguageModule": {
     "IsEnabled": true,
     "IsInstalled": true
   },
-  "LLE.TypeScript.TypeScriptModule": {
+  "LLE.Pages.PagesModule": {
     "IsEnabled": true,
     "IsInstalled": true
   },
@@ -27,7 +19,23 @@
     "IsEnabled": true,
     "IsInstalled": true
   },
-  "LLE.Pages.PagesModule": {
+  "LLE.LLMProviders.Ollama.OllamaModule": {
+    "IsEnabled": true,
+    "IsInstalled": true
+  },
+  "LLE.ReactFrontend.ReactFrontendModule": {
+    "IsEnabled": true,
+    "IsInstalled": true
+  },
+  "LLE.TypeScript.TypeScriptModule": {
+    "IsEnabled": true,
+    "IsInstalled": true
+  },
+  "LLE.MusicTranslation.MusicTranslationModule": {
+    "IsEnabled": true,
+    "IsInstalled": true
+  },
+  "LLE.FlashCards.FlashCardsModule": {
     "IsEnabled": true,
     "IsInstalled": true
   }
