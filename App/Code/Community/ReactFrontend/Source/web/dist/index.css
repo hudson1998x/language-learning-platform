@@ -849,6 +849,25 @@ body {
   font-size: 13px;
   color: #aaa;
 }
+.modal .modal-body .language-field .language-selector {
+  width: 100%;
+}
+.modal .modal-body .language-field .language-selector .language-selector-current {
+  width: 100%;
+  justify-content: space-between;
+  background: #0e0e0e;
+  border: 1px solid #333;
+  border-radius: 6px;
+  padding: 8px 10px;
+  color: #e5e5e5;
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+}
+.modal .modal-body .language-field .language-selector .language-selector-current:focus {
+  outline: none;
+  border-color: #4f46e5;
+}
 .modal .modal-body select {
   background: #0e0e0e;
   border: 1px solid #333;
@@ -1960,8 +1979,8 @@ body {
 .lyric-line {
   padding: 10px 14px;
   border-radius: 6px;
-  cursor: pointer;
   transition: background 0.15s ease;
+  position: relative;
 }
 .lyric-line:hover {
   background: rgba(255, 255, 255, 0.03);
@@ -1970,10 +1989,84 @@ body {
   background: #1a1a1a;
   border: 1px solid #2a2a2a;
 }
+.lyric-line .line-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
 .lyric-line .line-original {
   font-size: 15px;
   font-weight: 500;
   line-height: 1.5;
+  cursor: pointer;
+  flex: 1;
+}
+.lyric-line .line-original:focus-visible {
+  outline: 2px solid #4f46e5;
+  outline-offset: 2px;
+}
+.lyric-line .line-actions {
+  position: relative;
+  flex-shrink: 0;
+}
+.lyric-line .line-action-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #777;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  padding: 0;
+}
+.lyric-line .line-action-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #e5e5e5;
+  border-color: #2a2a2a;
+}
+.lyric-line .line-action-btn.active {
+  background: rgba(255, 255, 255, 0.06);
+  color: #e5e5e5;
+  border-color: #2a2a2a;
+}
+.lyric-line .line-dropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 4px);
+  min-width: 180px;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 4px;
+  z-index: 20;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+.lyric-line .line-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #e5e5e5;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.12s ease;
+  text-align: left;
+}
+.lyric-line .line-dropdown-item svg {
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+.lyric-line .line-dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.06);
 }
 .lyric-line .line-details {
   margin-top: 10px;

@@ -22222,7 +22222,7 @@
   // App/Design/React/Components/Local/LanguageSelector/index.tsx
   var import_react8 = __toESM(require_react(), 1);
   var import_jsx_runtime9 = __toESM(require_jsx_runtime(), 1);
-  var LanguageSelector = () => {
+  var LanguageSelector = ({ onLanguageChange }) => {
     const { language, availableLanguages, setLanguage, isLoading } = useLanguage();
     const [open, setOpen] = (0, import_react8.useState)(false);
     const [query, setQuery] = (0, import_react8.useState)("");
@@ -22323,7 +22323,11 @@
                 "aria-selected": isActive,
                 className: `language-card${isActive ? " active" : ""}`,
                 onClick: () => {
-                  setLanguage(lang);
+                  if (onLanguageChange) {
+                    onLanguageChange(lang);
+                  } else {
+                    setLanguage(lang);
+                  }
                   setOpen(false);
                 },
                 children: [
@@ -22521,8 +22525,9 @@
     { value: 2, label: "Mid" },
     { value: 3, label: "Hard" }
   ];
-  var CreateFlashCardModal = ({ userId, languageId, onClose, onCreated }) => {
-    const [form, setForm] = (0, import_react11.useState)(emptyForm);
+  var CreateFlashCardModal = ({ userId, languageId, onClose, onCreated, initialValues, showLanguageSelector }) => {
+    const [form, setForm] = (0, import_react11.useState)(() => ({ ...emptyForm, ...initialValues }));
+    const [selectedLanguageId, setSelectedLanguageId] = (0, import_react11.useState)(languageId || null);
     const [isSubmitting, setIsSubmitting] = (0, import_react11.useState)(false);
     const [error, setError] = (0, import_react11.useState)(null);
     const updateField = (field, value) => {
@@ -22534,12 +22539,17 @@
         setError("Front and back statements are required");
         return;
       }
+      const langId = selectedLanguageId ?? languageId;
+      if (!langId) {
+        setError("Please select a language");
+        return;
+      }
       setIsSubmitting(true);
       setError(null);
       try {
         const payload2 = {
           userId,
-          languageId,
+          languageId: langId,
           frontStatement: form.frontStatement,
           backStatement: form.backStatement,
           pronunciation: form.pronunciation || null,
@@ -22570,6 +22580,15 @@
         /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("button", { className: "modal-close", onClick: onClose, children: "\u2715" })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("form", { onSubmit: handleSubmit, className: "modal-body", children: [
+        showLanguageSelector && /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("label", { className: "language-field", children: [
+          "Language",
+          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(
+            LanguageSelector,
+            {
+              onLanguageChange: (lang) => setSelectedLanguageId(lang.id)
+            }
+          )
+        ] }),
         /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("label", { children: [
           "Front statement",
           /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(
@@ -23317,6 +23336,8 @@
   var import_react15 = __toESM(require_react(), 1);
   var import_jsx_runtime19 = __toESM(require_jsx_runtime(), 1);
   var SongDetailDialog = ({ trackId, onClose }) => {
+    const { session } = useSession();
+    const { language } = useLanguage();
     const [track, setTrack] = (0, import_react15.useState)(null);
     const [artist, setArtist] = (0, import_react15.useState)(null);
     const [album, setAlbum] = (0, import_react15.useState)(null);
@@ -23324,11 +23345,15 @@
     const [expandedIndex, setExpandedIndex] = (0, import_react15.useState)(null);
     const [isLoading, setIsLoading] = (0, import_react15.useState)(false);
     const [error, setError] = (0, import_react15.useState)(null);
+    const [openMenuIndex, setOpenMenuIndex] = (0, import_react15.useState)(null);
+    const [flashcardLineIndex, setFlashcardLineIndex] = (0, import_react15.useState)(null);
     (0, import_react15.useEffect)(() => {
       if (!trackId) return;
       setIsLoading(true);
       setError(null);
       setExpandedIndex(null);
+      setOpenMenuIndex(null);
+      setFlashcardLineIndex(null);
       loadTrack(trackId).then((res) => {
         if (!res.success || !res.data) {
           throw new Error(res.message ?? "Failed to load track");
@@ -23357,8 +23382,13 @@
     if (!trackId) return null;
     const toggleLine = (index) => {
       setExpandedIndex((prev) => prev === index ? null : index);
+      setOpenMenuIndex(null);
     };
-    return /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("div", { className: "detail-overlay", onClick: onClose, children: /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "detail-dialog", onClick: (e) => e.stopPropagation(), children: [
+    const flashcardLine = flashcardLineIndex !== null ? lines[flashcardLineIndex] : null;
+    return /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("div", { className: "detail-overlay", onClick: onClose, children: /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "detail-dialog", onClick: (e) => {
+      e.stopPropagation();
+      setOpenMenuIndex(null);
+    }, children: [
       /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "detail-header", children: [
         /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "detail-meta", children: [
           /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("h2", { children: track?.title ?? "Loading..." }),
@@ -23374,17 +23404,57 @@
         "div",
         {
           className: `lyric-line ${expandedIndex === i ? "expanded" : ""}`,
-          onClick: () => toggleLine(i),
-          role: "button",
-          tabIndex: 0,
-          onKeyDown: (e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault();
-              toggleLine(i);
-            }
-          },
           children: [
-            /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("div", { className: "line-original", children: line.lineContents }),
+            /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "line-header", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(
+                "div",
+                {
+                  className: "line-original",
+                  onClick: () => toggleLine(i),
+                  role: "button",
+                  tabIndex: 0,
+                  onKeyDown: (e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      toggleLine(i);
+                    }
+                  },
+                  children: line.lineContents
+                }
+              ),
+              /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "line-actions", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(
+                  "button",
+                  {
+                    className: `line-action-btn${openMenuIndex === i ? " active" : ""}`,
+                    onClick: (e) => {
+                      e.stopPropagation();
+                      setOpenMenuIndex((prev) => prev === i ? null : i);
+                    },
+                    "aria-label": "Actions",
+                    children: /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("svg", { width: "14", height: "14", viewBox: "0 0 14 14", fill: "none", children: /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("path", { d: "M7 3V3.01M7 7V7.01M7 11V11.01", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round" }) })
+                  }
+                ),
+                openMenuIndex === i && /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("div", { className: "line-dropdown", children: /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)(
+                  "button",
+                  {
+                    className: "line-dropdown-item",
+                    onClick: (e) => {
+                      e.stopPropagation();
+                      setOpenMenuIndex(null);
+                      setFlashcardLineIndex(i);
+                    },
+                    children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("svg", { width: "14", height: "14", viewBox: "0 0 14 14", fill: "none", children: [
+                        /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("rect", { x: "1", y: "3", width: "12", height: "10", rx: "1.5", stroke: "currentColor", strokeWidth: "1.3" }),
+                        /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("path", { d: "M4 1V3M10 1V3M1 6H13", stroke: "currentColor", strokeWidth: "1.3", strokeLinecap: "round" })
+                      ] }),
+                      "Create Flash Card"
+                    ]
+                  }
+                ) })
+              ] })
+            ] }),
             expandedIndex === i && /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "line-details", children: [
               /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "detail-row translation", children: [
                 /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("span", { className: "detail-label", children: "Translation:" }),
@@ -23402,7 +23472,25 @@
           ]
         },
         i
-      )) })
+      )) }),
+      flashcardLine && /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(
+        CreateFlashCardModal,
+        {
+          userId: session?.user?.id ?? "",
+          languageId: language?.id ?? "",
+          showLanguageSelector: true,
+          initialValues: {
+            frontStatement: flashcardLine.lineContents,
+            backStatement: flashcardLine.translationToUserLanguage,
+            pronunciation: flashcardLine.pronunciations.join(", "),
+            notes: `From ${track?.title ?? "Unknown"} by ${artist?.name ?? "Unknown"}`,
+            category: "Music",
+            tags: "music"
+          },
+          onClose: () => setFlashcardLineIndex(null),
+          onCreated: () => setFlashcardLineIndex(null)
+        }
+      )
     ] }) });
   };
 

@@ -2,7 +2,11 @@ import {FunctionComponent, useRef, useState, useEffect, useMemo} from "react";
 import { useLanguage } from "@hook/language-provider";
 import './style.scss';
 
-export const LanguageSelector: FunctionComponent = () => {
+interface LanguageSelectorProps {
+    onLanguageChange?: (language: Language) => void;
+}
+
+export const LanguageSelector: FunctionComponent<LanguageSelectorProps> = ({ onLanguageChange }) => {
     const { language, availableLanguages, setLanguage, isLoading } = useLanguage();
     const [open, setOpen] = useState(false);
     const [query, setQuery] = useState('');
@@ -114,7 +118,11 @@ export const LanguageSelector: FunctionComponent = () => {
                                     aria-selected={isActive}
                                     className={`language-card${isActive ? ' active' : ''}`}
                                     onClick={() => {
-                                        setLanguage(lang);
+                                        if (onLanguageChange) {
+                                            onLanguageChange(lang);
+                                        } else {
+                                            setLanguage(lang);
+                                        }
                                         setOpen(false);
                                     }}
                                 >

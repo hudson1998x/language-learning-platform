@@ -57,6 +57,30 @@
       color: #aaa;
     }
 
+    .language-field {
+      .language-selector {
+        width: 100%;
+
+        .language-selector-current {
+          width: 100%;
+          justify-content: space-between;
+          background: #0e0e0e;
+          border: 1px solid #333;
+          border-radius: 6px;
+          padding: 8px 10px;
+          color: #e5e5e5;
+          font-size: 14px;
+          font-family: inherit;
+          cursor: pointer;
+
+          &:focus {
+            outline: none;
+            border-color: #4f46e5;
+          }
+        }
+      }
+    }
+
     select {
       background: #0e0e0e;
       border: 1px solid #333;

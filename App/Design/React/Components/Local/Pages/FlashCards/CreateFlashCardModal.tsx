@@ -1,5 +1,6 @@
 import { useState, FormEvent } from "react";
 import { createFlashCard, FlashCard } from '@api/flashcard'
+import { LanguageSelector } from '@component/LanguageSelector'
 import './modal-style.scss'
 
 interface CreateFlashCardModalProps {
@@ -7,6 +8,8 @@ interface CreateFlashCardModalProps {
     languageId: string;
     onClose: () => void;
     onCreated: () => void;
+    initialValues?: Partial<FormState>;
+    showLanguageSelector?: boolean;
 }
 
 interface FormState {
@@ -35,9 +38,10 @@ const DIFFICULTY_OPTIONS = [
     { value: 3, label: 'Hard' },
 ]
 
-export const CreateFlashCardModal = ({ userId, languageId, onClose, onCreated }: CreateFlashCardModalProps) => {
+export const CreateFlashCardModal = ({ userId, languageId, onClose, onCreated, initialValues, showLanguageSelector }: CreateFlashCardModalProps) => {
 
-    const [form, setForm] = useState<FormState>(emptyForm)
+    const [form, setForm] = useState<FormState>(() => ({ ...emptyForm, ...initialValues }))
+    const [selectedLanguageId, setSelectedLanguageId] = useState<string | null>(languageId || null)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [error, setError] = useState<string | null>(null)
 
@@ -53,13 +57,19 @@ export const CreateFlashCardModal = ({ userId, languageId, onClose, onCreated }:
             return
         }
 
+        const langId = selectedLanguageId ?? languageId
+        if (!langId) {
+            setError('Please select a language')
+            return
+        }
+
         setIsSubmitting(true)
         setError(null)
 
         try {
             const payload: FlashCard = {
                 userId,
-                languageId,
+                languageId: langId,
                 frontStatement: form.frontStatement,
                 backStatement: form.backStatement,
                 pronunciation: form.pronunciation || null,
@@ -97,6 +107,14 @@ export const CreateFlashCardModal = ({ userId, languageId, onClose, onCreated }:
                 </div>
 
                 <form onSubmit={handleSubmit} className={'modal-body'}>
+                    {showLanguageSelector && (
+                        <label className={'language-field'}>
+                            Language
+                            <LanguageSelector
+                                onLanguageChange={(lang) => setSelectedLanguageId(lang.id)}
+                            />
+                        </label>
+                    )}
                     <label>
                         Front statement
                         <textarea
