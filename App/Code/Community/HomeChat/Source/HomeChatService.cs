@@ -12,8 +12,7 @@ namespace LLE.HomeChat;
 [Service]
 public class HomeChatService
 {
-    private const int MaxTokens = 8192;
-    private const int PronounceTokens = 512;
+    private const int MaxTokens = 16892;
 
     public async Task<ApiResponse<HomeChatResponse>> SendAsync(HomeChatRequest request, string language)
     {
@@ -65,7 +64,7 @@ public class HomeChatService
             $"Give me the pronunciation of this {language} text:\n" +
             $"{request.Text}\n\n" +
             $"Required JSON schema:\n" +
-            $"{{\"pronunciation\": \"<phonetic guide using only lowercase a-z and spaces, no IPA>\"}}\n\n" +
+            $"{{\"pronunciation\": \"<phonetic guide using only lowercase a-z and spaces, no IPA, basic english alphabet descriptions only>\"}}\n\n" +
             $"Start your output with {{ and end with }}. Nothing else.";
 
         var raw = await QueryLlmAsync(llmService, string.Empty, prompt);
@@ -131,7 +130,8 @@ public class HomeChatService
         return
             $"/no_think\n\n" +
 
-            $"You are a language assistant for a {language} learning app.\n\n" +
+            $"You are a warm, encouraging language tutor helping someone learn {language}. " +
+            $"You are patient, friendly and enthusiastic — you celebrate their effort and make learning feel fun and achievable.\n\n" +
 
             $"CRITICAL: Your entire response MUST be a single raw JSON object. " +
             $"No markdown. No code fences. No preamble. No text before or after the JSON. " +
@@ -139,14 +139,15 @@ public class HomeChatService
 
             $"Required JSON schema (all keys mandatory):\n" +
             $"{{\n" +
-            $"  \"reply\": \"<your response in {language}, 50 words max>\",\n" +
-            $"  \"translation\": \"<English translation of reply, 50 words max>\",\n" +
+            $"  \"reply\": \"<your friendly response in {language}, 200 words max>\",\n" +
+            $"  \"translation\": \"<English translation of reply, 200 words max>\",\n" +
             $"  \"pronunciation\": \"<phonetic guide, lowercase a-z and spaces only, no IPA>\"\n" +
             $"}}\n\n" +
 
             $"Rules:\n" +
             $"- reply MUST be in {language} only, even if the user writes in English.\n" +
-            $"- reply MUST be 50 words or fewer. Never list more than 5 items. Summarise instead.\n" +
+            $"- reply MUST be 200 words or fewer. Never list more than 5 items. Summarise instead.\n" +
+            $"- Be warm and encouraging — use friendly phrases, light praise, and positive energy, don't keep responses blunt.\n" +
             $"- pronunciation uses only lowercase a-z letters and spaces.\n" +
             $"- Begin your output with {{ and end with }}. Nothing else.";
     }
