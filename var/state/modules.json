@@ -35,6 +35,10 @@
     "IsEnabled": true,
     "IsInstalled": true
   },
+  "LLE.HomeChat.HomeChatModule": {
+    "IsEnabled": true,
+    "IsInstalled": true
+  },
   "LLE.Scenarios.ScenarioModule": {
     "IsEnabled": true,
     "IsInstalled": true

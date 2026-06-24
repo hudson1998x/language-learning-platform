@@ -1,3 +1,4 @@
+using LLE.HomeChat;
 using LLE.Kernel;
 using LLE.Languages;
 using LLE.LeMessage;
@@ -20,5 +21,6 @@ public static class CommunityModuleRegistry
         ApplicationLoader.AddModule(new OllamaModule());
         ApplicationLoader.AddModule(new MusicTranslationModule());
         ApplicationLoader.AddModule(new LeMessageModule());
+        ApplicationLoader.AddModule(new HomeChatModule());
     }
 }

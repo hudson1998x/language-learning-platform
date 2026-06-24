@@ -6,12 +6,14 @@ import FrontendTheme from '@theme:frontend/Default'
 import AdminTheme from '@theme:admin/Default'
 export { FrontendTheme, AdminTheme } 
 
+import { Homepage } from '@component/Pages/Homepage'
 import { FlashCards } from '@component/Pages/FlashCards'
 import { Study } from '@component/Pages/FlashCards/Study'
 import { LanguageSelector } from '@component/LanguageSelector'
 import { Text } from '@component/Text'
 import { Spinner } from '@component/Spinner'
 
+register('@component/Pages/Homepage', Homepage)
 register('@component/Pages/FlashCards', FlashCards)
 register('@component/Pages/FlashCards/Study', Study)
 register('@component/LanguageSelector', LanguageSelector)
