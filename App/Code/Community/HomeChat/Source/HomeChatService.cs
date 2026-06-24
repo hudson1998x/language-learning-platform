@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using LLE.HomeChat.Dto;
 using LLE.Kernel.Attributes;
 using LLE.Kernel.Dto;
@@ -11,7 +12,7 @@ namespace LLE.HomeChat;
 [Service]
 public class HomeChatService
 {
-    private const int MaxTokens = 4096;
+    private const int MaxTokens = 8192;
     private const int PronounceTokens = 512;
 
     public async Task<ApiResponse<HomeChatResponse>> SendAsync(HomeChatRequest request, string language)
@@ -57,15 +58,15 @@ public class HomeChatService
         var llmService = ServiceCatalog.GetService<LLMService>();
         var prompt =
             $"You are a pronunciation assistant for language learners.\n\n" +
+            $"CRITICAL: Your entire response MUST be a single raw JSON object. " +
+            $"No markdown. No code fences. No explanation. No text before or after the JSON. " +
+            $"If you output anything other than a JSON object, the app will break.\n\n" +
             $"The target language is {language}.\n\n" +
             $"Give me the pronunciation of this {language} text:\n" +
             $"{request.Text}\n\n" +
-            $"Rules:\n" +
-            $"- Use ONLY lowercase a-z letters and spaces\n" +
-            $"- No IPA symbols, brackets, or punctuation\n" +
-            $"- Keep it simple and readable for learners\n\n" +
-            $"Output ONLY a valid JSON object with one key:\n" +
-            $"{{\"pronunciation\": \"...\"}}";
+            $"Required JSON schema:\n" +
+            $"{{\"pronunciation\": \"<phonetic guide using only lowercase a-z and spaces, no IPA>\"}}\n\n" +
+            $"Start your output with {{ and end with }}. Nothing else.";
 
         var raw = await QueryLlmAsync(llmService, string.Empty, prompt);
 
@@ -128,24 +129,26 @@ public class HomeChatService
     private static string BuildSystemPrompt(string language)
     {
         return
-            $"# ROLE\n" +
-            $"You are a helpful language assistant for a language learning app.\n\n" +
+            $"/no_think\n\n" +
 
-            $"# TARGET LANGUAGE\n" +
-            $"{language}\n\n" +
+            $"You are a language assistant for a {language} learning app.\n\n" +
 
-            $"# INSTRUCTIONS\n" +
-            $"1. Respond naturally in {language} — answer the user's question or continue the conversation.\n" +
-            $"2. After your {language} response, provide an English translation.\n" +
-            $"3. Keep responses conversational and helpful.\n" +
-            $"4. If the user writes in English, still respond in {language} first.\n\n" +
+            $"CRITICAL: Your entire response MUST be a single raw JSON object. " +
+            $"No markdown. No code fences. No preamble. No text before or after the JSON. " +
+            $"Do not think out loud. Do not explain. Output ONLY the JSON.\n\n" +
 
-            $"# OUTPUT FORMAT\n" +
-            $"Respond with exactly one valid JSON object with these keys:\n" +
-            $"- \"reply\": (string) Your response entirely in {language}\n" +
-            $"- \"translation\": (string) English translation of your reply\n" +
-            $"- \"pronunciation\": (string) A simplified phonetic guide for the {language} reply. Use ONLY lowercase a-z letters and spaces. No IPA or punctuation.\n" +
-            $"Do NOT wrap in markdown code blocks. Output ONLY the raw JSON.";
+            $"Required JSON schema (all keys mandatory):\n" +
+            $"{{\n" +
+            $"  \"reply\": \"<your response in {language}, 50 words max>\",\n" +
+            $"  \"translation\": \"<English translation of reply, 50 words max>\",\n" +
+            $"  \"pronunciation\": \"<phonetic guide, lowercase a-z and spaces only, no IPA>\"\n" +
+            $"}}\n\n" +
+
+            $"Rules:\n" +
+            $"- reply MUST be in {language} only, even if the user writes in English.\n" +
+            $"- reply MUST be 50 words or fewer. Never list more than 5 items. Summarise instead.\n" +
+            $"- pronunciation uses only lowercase a-z letters and spaces.\n" +
+            $"- Begin your output with {{ and end with }}. Nothing else.";
     }
 
     private static string BuildUserPrompt(HomeChatRequest request)
@@ -191,10 +194,11 @@ public class HomeChatService
     {
         try
         {
-            var jsonStart = raw.IndexOf('{');
-            var jsonEnd = raw.LastIndexOf('}');
+            // Qwen3 may emit <think>...</think> blocks before the JSON — strip them
+            var cleaned = Regex.Replace(raw, @"<think>.*?</think>", "", RegexOptions.Singleline).Trim();
 
-            if (jsonStart < 0 || jsonEnd <= jsonStart)
+            var jsonStart = cleaned.IndexOf('{');
+            if (jsonStart < 0)
             {
                 return new ApiResponse<HomeChatResponse>
                 {
@@ -203,20 +207,42 @@ public class HomeChatService
                 };
             }
 
-            var json = raw[jsonStart..(jsonEnd + 1)];
-            var node = JsonDocument.Parse(json);
-            var root = node.RootElement;
+            var jsonEnd = cleaned.LastIndexOf('}');
+            var isTruncated = jsonEnd <= jsonStart;
 
-            var reply = root.TryGetProperty("reply", out var r) ? r.GetString()?.Trim() ?? "" : "";
-            var translation = root.TryGetProperty("translation", out var t) ? t.GetString()?.Trim() ?? "" : "";
-            var pronunciation = root.TryGetProperty("pronunciation", out var p) ? p.GetString()?.Trim() ?? "" : "";
+            string reply = "", translation = "", pronunciation = "";
+
+            if (!isTruncated)
+            {
+                // Happy path — well-formed JSON
+                try
+                {
+                    var root = JsonDocument.Parse(cleaned[jsonStart..(jsonEnd + 1)]).RootElement;
+                    reply        = root.TryGetProperty("reply",         out var r) ? r.GetString()?.Trim() ?? "" : "";
+                    translation  = root.TryGetProperty("translation",   out var t) ? t.GetString()?.Trim() ?? "" : "";
+                    pronunciation= root.TryGetProperty("pronunciation", out var p) ? p.GetString()?.Trim() ?? "" : "";
+                }
+                catch (JsonException)
+                {
+                    isTruncated = true; // treat malformed JSON the same as truncated
+                }
+            }
+
+            if (isTruncated)
+            {
+                // Regex fallback: extract whatever string values we can from the raw text
+                Console.Error.WriteLine("[HomeChatService] Response truncated or malformed — attempting regex field extraction");
+                reply        = ExtractJsonStringField(cleaned, "reply");
+                translation  = ExtractJsonStringField(cleaned, "translation");
+                pronunciation= ExtractJsonStringField(cleaned, "pronunciation");
+            }
 
             if (string.IsNullOrWhiteSpace(reply))
             {
                 return new ApiResponse<HomeChatResponse>
                 {
                     Success = false,
-                    Message = "LLM returned empty 'reply' field"
+                    Message = $"Could not extract 'reply' from LLM response: {Truncate(raw, 200)}"
                 };
             }
 
@@ -239,6 +265,26 @@ public class HomeChatService
                 Message = $"Failed to parse LLM response: {ex.Message}. Raw: {Truncate(raw, 200)}"
             };
         }
+    }
+
+    /// <summary>
+    /// Extracts a JSON string field value even from truncated/malformed JSON.
+    /// Handles both complete values ("field": "value") and truncated ones ("field": "val...EOF).
+    /// </summary>
+    private static string ExtractJsonStringField(string text, string fieldName)
+    {
+        // Match "fieldName": "value" — greedy up to an unescaped closing quote or end of string
+        var match = Regex.Match(text, $"\"{Regex.Escape(fieldName)}\"\\s*:\\s*\"((?:[^\"\\\\]|\\\\.)*)\"?");
+        if (!match.Success) return "";
+
+        var value = match.Groups[1].Value;
+        // Unescape basic JSON escape sequences
+        return value
+            .Replace("\\\"", "\"")
+            .Replace("\\n", "\n")
+            .Replace("\\t", "\t")
+            .Replace("\\\\", "\\")
+            .Trim();
     }
 
     private static string Truncate(string s, int maxLength) =>
