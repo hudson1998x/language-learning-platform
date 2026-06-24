@@ -22414,11 +22414,25 @@
   var import_jsx_runtime13 = __toESM(require_jsx_runtime(), 1);
 
   // App/Design/React/Components/Local/Pages/Homepage/index.tsx
-  var import_react10 = __toESM(require_react(), 1);
+  var import_react11 = __toESM(require_react(), 1);
 
   // App/Api/homeChat.ts
   var sendMessage = (payload2) => {
     return fetch("/api/homechat/send", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload2)
+    }).then((response) => {
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+      return response.json();
+    });
+  };
+  var generatePronunciation = (payload2) => {
+    return fetch("/api/homechat/pronounce", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -22454,195 +22468,8 @@
     );
   };
 
-  // App/Design/React/Components/Local/Pages/Homepage/index.tsx
-  var import_jsx_runtime15 = __toESM(require_jsx_runtime(), 1);
-  var TILES = [
-    {
-      label: "Flash cards",
-      href: "/flashcards",
-      icon: "cards",
-      subtitle: "Review vocabulary with spaced repetition"
-    },
-    {
-      label: "Music translation",
-      href: "/musiclyrics",
-      icon: "music",
-      subtitle: "Translate song lyrics in real time"
-    },
-    {
-      label: "Scenarios",
-      href: "/scenarios",
-      icon: "scenes",
-      subtitle: "Practice real-life conversations"
-    },
-    {
-      label: "LeMessage",
-      href: "/messages",
-      icon: "chat",
-      subtitle: "Chat with AI language partners"
-    }
-  ];
-  var TileIcon = ({ icon }) => {
-    switch (icon) {
-      case "cards":
-        return /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("svg", { width: "28", height: "28", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.5", strokeLinecap: "round", strokeLinejoin: "round", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("rect", { x: "3", y: "3", width: "18", height: "18", rx: "2" }),
-          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("path", { d: "M9 8h6M9 12h6M9 16h4" })
-        ] });
-      case "music":
-        return /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("svg", { width: "28", height: "28", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.5", strokeLinecap: "round", strokeLinejoin: "round", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("path", { d: "M9 18V5l12-2v13" }),
-          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("circle", { cx: "6", cy: "18", r: "3" }),
-          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("circle", { cx: "18", cy: "16", r: "3" })
-        ] });
-      case "scenes":
-        return /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("svg", { width: "28", height: "28", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.5", strokeLinecap: "round", strokeLinejoin: "round", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("rect", { x: "2", y: "3", width: "20", height: "14", rx: "2" }),
-          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("path", { d: "M8 21h8M12 17v4" })
-        ] });
-      case "chat":
-        return /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("svg", { width: "28", height: "28", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.5", strokeLinecap: "round", strokeLinejoin: "round", children: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("path", { d: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" }) });
-      default:
-        return null;
-    }
-  };
-  var Homepage = () => {
-    const [messages, setMessages] = (0, import_react10.useState)([]);
-    const [userInput, setUserInput] = (0, import_react10.useState)("");
-    const [isSending, setIsSending] = (0, import_react10.useState)(false);
-    const [error, setError] = (0, import_react10.useState)(null);
-    const messagesEndRef = (0, import_react10.useRef)(null);
-    const inputRef = (0, import_react10.useRef)(null);
-    (0, import_react10.useEffect)(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [messages]);
-    (0, import_react10.useEffect)(() => {
-      if (!isSending) {
-        inputRef.current?.focus();
-      }
-    }, [isSending]);
-    const handleSend = async () => {
-      if (!userInput.trim() || isSending) return;
-      const text = userInput;
-      setUserInput("");
-      setIsSending(true);
-      setError(null);
-      const userMsg = { role: "user", content: text };
-      setMessages((prev) => [...prev, userMsg]);
-      try {
-        const history = messages.map((m) => ({
-          role: m.role,
-          content: m.content
-        }));
-        const res = await sendMessage({ message: text, history });
-        if (res.success && res.data) {
-          setMessages((prev) => [
-            ...prev,
-            {
-              role: "assistant",
-              content: res.data.reply,
-              translation: res.data.translation
-            }
-          ]);
-        } else {
-          setError(res.message ?? "Failed to get response");
-          setMessages((prev) => prev.filter((m) => m !== userMsg));
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to send message");
-        setMessages((prev) => prev.filter((m) => m !== userMsg));
-      } finally {
-        setIsSending(false);
-      }
-    };
-    const handleKeyDown = (e) => {
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        handleSend();
-      }
-    };
-    const hasMessages = messages.length > 0;
-    return /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "homepage", children: /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "homepage__chat", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "homepage__chat-messages", children: [
-        !hasMessages && /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "homepage__empty", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("h1", { className: "homepage__title", children: "What would you like to learn today?" }),
-          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("p", { className: "homepage__subtitle", children: "Practice a conversation, translate music, review flashcards, or simply ask for help." }),
-          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "homepage__tiles", children: TILES.map((tile) => /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("a", { href: tile.href, className: "homepage__tile", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "homepage__tile-icon", children: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(TileIcon, { icon: tile.icon }) }),
-            /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "homepage__tile-label", children: tile.label }),
-            /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "homepage__tile-subtitle", children: tile.subtitle })
-          ] }, tile.href)) })
-        ] }),
-        hasMessages && messages.map((msg, i) => /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)(
-          "div",
-          {
-            className: `homepage__bubble ${msg.role === "user" ? "user" : "assistant"}`,
-            children: [
-              /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "homepage__bubble-content", children: msg.content }),
-              msg.role === "assistant" && msg.translation && /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "homepage__bubble-translation", children: msg.translation })
-            ]
-          },
-          i
-        )),
-        isSending && /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "homepage__bubble assistant sending", children: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Spinner, { size: "sm" }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { ref: messagesEndRef })
-      ] }),
-      error && /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "homepage__chat-error", children: error }),
-      /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "homepage__chat-input", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
-          "input",
-          {
-            ref: inputRef,
-            type: "text",
-            value: userInput,
-            onChange: (e) => setUserInput(e.target.value),
-            onKeyDown: handleKeyDown,
-            placeholder: "Type your message...",
-            disabled: isSending
-          }
-        ),
-        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
-          "button",
-          {
-            className: "homepage__send-btn",
-            onClick: handleSend,
-            disabled: !userInput.trim() || isSending,
-            children: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("svg", { width: "18", height: "18", viewBox: "0 0 18 18", fill: "none", children: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("path", { d: "M2 9L16 2L9 16L7 11L2 9Z", stroke: "currentColor", strokeWidth: "1.5", strokeLinecap: "round", strokeLinejoin: "round" }) })
-          }
-        )
-      ] })
-    ] }) });
-  };
-
-  // App/Design/React/Components/Local/Pages/FlashCards/index.tsx
-  var import_react14 = __toESM(require_react(), 1);
-
-  // App/Design/React/Hooks/Core/usePagination.tsx
-  var import_react11 = __toESM(require_react(), 1);
-  var usePagination = (callable, deps) => {
-    const [page, setPage] = (0, import_react11.useState)(1);
-    const [size, setSize] = (0, import_react11.useState)(20);
-    const [sortField, setSortField] = (0, import_react11.useState)("createTime");
-    const [sortDir, setSortDir] = (0, import_react11.useState)("desc");
-    const [results, isLoading, error] = usePromise(
-      () => callable(String(page), String(size), sortField, sortDir),
-      [...deps, page, size, sortField, sortDir]
-    );
-    return {
-      page,
-      size,
-      setSize,
-      sortField,
-      sortDir,
-      setSortField,
-      setSortDir,
-      nextPage: () => setPage((prev) => prev + 1),
-      prevPage: () => setPage((prev) => prev <= 1 ? 1 : prev - 1),
-      results: results?.data ?? [],
-      isLoading,
-      error
-    };
-  };
+  // App/Design/React/Components/Local/Pages/FlashCards/CreateFlashCardModal.tsx
+  var import_react10 = __toESM(require_react(), 1);
 
   // App/Api/flashcard.ts
   var createFlashCard = (payload2) => {
@@ -22713,8 +22540,7 @@
   };
 
   // App/Design/React/Components/Local/Pages/FlashCards/CreateFlashCardModal.tsx
-  var import_react12 = __toESM(require_react(), 1);
-  var import_jsx_runtime16 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime15 = __toESM(require_jsx_runtime(), 1);
   var emptyForm = {
     frontStatement: "",
     backStatement: "",
@@ -22730,12 +22556,26 @@
     { value: 3, label: "Hard" }
   ];
   var CreateFlashCardModal = ({ userId, languageId, onClose, onCreated, initialValues, showLanguageSelector }) => {
-    const [form, setForm] = (0, import_react12.useState)(() => ({ ...emptyForm, ...initialValues }));
-    const [selectedLanguageId, setSelectedLanguageId] = (0, import_react12.useState)(languageId || null);
-    const [isSubmitting, setIsSubmitting] = (0, import_react12.useState)(false);
-    const [error, setError] = (0, import_react12.useState)(null);
+    const [form, setForm] = (0, import_react10.useState)(() => ({ ...emptyForm, ...initialValues }));
+    const [selectedLanguageId, setSelectedLanguageId] = (0, import_react10.useState)(languageId || null);
+    const [isSubmitting, setIsSubmitting] = (0, import_react10.useState)(false);
+    const [isGeneratingPronunciation, setIsGeneratingPronunciation] = (0, import_react10.useState)(false);
+    const [error, setError] = (0, import_react10.useState)(null);
     const updateField = (field, value) => {
       setForm((prev) => ({ ...prev, [field]: value }));
+    };
+    const handleGeneratePronunciation = async () => {
+      if (!form.frontStatement.trim() || isGeneratingPronunciation) return;
+      setIsGeneratingPronunciation(true);
+      try {
+        const res = await generatePronunciation({ text: form.frontStatement });
+        if (res.success && res.data?.pronunciation) {
+          updateField("pronunciation", res.data.pronunciation);
+        }
+      } catch {
+      } finally {
+        setIsGeneratingPronunciation(false);
+      }
     };
     const handleSubmit = async (e) => {
       e.preventDefault();
@@ -22778,24 +22618,24 @@
         setIsSubmitting(false);
       }
     };
-    return /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "modal-overlay", onClick: onClose, children: /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "modal", onClick: (e) => e.stopPropagation(), children: [
-      /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "modal-header", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("h2", { children: "Create flash card" }),
-        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("button", { className: "modal-close", onClick: onClose, children: "\u2715" })
+    return /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "modal-overlay", onClick: onClose, children: /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "modal", onClick: (e) => e.stopPropagation(), children: [
+      /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "modal-header", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("h2", { children: "Create flash card" }),
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("button", { className: "modal-close", onClick: onClose, children: "\u2715" })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("form", { onSubmit: handleSubmit, className: "modal-body", children: [
-        showLanguageSelector && /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("label", { className: "language-field", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("form", { onSubmit: handleSubmit, className: "modal-body", children: [
+        showLanguageSelector && /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("label", { className: "language-field", children: [
           "Language",
-          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
             LanguageSelector,
             {
               onLanguageChange: (lang) => setSelectedLanguageId(lang.id)
             }
           )
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("label", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("label", { children: [
           "Front statement",
-          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
             "textarea",
             {
               value: form.frontStatement,
@@ -22804,9 +22644,9 @@
             }
           )
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("label", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("label", { children: [
           "Back statement",
-          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
             "textarea",
             {
               value: form.backStatement,
@@ -22815,20 +22655,32 @@
             }
           )
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("label", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("label", { children: [
           "Pronunciation",
-          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
-            "input",
-            {
-              type: "text",
-              value: form.pronunciation,
-              onChange: (e) => updateField("pronunciation", e.target.value)
-            }
-          )
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "pronunciation-row", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
+              "input",
+              {
+                type: "text",
+                value: form.pronunciation,
+                onChange: (e) => updateField("pronunciation", e.target.value)
+              }
+            ),
+            !form.pronunciation.trim() && form.frontStatement.trim() && /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
+              "button",
+              {
+                type: "button",
+                className: "pronounce-btn",
+                onClick: handleGeneratePronunciation,
+                disabled: isGeneratingPronunciation,
+                children: isGeneratingPronunciation ? "..." : "Generate"
+              }
+            )
+          ] })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("label", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("label", { children: [
           "Notes",
-          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
             "textarea",
             {
               value: form.notes,
@@ -22836,9 +22688,9 @@
             }
           )
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("label", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("label", { children: [
           "Category",
-          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
             "input",
             {
               type: "text",
@@ -22847,9 +22699,9 @@
             }
           )
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("label", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("label", { children: [
           "Tags",
-          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
             "input",
             {
               type: "text",
@@ -22859,24 +22711,257 @@
             }
           )
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("label", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("label", { children: [
           "Difficulty",
-          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
             "select",
             {
               value: form.difficulty,
               onChange: (e) => updateField("difficulty", Number(e.target.value)),
-              children: DIFFICULTY_OPTIONS.map((option) => /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("option", { value: option.value, children: option.label }, option.value))
+              children: DIFFICULTY_OPTIONS.map((option) => /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("option", { value: option.value, children: option.label }, option.value))
             }
           )
         ] }),
-        error && /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "modal-error", children: error }),
-        /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "modal-actions", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("button", { type: "button", onClick: onClose, disabled: isSubmitting, children: "Cancel" }),
-          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("button", { type: "submit", disabled: isSubmitting, children: isSubmitting ? "Creating..." : "Create" })
+        error && /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "modal-error", children: error }),
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "modal-actions", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("button", { type: "button", onClick: onClose, disabled: isSubmitting, children: "Cancel" }),
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("button", { type: "submit", disabled: isSubmitting, children: isSubmitting ? "Creating..." : "Create" })
         ] })
       ] })
     ] }) });
+  };
+
+  // App/Design/React/Components/Local/Pages/Homepage/index.tsx
+  var import_jsx_runtime16 = __toESM(require_jsx_runtime(), 1);
+  var TILES = [
+    {
+      label: "Flash cards",
+      href: "/flashcards",
+      icon: "cards",
+      subtitle: "Review vocabulary with spaced repetition"
+    },
+    {
+      label: "Music translation",
+      href: "/musiclyrics",
+      icon: "music",
+      subtitle: "Translate song lyrics in real time"
+    },
+    {
+      label: "Scenarios",
+      href: "/scenarios",
+      icon: "scenes",
+      subtitle: "Practice real-life conversations"
+    },
+    {
+      label: "LeMessage",
+      href: "/messages",
+      icon: "chat",
+      subtitle: "Chat with AI language partners"
+    }
+  ];
+  var TileIcon = ({ icon }) => {
+    switch (icon) {
+      case "cards":
+        return /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("svg", { width: "28", height: "28", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.5", strokeLinecap: "round", strokeLinejoin: "round", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("rect", { x: "3", y: "3", width: "18", height: "18", rx: "2" }),
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("path", { d: "M9 8h6M9 12h6M9 16h4" })
+        ] });
+      case "music":
+        return /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("svg", { width: "28", height: "28", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.5", strokeLinecap: "round", strokeLinejoin: "round", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("path", { d: "M9 18V5l12-2v13" }),
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("circle", { cx: "6", cy: "18", r: "3" }),
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("circle", { cx: "18", cy: "16", r: "3" })
+        ] });
+      case "scenes":
+        return /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("svg", { width: "28", height: "28", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.5", strokeLinecap: "round", strokeLinejoin: "round", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("rect", { x: "2", y: "3", width: "20", height: "14", rx: "2" }),
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("path", { d: "M8 21h8M12 17v4" })
+        ] });
+      case "chat":
+        return /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("svg", { width: "28", height: "28", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.5", strokeLinecap: "round", strokeLinejoin: "round", children: /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("path", { d: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" }) });
+      default:
+        return null;
+    }
+  };
+  var Homepage = () => {
+    const { session } = useSession();
+    const { language } = useLanguage();
+    const [messages, setMessages] = (0, import_react11.useState)([]);
+    const [userInput, setUserInput] = (0, import_react11.useState)("");
+    const [isSending, setIsSending] = (0, import_react11.useState)(false);
+    const [error, setError] = (0, import_react11.useState)(null);
+    const [flashcardIndex, setFlashcardIndex] = (0, import_react11.useState)(null);
+    const messagesEndRef = (0, import_react11.useRef)(null);
+    const inputRef = (0, import_react11.useRef)(null);
+    (0, import_react11.useEffect)(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [messages]);
+    (0, import_react11.useEffect)(() => {
+      if (!isSending) {
+        inputRef.current?.focus();
+      }
+    }, [isSending]);
+    const handleSend = async () => {
+      if (!userInput.trim() || isSending) return;
+      const text = userInput;
+      setUserInput("");
+      setIsSending(true);
+      setError(null);
+      const userMsg = { role: "user", content: text };
+      setMessages((prev) => [...prev, userMsg]);
+      try {
+        const history = messages.map((m) => ({
+          role: m.role,
+          content: m.content
+        }));
+        const res = await sendMessage({ message: text, history });
+        if (res.success && res.data) {
+          setMessages((prev) => [
+            ...prev,
+            {
+              role: "assistant",
+              content: res.data.reply,
+              translation: res.data.translation,
+              pronunciation: res.data.pronunciation
+            }
+          ]);
+        } else {
+          setError(res.message ?? "Failed to get response");
+          setMessages((prev) => prev.filter((m) => m !== userMsg));
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to send message");
+        setMessages((prev) => prev.filter((m) => m !== userMsg));
+      } finally {
+        setIsSending(false);
+      }
+    };
+    const handleKeyDown = (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        handleSend();
+      }
+    };
+    const hasMessages = messages.length > 0;
+    return /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "homepage", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "homepage__chat", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "homepage__chat-messages", children: [
+          !hasMessages && /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "homepage__empty", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("h1", { className: "homepage__title", children: "What would you like to learn today?" }),
+            /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("p", { className: "homepage__subtitle", children: "Practice a conversation, translate music, review flashcards, or simply ask for help." }),
+            /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "homepage__tiles", children: TILES.map((tile) => /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("a", { href: tile.href, className: "homepage__tile", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "homepage__tile-icon", children: /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(TileIcon, { icon: tile.icon }) }),
+              /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "homepage__tile-label", children: tile.label }),
+              /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "homepage__tile-subtitle", children: tile.subtitle })
+            ] }, tile.href)) })
+          ] }),
+          hasMessages && messages.map((msg, i) => /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)(
+            "div",
+            {
+              className: `homepage__bubble ${msg.role === "user" ? "user" : "assistant"}`,
+              children: [
+                /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "homepage__bubble-content", children: msg.content }),
+                msg.role === "assistant" && msg.translation && /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "homepage__bubble-translation", children: msg.translation }),
+                msg.role === "assistant" && /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "homepage__bubble-actions", children: /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)(
+                  "button",
+                  {
+                    className: "homepage__card-btn",
+                    onClick: () => setFlashcardIndex(i),
+                    title: "Create flash card",
+                    children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("svg", { width: "14", height: "14", viewBox: "0 0 14 14", fill: "none", children: [
+                        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("rect", { x: "1", y: "3", width: "12", height: "10", rx: "1.5", stroke: "currentColor", strokeWidth: "1.3" }),
+                        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("path", { d: "M4 1V3M10 1V3M1 6H13", stroke: "currentColor", strokeWidth: "1.3", strokeLinecap: "round" })
+                      ] }),
+                      "Flash card"
+                    ]
+                  }
+                ) })
+              ]
+            },
+            i
+          )),
+          isSending && /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "homepage__bubble assistant sending", children: /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Spinner, { size: "sm" }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { ref: messagesEndRef })
+        ] }),
+        error && /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "homepage__chat-error", children: error }),
+        /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "homepage__chat-input", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
+            "input",
+            {
+              ref: inputRef,
+              type: "text",
+              value: userInput,
+              onChange: (e) => setUserInput(e.target.value),
+              onKeyDown: handleKeyDown,
+              placeholder: "Type your message...",
+              disabled: isSending
+            }
+          ),
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
+            "button",
+            {
+              className: "homepage__send-btn",
+              onClick: handleSend,
+              disabled: !userInput.trim() || isSending,
+              children: /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("svg", { width: "18", height: "18", viewBox: "0 0 18 18", fill: "none", children: /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("path", { d: "M2 9L16 2L9 16L7 11L2 9Z", stroke: "currentColor", strokeWidth: "1.5", strokeLinecap: "round", strokeLinejoin: "round" }) })
+            }
+          )
+        ] })
+      ] }),
+      flashcardIndex !== null && messages[flashcardIndex] && (() => {
+        const msg = messages[flashcardIndex];
+        const prevMsg = flashcardIndex > 0 ? messages[flashcardIndex - 1] : null;
+        return /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
+          CreateFlashCardModal,
+          {
+            userId: session?.user?.id ?? "",
+            languageId: language?.id ?? "",
+            showLanguageSelector: true,
+            initialValues: {
+              frontStatement: msg.content,
+              backStatement: msg.translation ?? "",
+              pronunciation: msg.pronunciation ?? "",
+              notes: `From home chat conversation`,
+              category: "Home-Chat",
+              tags: "homechat"
+            },
+            onClose: () => setFlashcardIndex(null),
+            onCreated: () => setFlashcardIndex(null)
+          }
+        );
+      })()
+    ] });
+  };
+
+  // App/Design/React/Components/Local/Pages/FlashCards/index.tsx
+  var import_react14 = __toESM(require_react(), 1);
+
+  // App/Design/React/Hooks/Core/usePagination.tsx
+  var import_react12 = __toESM(require_react(), 1);
+  var usePagination = (callable, deps) => {
+    const [page, setPage] = (0, import_react12.useState)(1);
+    const [size, setSize] = (0, import_react12.useState)(20);
+    const [sortField, setSortField] = (0, import_react12.useState)("createTime");
+    const [sortDir, setSortDir] = (0, import_react12.useState)("desc");
+    const [results, isLoading, error] = usePromise(
+      () => callable(String(page), String(size), sortField, sortDir),
+      [...deps, page, size, sortField, sortDir]
+    );
+    return {
+      page,
+      size,
+      setSize,
+      sortField,
+      sortDir,
+      setSortField,
+      setSortDir,
+      nextPage: () => setPage((prev) => prev + 1),
+      prevPage: () => setPage((prev) => prev <= 1 ? 1 : prev - 1),
+      results: results?.data ?? [],
+      isLoading,
+      error
+    };
   };
 
   // App/Design/React/Components/Local/Pages/FlashCards/Study/index.tsx

@@ -11,6 +11,41 @@ public static class Features
 {
     public static void LoadFeatures()
     {
+        FeatureRegistry.Add(new Feature<PronounceRequest, ApiResponse<PronounceResponse>>
+        {
+            FeatureName = "pronounce",
+            FeatureGroup = "homechat",
+            Route = "/api/homechat/pronounce",
+            Method = HttpMethod.Post,
+            Handler = async (request, httpContext) =>
+            {
+                var languageId = GetLanguageId(httpContext);
+                if (languageId is null)
+                {
+                    return new ApiResponse<PronounceResponse>
+                    {
+                        Success = false,
+                        Message = "No language selected"
+                    };
+                }
+
+                var ctx = UserContext.FromHttpContext(httpContext);
+                var langRepo = RepositoryCatalog.GetRepository<ILanguageRepository>();
+                var lang = await langRepo.FindByIdAsync(languageId.Value, ctx, DataOptions.Bypass);
+                if (lang is null)
+                {
+                    return new ApiResponse<PronounceResponse>
+                    {
+                        Success = false,
+                        Message = "Language not found"
+                    };
+                }
+
+                var service = ServiceCatalog.GetService<HomeChatService>();
+                return await service.GeneratePronunciationAsync(request, lang.Name);
+            }
+        });
+
         FeatureRegistry.Add(new Feature<HomeChatRequest, ApiResponse<HomeChatResponse>>
         {
             FeatureName = "sendMessage",

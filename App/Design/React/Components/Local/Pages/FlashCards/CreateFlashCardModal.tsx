@@ -1,6 +1,7 @@
 import { useState, FormEvent } from "react";
 import { createFlashCard, FlashCard } from '@api/flashcard'
 import { LanguageSelector } from '@component/LanguageSelector'
+import { generatePronunciation } from '@api/homeChat'
 import './modal-style.scss'
 
 interface CreateFlashCardModalProps {
@@ -43,11 +44,28 @@ export const CreateFlashCardModal = ({ userId, languageId, onClose, onCreated, i
     const [form, setForm] = useState<FormState>(() => ({ ...emptyForm, ...initialValues }))
     const [selectedLanguageId, setSelectedLanguageId] = useState<string | null>(languageId || null)
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [isGeneratingPronunciation, setIsGeneratingPronunciation] = useState(false)
     const [error, setError] = useState<string | null>(null)
 
     const updateField = <K extends keyof FormState>(field: K, value: FormState[K]) => {
         setForm((prev) => ({ ...prev, [field]: value }))
     }
+
+    const handleGeneratePronunciation = async () => {
+        if (!form.frontStatement.trim() || isGeneratingPronunciation) return;
+
+        setIsGeneratingPronunciation(true);
+        try {
+            const res = await generatePronunciation({ text: form.frontStatement });
+            if (res.success && res.data?.pronunciation) {
+                updateField('pronunciation', res.data.pronunciation);
+            }
+        } catch {
+            // silent — field stays empty, user can type manually
+        } finally {
+            setIsGeneratingPronunciation(false);
+        }
+    };
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault()
@@ -135,11 +153,23 @@ export const CreateFlashCardModal = ({ userId, languageId, onClose, onCreated, i
 
                     <label>
                         Pronunciation
-                        <input
-                            type={'text'}
-                            value={form.pronunciation}
-                            onChange={(e) => updateField('pronunciation', e.target.value)}
-                        />
+                        <div className={'pronunciation-row'}>
+                            <input
+                                type={'text'}
+                                value={form.pronunciation}
+                                onChange={(e) => updateField('pronunciation', e.target.value)}
+                            />
+                            {!form.pronunciation.trim() && form.frontStatement.trim() && (
+                                <button
+                                    type={'button'}
+                                    className={'pronounce-btn'}
+                                    onClick={handleGeneratePronunciation}
+                                    disabled={isGeneratingPronunciation}
+                                >
+                                    {isGeneratingPronunciation ? '...' : 'Generate'}
+                                </button>
+                            )}
+                        </div>
                     </label>
 
                     <label>

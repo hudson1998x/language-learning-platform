@@ -12,6 +12,7 @@ namespace LLE.HomeChat;
 public class HomeChatService
 {
     private const int MaxTokens = 4096;
+    private const int PronounceTokens = 512;
 
     public async Task<ApiResponse<HomeChatResponse>> SendAsync(HomeChatRequest request, string language)
     {
@@ -42,6 +43,88 @@ public class HomeChatService
         return TryParseResponse(raw);
     }
 
+    public async Task<ApiResponse<PronounceResponse>> GeneratePronunciationAsync(PronounceRequest request, string language)
+    {
+        if (string.IsNullOrWhiteSpace(request.Text))
+        {
+            return new ApiResponse<PronounceResponse>
+            {
+                Success = false,
+                Message = "Text is required"
+            };
+        }
+
+        var llmService = ServiceCatalog.GetService<LLMService>();
+        var prompt =
+            $"You are a pronunciation assistant for language learners.\n\n" +
+            $"The target language is {language}.\n\n" +
+            $"Give me the pronunciation of this {language} text:\n" +
+            $"{request.Text}\n\n" +
+            $"Rules:\n" +
+            $"- Use ONLY lowercase a-z letters and spaces\n" +
+            $"- No IPA symbols, brackets, or punctuation\n" +
+            $"- Keep it simple and readable for learners\n\n" +
+            $"Output ONLY a valid JSON object with one key:\n" +
+            $"{{\"pronunciation\": \"...\"}}";
+
+        var raw = await QueryLlmAsync(llmService, string.Empty, prompt);
+
+        if (string.IsNullOrWhiteSpace(raw))
+        {
+            return new ApiResponse<PronounceResponse>
+            {
+                Success = false,
+                Message = "LLM returned an empty response"
+            };
+        }
+
+        try
+        {
+            var jsonStart = raw.IndexOf('{');
+            var jsonEnd = raw.LastIndexOf('}');
+
+            if (jsonStart < 0 || jsonEnd <= jsonStart)
+            {
+                return new ApiResponse<PronounceResponse>
+                {
+                    Success = false,
+                    Message = $"No JSON object found: {Truncate(raw, 200)}"
+                };
+            }
+
+            var json = raw[jsonStart..(jsonEnd + 1)];
+            var node = JsonDocument.Parse(json);
+            var root = node.RootElement;
+
+            var pronunciation = root.TryGetProperty("pronunciation", out var p)
+                ? p.GetString()?.Trim() ?? ""
+                : "";
+
+            if (string.IsNullOrWhiteSpace(pronunciation))
+            {
+                return new ApiResponse<PronounceResponse>
+                {
+                    Success = false,
+                    Message = "LLM returned empty pronunciation"
+                };
+            }
+
+            return new ApiResponse<PronounceResponse>
+            {
+                Success = true,
+                Data = new PronounceResponse { Pronunciation = pronunciation }
+            };
+        }
+        catch (Exception ex)
+        {
+            return new ApiResponse<PronounceResponse>
+            {
+                Success = false,
+                Message = $"Failed to parse: {ex.Message}. Raw: {Truncate(raw, 200)}"
+            };
+        }
+    }
+
     private static string BuildSystemPrompt(string language)
     {
         return
@@ -61,6 +144,7 @@ public class HomeChatService
             $"Respond with exactly one valid JSON object with these keys:\n" +
             $"- \"reply\": (string) Your response entirely in {language}\n" +
             $"- \"translation\": (string) English translation of your reply\n" +
+            $"- \"pronunciation\": (string) A simplified phonetic guide for the {language} reply. Use ONLY lowercase a-z letters and spaces. No IPA or punctuation.\n" +
             $"Do NOT wrap in markdown code blocks. Output ONLY the raw JSON.";
     }
 
@@ -125,6 +209,7 @@ public class HomeChatService
 
             var reply = root.TryGetProperty("reply", out var r) ? r.GetString()?.Trim() ?? "" : "";
             var translation = root.TryGetProperty("translation", out var t) ? t.GetString()?.Trim() ?? "" : "";
+            var pronunciation = root.TryGetProperty("pronunciation", out var p) ? p.GetString()?.Trim() ?? "" : "";
 
             if (string.IsNullOrWhiteSpace(reply))
             {
@@ -141,7 +226,8 @@ public class HomeChatService
                 Data = new HomeChatResponse
                 {
                     Reply = reply,
-                    Translation = translation
+                    Translation = translation,
+                    Pronunciation = pronunciation
                 }
             };
         }

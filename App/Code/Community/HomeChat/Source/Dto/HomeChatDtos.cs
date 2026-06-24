@@ -16,4 +16,15 @@ public class HomeChatResponse
 {
     public string Reply { get; set; } = string.Empty;
     public string Translation { get; set; } = string.Empty;
+    public string Pronunciation { get; set; } = string.Empty;
+}
+
+public class PronounceRequest
+{
+    public string Text { get; set; } = string.Empty;
+}
+
+public class PronounceResponse
+{
+    public string Pronunciation { get; set; } = string.Empty;
 }

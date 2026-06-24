@@ -1,12 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import { sendMessage } from '@api/homeChat';
 import { Spinner } from '@component/Spinner';
+import { CreateFlashCardModal } from '@component/Pages/FlashCards/CreateFlashCardModal';
+import { useSession } from '@hook/session-provider';
+import { useLanguage } from '@hook/language-provider';
 import './style.scss';
 
 interface ChatMessage {
     role: 'user' | 'assistant';
     content: string;
     translation?: string;
+    pronunciation?: string;
 }
 
 interface Tile {
@@ -79,10 +83,14 @@ const TileIcon = ({ icon }: { icon: string }) => {
 };
 
 export const Homepage = () => {
+    const { session } = useSession();
+    const { language } = useLanguage();
+
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [userInput, setUserInput] = useState('');
     const [isSending, setIsSending] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [flashcardIndex, setFlashcardIndex] = useState<number | null>(null);
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
@@ -123,6 +131,7 @@ export const Homepage = () => {
                         role: 'assistant',
                         content: res.data!.reply,
                         translation: res.data!.translation,
+                        pronunciation: res.data!.pronunciation,
                     },
                 ]);
             } else {
@@ -182,6 +191,21 @@ export const Homepage = () => {
                                     {msg.translation}
                                 </div>
                             )}
+                            {msg.role === 'assistant' && (
+                                <div className={'homepage__bubble-actions'}>
+                                    <button
+                                        className={'homepage__card-btn'}
+                                        onClick={() => setFlashcardIndex(i)}
+                                        title={'Create flash card'}
+                                    >
+                                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                                            <rect x="1" y="3" width="12" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.3" />
+                                            <path d="M4 1V3M10 1V3M1 6H13" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+                                        </svg>
+                                        Flash card
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     ))}
 
@@ -219,6 +243,28 @@ export const Homepage = () => {
                     </button>
                 </div>
             </div>
+
+            {flashcardIndex !== null && messages[flashcardIndex] && (() => {
+                const msg = messages[flashcardIndex];
+                const prevMsg = flashcardIndex > 0 ? messages[flashcardIndex - 1] : null;
+                return (
+                    <CreateFlashCardModal
+                        userId={session?.user?.id ?? ''}
+                        languageId={language?.id ?? ''}
+                        showLanguageSelector={true}
+                        initialValues={{
+                            frontStatement: msg.content,
+                            backStatement: msg.translation ?? '',
+                            pronunciation: msg.pronunciation ?? '',
+                            notes: `From home chat conversation`,
+                            category: 'Home-Chat',
+                            tags: 'homechat',
+                        }}
+                        onClose={() => setFlashcardIndex(null)}
+                        onCreated={() => setFlashcardIndex(null)}
+                    />
+                );
+            })()}
         </div>
     );
 };
