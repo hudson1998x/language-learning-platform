@@ -39,6 +39,7 @@ export const ScenarioSession = ({ scenarioId, onClose }: ScenarioSessionProps) =
     const [error, setError] = useState<string | null>(null);
     const [openMenuIndex, setOpenMenuIndex] = useState<number | null>(null);
     const [flashcardIndex, setFlashcardIndex] = useState<number | null>(null);
+    const [correctionIndex, setCorrectionIndex] = useState<number | null>(null);
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
@@ -113,10 +114,19 @@ export const ScenarioSession = ({ scenarioId, onClose }: ScenarioSessionProps) =
         setError(null);
 
         try {
-            const history: ChatMessage[] = chatEntries.map((entry) => ({
-                role: entry.line.isUser ? 'user' : 'assistant',
-                content: entry.line.isUser ? entry.line.original : entry.line.message,
-            }));
+            const history = chatEntries.map((entry) => {
+                const base: Record<string, unknown> = {
+                    role: entry.line.isUser ? 'user' : 'assistant',
+                    content: entry.line.isUser ? entry.line.original : entry.line.message,
+                };
+                if (!entry.line.isUser) {
+                    const ai = entry.line as Record<string, unknown>;
+                    base.correct = ai.correct;
+                    base.feedback = ai.feedback;
+                    base.hint = ai.hint;
+                }
+                return base as unknown as ChatMessage;
+            });
 
             const res = await sendMessage({
                 message: messageText,
@@ -144,6 +154,10 @@ export const ScenarioSession = ({ scenarioId, onClose }: ScenarioSessionProps) =
             e.preventDefault();
             handleSend();
         }
+    };
+
+    const getAiField = (entry: ChatEntry, field: string): unknown => {
+        return (entry.line as Record<string, unknown>)[field];
     };
 
     if (phase === 'error' && error) {
@@ -211,7 +225,10 @@ export const ScenarioSession = ({ scenarioId, onClose }: ScenarioSessionProps) =
                     {chatEntries.map((entry, i) => (
                         <div key={i} className={`chat-bubble ${entry.line.isUser ? 'user' : 'assistant'}`}>
                             <div className={'bubble-message'}>
-                                {entry.line.isUser ? entry.line.original : entry.line.message}
+                                {entry.line.isUser
+                                    ? entry.line.original
+                                    : entry.line.message
+                                }
                             </div>
 
                             {!entry.line.isUser && (
@@ -245,11 +262,40 @@ export const ScenarioSession = ({ scenarioId, onClose }: ScenarioSessionProps) =
                                                     </svg>
                                                     Create Flash Card
                                                 </button>
+                                                {i > 0 && chatEntries[i - 1]?.line.isUser && (
+                                                    <button
+                                                        className={'line-dropdown-item'}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setOpenMenuIndex(null);
+                                                            setCorrectionIndex(i);
+                                                        }}
+                                                    >
+                                                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                                                            <path d="M2 7L5 10L12 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                                        </svg>
+                                                        Create Correction Flash Card
+                                                    </button>
+                                                )}
                                             </div>
                                         )}
                                     </div>
 
+                                    {(getAiField(entry, 'correct') !== undefined) && (
+                                        <div className={`bubble-evaluation ${getAiField(entry, 'correct') ? 'correct' : 'incorrect'}`}>
+                                            <span className={'eval-badge'}>
+                                                {getAiField(entry, 'correct') ? '✓ Correct' : '✗ Needs improvement'}
+                                            </span>
+                                        </div>
+                                    )}
+
                                     <div className={'bubble-details'}>
+                                        {getAiField(entry, 'feedback') && (
+                                            <div className={'detail-row feedback'}>
+                                                <span className={'detail-label'}>Feedback:</span>
+                                                <span>{getAiField(entry, 'feedback') as string}</span>
+                                            </div>
+                                        )}
                                         {entry.line.translation && (
                                             <div className={'detail-row'}>
                                                 <span className={'detail-label'}>Translation:</span>
@@ -330,6 +376,28 @@ export const ScenarioSession = ({ scenarioId, onClose }: ScenarioSessionProps) =
                     onCreated={() => setFlashcardIndex(null)}
                 />
             )}
+
+            {correctionIndex !== null && chatEntries[correctionIndex] && (() => {
+                const userEntry = chatEntries[correctionIndex - 1];
+                const aiLine = chatEntries[correctionIndex].line as Record<string, unknown>;
+                return (
+                    <CreateFlashCardModal
+                        userId={session?.user?.id ?? ''}
+                        languageId={language?.id ?? ''}
+                        showLanguageSelector={true}
+                        initialValues={{
+                            frontStatement: userEntry?.line?.original ?? '',
+                            backStatement: (aiLine.hint as string) || '',
+                            pronunciation: '',
+                            notes: (aiLine.feedback as string) || '',
+                            category: 'Scenario-Correction',
+                            tags: 'scenario,correction',
+                        }}
+                        onClose={() => setCorrectionIndex(null)}
+                        onCreated={() => setCorrectionIndex(null)}
+                    />
+                );
+            })()}
         </div>
     );
 };

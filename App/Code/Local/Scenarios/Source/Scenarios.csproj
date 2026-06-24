@@ -15,7 +15,7 @@
       <ProjectReference Include="..\..\..\Core\Kernel\Source\Kernel.csproj" />
       <ProjectReference Include="..\..\..\Core\TypeScript\Source\TypeScript.csproj" />
       <ProjectReference Include="..\..\..\Community\LLMFramework\Source\LLMFramework.csproj" />
-      <ProjectReference Include="..\..\Community\Languages\Source\Languages.csproj" />
+      <ProjectReference Include="..\..\..\Community\Languages\Source\Languages.csproj" />
     </ItemGroup>
 
 </Project>

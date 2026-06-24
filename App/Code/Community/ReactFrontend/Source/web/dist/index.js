@@ -23328,6 +23328,7 @@
     const [error, setError] = (0, import_react15.useState)(null);
     const [openMenuIndex, setOpenMenuIndex] = (0, import_react15.useState)(null);
     const [flashcardIndex, setFlashcardIndex] = (0, import_react15.useState)(null);
+    const [correctionIndex, setCorrectionIndex] = (0, import_react15.useState)(null);
     const messagesEndRef = (0, import_react15.useRef)(null);
     const inputRef = (0, import_react15.useRef)(null);
     (0, import_react15.useEffect)(() => {
@@ -23392,10 +23393,19 @@
       setIsSending(true);
       setError(null);
       try {
-        const history = chatEntries.map((entry) => ({
-          role: entry.line.isUser ? "user" : "assistant",
-          content: entry.line.isUser ? entry.line.original : entry.line.message
-        }));
+        const history = chatEntries.map((entry) => {
+          const base = {
+            role: entry.line.isUser ? "user" : "assistant",
+            content: entry.line.isUser ? entry.line.original : entry.line.message
+          };
+          if (!entry.line.isUser) {
+            const ai = entry.line;
+            base.correct = ai.correct;
+            base.feedback = ai.feedback;
+            base.hint = ai.hint;
+          }
+          return base;
+        });
         const res = await sendMessage({
           message: messageText,
           scenarioTitle: scenario.title,
@@ -23419,6 +23429,9 @@
         e.preventDefault();
         handleSend();
       }
+    };
+    const getAiField = (entry, field) => {
+      return entry.line[field];
     };
     if (phase === "error" && error) {
       return /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("div", { className: "session-overlay", children: /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "session-error", children: [
@@ -23481,26 +23494,48 @@
                     children: /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("svg", { width: "14", height: "14", viewBox: "0 0 14 14", fill: "none", children: /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("path", { d: "M7 3V3.01M7 7V7.01M7 11V11.01", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round" }) })
                   }
                 ),
-                openMenuIndex === i && /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("div", { className: "line-dropdown", children: /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)(
-                  "button",
-                  {
-                    className: "line-dropdown-item",
-                    onClick: (e) => {
-                      e.stopPropagation();
-                      setOpenMenuIndex(null);
-                      setFlashcardIndex(i);
-                    },
-                    children: [
-                      /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("svg", { width: "14", height: "14", viewBox: "0 0 14 14", fill: "none", children: [
-                        /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("rect", { x: "1", y: "3", width: "12", height: "10", rx: "1.5", stroke: "currentColor", strokeWidth: "1.3" }),
-                        /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("path", { d: "M4 1V3M10 1V3M1 6H13", stroke: "currentColor", strokeWidth: "1.3", strokeLinecap: "round" })
-                      ] }),
-                      "Create Flash Card"
-                    ]
-                  }
-                ) })
+                openMenuIndex === i && /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "line-dropdown", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)(
+                    "button",
+                    {
+                      className: "line-dropdown-item",
+                      onClick: (e) => {
+                        e.stopPropagation();
+                        setOpenMenuIndex(null);
+                        setFlashcardIndex(i);
+                      },
+                      children: [
+                        /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("svg", { width: "14", height: "14", viewBox: "0 0 14 14", fill: "none", children: [
+                          /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("rect", { x: "1", y: "3", width: "12", height: "10", rx: "1.5", stroke: "currentColor", strokeWidth: "1.3" }),
+                          /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("path", { d: "M4 1V3M10 1V3M1 6H13", stroke: "currentColor", strokeWidth: "1.3", strokeLinecap: "round" })
+                        ] }),
+                        "Create Flash Card"
+                      ]
+                    }
+                  ),
+                  i > 0 && chatEntries[i - 1]?.line.isUser && /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)(
+                    "button",
+                    {
+                      className: "line-dropdown-item",
+                      onClick: (e) => {
+                        e.stopPropagation();
+                        setOpenMenuIndex(null);
+                        setCorrectionIndex(i);
+                      },
+                      children: [
+                        /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("svg", { width: "14", height: "14", viewBox: "0 0 14 14", fill: "none", children: /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("path", { d: "M2 7L5 10L12 3", stroke: "currentColor", strokeWidth: "1.5", strokeLinecap: "round", strokeLinejoin: "round" }) }),
+                        "Create Correction Flash Card"
+                      ]
+                    }
+                  )
+                ] })
               ] }),
+              getAiField(entry, "correct") !== void 0 && /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("div", { className: `bubble-evaluation ${getAiField(entry, "correct") ? "correct" : "incorrect"}`, children: /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("span", { className: "eval-badge", children: getAiField(entry, "correct") ? "\u2713 Correct" : "\u2717 Needs improvement" }) }),
               /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "bubble-details", children: [
+                getAiField(entry, "feedback") && /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "detail-row feedback", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("span", { className: "detail-label", children: "Feedback:" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("span", { children: getAiField(entry, "feedback") })
+                ] }),
                 entry.line.translation && /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "detail-row", children: [
                   /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("span", { className: "detail-label", children: "Translation:" }),
                   /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("span", { children: entry.line.translation })
@@ -23565,7 +23600,29 @@
           onClose: () => setFlashcardIndex(null),
           onCreated: () => setFlashcardIndex(null)
         }
-      )
+      ),
+      correctionIndex !== null && chatEntries[correctionIndex] && (() => {
+        const userEntry = chatEntries[correctionIndex - 1];
+        const aiLine = chatEntries[correctionIndex].line;
+        return /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(
+          CreateFlashCardModal,
+          {
+            userId: session?.user?.id ?? "",
+            languageId: language?.id ?? "",
+            showLanguageSelector: true,
+            initialValues: {
+              frontStatement: userEntry?.line?.original ?? "",
+              backStatement: aiLine.hint || "",
+              pronunciation: "",
+              notes: aiLine.feedback || "",
+              category: "Scenario-Correction",
+              tags: "scenario,correction"
+            },
+            onClose: () => setCorrectionIndex(null),
+            onCreated: () => setCorrectionIndex(null)
+          }
+        );
+      })()
     ] });
   };
 

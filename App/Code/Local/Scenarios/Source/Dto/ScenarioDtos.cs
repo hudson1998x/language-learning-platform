@@ -28,6 +28,9 @@ public class ChatMessage
 {
     public string Role { get; set; } = string.Empty;
     public string Content { get; set; } = string.Empty;
+    public bool Correct { get; set; } = true;
+    public string Feedback { get; set; } = string.Empty;
+    public string Hint { get; set; } = string.Empty;
 }
 
 public class ScenarioLine
@@ -38,5 +41,7 @@ public class ScenarioLine
     public string Pronunciation { get; set; } = string.Empty;
     public string CulturalMeaning { get; set; } = string.Empty;
     public string Hint { get; set; } = string.Empty;
+    public bool Correct { get; set; } = true;
+    public string Feedback { get; set; } = string.Empty;
     public bool IsUser { get; set; }
 }

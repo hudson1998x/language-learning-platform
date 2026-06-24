@@ -311,7 +311,41 @@
             &.hint {
                 color: #d97706;
             }
+
+            &.feedback {
+                color: #dc2626;
+
+                .detail-label {
+                    color: #dc2626;
+                }
+            }
         }
+    }
+}
+
+.bubble-evaluation {
+    margin-top: 4px;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+
+    &.correct {
+        background: #f0fdf4;
+        color: #16a34a;
+        border: 1px solid #bbf7d0;
+    }
+
+    &.incorrect {
+        background: #fef2f2;
+        color: #dc2626;
+        border: 1px solid #fecaca;
+    }
+
+    .eval-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
     }
 }
 

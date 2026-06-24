@@ -1,6 +1,7 @@
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.RegularExpressions;
 using LLE.Kernel.Attributes;
 using LLE.Kernel.Dto;
 using LLE.Kernel.Registry;
@@ -20,65 +21,103 @@ public class ScenarioService
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
     };
 
-    private const int MaxTokens = 2000;
-    private const int MaxRetries = 2;
+    // Qwen3 emits <think>...</think> blocks before its actual output.
+    // This regex strips them so we can cleanly extract the JSON payload.
+    private static readonly Regex ThinkBlockRegex = new(
+        @"<think>[\s\S]*?</think>",
+        RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+    // "begin" (case-insensitive) is treated as a session-start trigger, not learner input.
+    private const string SessionStartTrigger = "begin";
+
+    private const int MaxTokens = 16000;
+    private const int MaxRetries = 3;
 
     private static string BuildSystemPrompt(string scenarioTitle, string scenarioSteps, int difficulty, string language)
     {
         var difficultyLevel = difficulty switch
         {
-            1 => "basic (use simple vocabulary, short sentences, slow pacing)",
-            2 => "intermediate (use moderate vocabulary, compound sentences, natural pacing)",
-            3 => "advanced (use complex vocabulary, idiomatic expressions, full-speed pacing)",
-            _ => "intermediate"
+            1 => "BASIC: Simple vocabulary, short sentences, slow pacing.",
+            2 => "INTERMEDIATE: Moderate vocabulary, compound sentences, natural pacing.",
+            3 => "ADVANCED: Complex vocabulary, idiomatic expressions, full-speed pacing.",
+            _ => "INTERMEDIATE"
         };
-        
-        
 
         return
-            "You are a professional language instructor running an interactive practice session.\n\n" +
-            $"SCENARIO: {scenarioTitle}\n" +
-            $"STEPS/INSTRUCTIONS:\n{scenarioSteps}\n\n" +
-            $"DIFFICULTY: {difficultyLevel}\n\n" +
-            $"LANGUAGE: {language}\n\n" +
-            "Rules:\n" +
-            "  - Respond ONLY in the target learning language for the 'message' field. !!Never use English in 'message'!!.\n" +
-            "  - Stay in character for the scenario. Act out the role the scenario describes.\n" +
-            "  - Keep responses concise and appropriate for the difficulty level.\n" +
-            "  - You MUST always respond with a raw JSON object and nothing else. No markdown fences, no prose.\n" +
-            "  - The 'message' field MUST always be non-empty. It is the most important field.\n\n" +
-            "Required JSON schema (all fields required, no field may be omitted or null):\n" +
-            "{\n" +
-            "  \"message\": \"<your in-character response in the target language — NEVER empty>\",\n" +
-            "  \"translation\": \"<English translation of your response>\",\n" +
-            "  \"pronunciation\": \"<phonetic romanisation — MANDATORY, never omit>\",\n" +
-            "  \"culturalMeaning\": \"<1-2 sentences on cultural context if relevant, or empty string>\",\n" +
-            "  \"hint\": \"<a helpful tip or correction for the learner, or empty string if not needed>\"\n" +
-            "}\n\n" +
-            "Pronunciation rules:\n" +
-            "  - Break pronunciation into small, speakable chunks separated by spaces.\n" +
-            "  - Use simple Latin letters only (a–z), plus optional diacritics for tone where required.\n" +
-            "  - NEVER use IPA symbols or phonetic alphabets.\n" +
-            "  - Chinese -> Pinyin (e.g. \"wo ai ni\")\n" +
-            "  - Japanese -> Hepburn romaji (e.g. \"watashi wa anata ga suki desu\")\n" +
-            "  - Korean -> Revised Romanization (e.g. \"saranghaeyo\")\n" +
-            "  - Other -> best-effort phonetic spelling\n\n" +
-            "IMPORTANT: Never respond in message in english, respond in the passed language\n\n" +
-            "IMPORTANT: Output ONLY the JSON object. Do not include any text before or after it.";
+            $"# ROLE\n" +
+            $"You are a strict backend engine for an interactive language learning system. You act exclusively as the language tutor.\n\n" +
+
+            $"# SESSION CONTEXT\n" +
+            $"* TARGET LANGUAGE: {language}\n" +
+            $"* DIFFICULTY LEVEL: {difficultyLevel}\n" +
+            $"* CURRENT SCENARIO: {scenarioTitle}\n" +
+            $"* SCENARIO STEPS:\n{scenarioSteps}\n\n" +
+
+            $"# STRICT INSTRUCTOR RULES\n" +
+            $"1. Act ONLY as the instructor. NEVER write lines for the learner, never simulate learner behavior, and never continue the conversation on behalf of the learner.\n" +
+            $"2. Advance through the SCENARIO STEPS in exact sequential order—one step per user turn.\n" +
+            $"3. Your very first response in the session MUST introduce the scenario and open with the specific cue: \"The plane is landing, please stay seated.\"\n\n" +
+
+            $"# OUTPUT FORMAT REQUIREMENTS\n" +
+            $"* You MUST respond with exactly one valid JSON object.\n" +
+            $"* Do NOT wrap your JSON response inside markdown blocks (do not use ```json).\n" +
+            $"* Do NOT include any text, preamble, conversational pleasantries, or explanations outside the JSON object.\n" +
+            $"* Ensure all keys and string values are properly escaped for valid JSON parsing.\n\n" +
+
+            $"# SCHEMA DEFINITION\n" +
+            $"Your response must contain exactly these 7 keys, and NONE of them should be empty string values:\n" +
+            $"1. \"message\": (String) A direct imperative instruction to the learner, written ENTIRELY in the target language. Must never be empty.\n" +
+            $"2. \"translation\": (String) The literal English translation of the user's *last* message. If this is the start of the session (no input yet), set this to \"[Session Started]\".\n" +
+            $"3. \"pronunciation\": (String) A simplified phonetic guide for your target language `message` field. Use ONLY lowercase a-z letters and spaces. Do NOT use IPA symbols, brackets, or punctuation.\n" +
+            $"4. \"correct\": (Boolean) true if the learner's response was accurate/acceptable, or if the session is starting. Otherwise, false.\n" +
+            $"5. \"feedback\": (String) Written in English. Provide immediate guidance on how the learner should approach this scenario or step. Must never be empty.\n" +
+            $"6. \"culturalMeaning\": (String) Written in English. Provide relevant cultural or contextual insight regarding this scenario step. Must never be empty.\n" +
+            $"7. \"hint\": (String) A useful starter phrase or ideal target-language response to assist the learner with this step. Must never be empty.\n\n" +
+
+            $"# BASELINE JSON TEMPLATE\n" +
+            $"{{\n" +
+            $"  \"message\": \"\",\n" +
+            $"  \"translation\": \"\",\n" +
+            $"  \"pronunciation\": \"\",\n" +
+            $"  \"correct\": true,\n" +
+            $"  \"feedback\": \"\",\n" +
+            $"  \"culturalMeaning\": \"\",\n" +
+            $"  \"hint\": \"\"\n" +
+            $"\n}}";
     }
 
     /// <summary>
-    /// Builds a synthetic opening exchange to prime the LLM when the user sends their very first message.
-    /// Without this, models (especially smaller local ones) often fail to produce well-formed JSON
-    /// because they have no prior example of the expected output format in the conversation window.
+    /// Priming context for the very first turn. Explicitly tells the model that "begin"
+    /// is a system trigger — not learner speech — so it never tries to translate it.
     /// </summary>
-    private static string BuildPrimingContext(string scenarioTitle)
+    private static string BuildSessionStartPrimingContext(string scenarioTitle)
     {
         return
-            $"[This is the start of a new scenario: \"{scenarioTitle}\". " +
-            "The learner is about to speak first. " +
-            "Remember: respond ONLY with the JSON object as specified. " +
-            "The 'message' field must be non-empty and in the target language.]";
+            $"<system_directive>\n" +
+            $"[SESSION INITIALIZATION: \"{scenarioTitle}\"]\n" +
+            $"The user has triggered the session start via 'begin'.\n" +
+            $"Do NOT leave fields empty. Fill them with initialization details:\n" +
+            $"* Execute Step 1 of the scenario in the \"message\" field.\n" +
+            $"* Set \"translation\" to \"[Session Started]\".\n" +
+            $"* Set \"correct\" to true.\n" +
+            $"* Set \"feedback\" to an introductory welcome message explaining the scenario goal in English.\n" +
+            $"* Set \"culturalMeaning\" to a brief note on behavioral context or etiquette for this setting.\n" +
+            $"* Set \"hint\" to a helpful starting word or phrase in the target language to assist their first step.\n" +
+            $"* Output ONLY the raw JSON object.\n" +
+            $"</system_directive>";
+    }
+
+    /// <summary>
+    /// Priming context for the first real learner message (non-"begin" opening).
+    /// </summary>
+    private static string BuildFirstMessagePrimingContext(string scenarioTitle)
+    {
+        return
+            $"<system_directive>\n" +
+            $"[FIRST LEARNER INPUT for scenario: \"{scenarioTitle}\"]\n" +
+            $"Evaluate the text inside the <input> tags. Provide the correct assessment, translate their statement into English inside \"translation\", provide coaching feedback, a cultural explanation, a phrase suggestion in \"hint\", and provide the next step.\n" +
+            $"Do NOT leave any fields empty.\n" +
+            $"</system_directive>";
     }
 
     public async Task<ApiResponse<StartStudySessionResponse>> StartStudySessionAsync(
@@ -130,28 +169,52 @@ public class ScenarioService
         }
 
         var llmService = ServiceCatalog.GetService<LLMService>();
-        var systemPrompt = BuildSystemPrompt(request.ScenarioTitle, request.ScenarioSteps, request.Difficulty, request.Language);
+        var systemPrompt = BuildSystemPrompt(
+            request.ScenarioTitle, request.ScenarioSteps, request.Difficulty, request.Language);
 
-        // Build conversation context from history
-        string userPrompt;
         var hasHistory = request.History is { Length: > 0 };
+
+        // Detect the session-start trigger so we never ask the model to translate "begin".
+        var isSessionStart = !hasHistory &&
+            request.Message.Trim().Equals(SessionStartTrigger, StringComparison.OrdinalIgnoreCase);
+
+        string userPrompt;
 
         if (!hasHistory)
         {
-            // First message: include a priming hint so the model knows what's expected
-            var priming = BuildPrimingContext(request.ScenarioTitle);
-            userPrompt = $"{priming}\n\nThe learner says: {request.Message}";
+            if (isSessionStart)
+            {
+                var priming = BuildSessionStartPrimingContext(request.ScenarioTitle);
+                userPrompt = $"{priming}\n\nStart the scenario now.";
+            }
+            else
+            {
+                var priming = BuildFirstMessagePrimingContext(request.ScenarioTitle);
+                userPrompt = $"{priming}\n\n<current_input>\n{request.Message}\n</current_input>";
+            }
         }
         else
         {
             var recentHistory = request.History!.TakeLast(6);
             var conversationContext = string.Join("\n", recentHistory.Select(h =>
-                (h.Role == "user" ? "Learner" : "Instructor") + ": " + h.Content));
-            userPrompt = $"Conversation so far:\n{conversationContext}\n\nThe learner now says: {request.Message}";
+            {
+                if (h.Role == "user")
+                    return $"  <learner_turn>{h.Content}</learner_turn>";
+
+                return $"  <tutor_turn correct=\"{h.Correct.ToString().ToLower()}\">{h.Content}</tutor_turn>";
+            }));
+
+            userPrompt =
+                $"<conversation_history>\n{conversationContext}\n</conversation_history>\n\n" +
+                $"<current_input>\n{request.Message}\n</current_input>\n\n" +
+                $"<instruction>\n" +
+                $"Process the <current_input>. Evaluate correctness against the current scenario progress.\n" +
+                $"All fields in the output schema are mandatory and must be completely populated with content. Do not use code blocks.\n" +
+                $"</instruction>";
         }
 
-        // Retry loop — small local models occasionally produce malformed output
         string? lastError = null;
+
         for (var attempt = 0; attempt < MaxRetries; attempt++)
         {
             var raw = await QueryLlmAsync(llmService, systemPrompt, userPrompt, MaxTokens);
@@ -168,11 +231,13 @@ public class ScenarioService
 
             lastError = parseResult.Message;
 
-            // On retry, append a gentle correction to the prompt
             if (attempt < MaxRetries - 1)
             {
-                userPrompt += "\n\n[SYSTEM: Your previous response was not valid JSON or was missing the 'message' field. " +
-                              "Please respond ONLY with the required JSON object. The 'message' field must not be empty.]";
+                userPrompt +=
+                    $"\n\n[SYSTEM CORRECTION — attempt {attempt + 2}/{MaxRetries}]: " +
+                    $"Your previous response was rejected: {lastError}. " +
+                    "You MUST output ONLY a valid JSON object. " +
+                    "Every single field is mandatory and MUST be fully populated with actual analytical content—no empty strings or placeholders allowed.";
             }
         }
 
@@ -183,99 +248,109 @@ public class ScenarioService
         };
     }
 
-    private static ApiResponse<ScenarioLine> TryParseScenarioLine(string raw, string originalUserMessage)
+    private static ApiResponse<ScenarioLine> TryParseScenarioLine(
+        string raw,
+        string originalUserMessage)
     {
         try
         {
-            var json = StripMarkdownFences(raw);
+            // ── Step 1: strip Qwen3 thinking blocks ──────────────────────────────
+            var withoutThink = ThinkBlockRegex.Replace(raw, string.Empty).Trim();
+
+            // ── Step 2: strip markdown code fences ───────────────────────────────
+            var json = StripMarkdownFences(withoutThink);
 
             if (string.IsNullOrWhiteSpace(json))
-            {
-                return new ApiResponse<ScenarioLine>
-                {
-                    Success = false,
-                    Message = "Response was empty after stripping markdown fences"
-                };
-            }
+                return Fail("Response was empty after stripping think blocks and markdown fences");
 
-            // Find the outermost JSON object in case the model prepended/appended stray text
+            // ── Step 3: isolate the outermost JSON object ─────────────────────────
             var jsonStart = json.IndexOf('{');
-            var jsonEnd = json.LastIndexOf('}');
+            var jsonEnd   = json.LastIndexOf('}');
+
             if (jsonStart < 0 || jsonEnd <= jsonStart)
-            {
-                return new ApiResponse<ScenarioLine>
-                {
-                    Success = false,
-                    Message = $"No JSON object found in LLM response. Raw: {Truncate(raw, 200)}"
-                };
-            }
+                return Fail($"No JSON object found in response. Raw (truncated): {Truncate(raw, 200)}");
 
             json = json[jsonStart..(jsonEnd + 1)];
 
+            // ── Step 4: parse ─────────────────────────────────────────────────────
             var node = JsonNode.Parse(json)
                        ?? throw new JsonException("Parsed JSON was null");
 
-            var message = node["message"]?.GetValue<string>()?.Trim() ?? string.Empty;
-            var translation = node["translation"]?.GetValue<string>()?.Trim() ?? string.Empty;
-            var pronunciation = node["pronunciation"]?.GetValue<string>()?.Trim() ?? string.Empty;
+            var message         = node["message"]?.GetValue<string>()?.Trim()         ?? string.Empty;
+            var translation     = node["translation"]?.GetValue<string>()?.Trim()     ?? string.Empty;
+            var pronunciation   = node["pronunciation"]?.GetValue<string>()?.Trim()   ?? string.Empty;
             var culturalMeaning = node["culturalMeaning"]?.GetValue<string>()?.Trim() ?? string.Empty;
-            var hint = node["hint"]?.GetValue<string>()?.Trim() ?? string.Empty;
+            var hint            = node["hint"]?.GetValue<string>()?.Trim()            ?? string.Empty;
+            var feedback        = node["feedback"]?.GetValue<string>()?.Trim()        ?? string.Empty;
+            var correct         = node["correct"]?.GetValue<bool?>()                  ?? true;
 
+            // ── Step 5: validate fields ────────────────────────────────
             if (string.IsNullOrWhiteSpace(message))
-            {
-                return new ApiResponse<ScenarioLine>
-                {
-                    Success = false,
-                    Message = $"LLM returned empty 'message' field. Full JSON: {Truncate(json, 300)}"
-                };
-            }
+                return Fail($"LLM returned empty 'message' field. JSON: {Truncate(json, 300)}");
 
-            // Pronunciation is mandatory — fall back gracefully rather than failing
-            if (string.IsNullOrWhiteSpace(pronunciation))
-                pronunciation = "[pronunciation unavailable]";
+            if (string.IsNullOrWhiteSpace(translation))
+                return Fail($"LLM returned empty 'translation' field. JSON: {Truncate(json, 300)}");
+
+            if (string.IsNullOrWhiteSpace(feedback))
+                return Fail($"LLM returned empty 'feedback' field. JSON: {Truncate(json, 300)}");
+
+            if (string.IsNullOrWhiteSpace(hint))
+                return Fail($"LLM returned empty 'hint' field. JSON: {Truncate(json, 300)}");
+
+            // Pronunciation degrades gracefully — bad pronunciation shouldn't cause a retry.
+            if (string.IsNullOrWhiteSpace(pronunciation) || IsPronunciationPlaceholder(pronunciation))
+                pronunciation = BuildFallbackPronunciation(message);
 
             return new ApiResponse<ScenarioLine>
             {
                 Success = true,
                 Data = new ScenarioLine
                 {
-                    Original = originalUserMessage,
-                    Message = message,
-                    Translation = translation,
-                    Pronunciation = pronunciation,
+                    Original        = originalUserMessage,
+                    Message         = message,
+                    Translation     = translation,
+                    Pronunciation   = pronunciation,
                     CulturalMeaning = culturalMeaning,
-                    Hint = hint,
-                    IsUser = false
+                    Hint            = hint,
+                    Correct         = correct,
+                    Feedback        = feedback,
+                    IsUser          = false
                 }
             };
         }
         catch (Exception ex)
         {
-            return new ApiResponse<ScenarioLine>
-            {
-                Success = false,
-                Message = $"Failed to parse LLM response: {ex.Message}. Raw: {Truncate(raw, 200)}"
-            };
+            return Fail($"Failed to parse LLM response: {ex.Message}. Raw: {Truncate(raw, 200)}");
         }
     }
 
-    /// <summary>
-    /// Strips markdown code fences robustly, handling:
-    ///   ```json\n...\n```
-    ///   ```\n...\n```
-    ///   Trailing whitespace/newlines after closing fence
-    ///   Windows-style \r\n line endings
-    /// </summary>
+    private static bool IsPronunciationPlaceholder(string pronunciation)
+    {
+        var lower = pronunciation.ToLowerInvariant();
+        return lower is "unavailable" or "unknown" or "n/a" or "na" or "none"
+            || lower.StartsWith("[") || lower.StartsWith("(");
+    }
+
+    private static string BuildFallbackPronunciation(string message)
+    {
+        var normalised = message.Normalize(System.Text.NormalizationForm.FormD);
+        var cleaned = new string(normalised
+            .Where(c => c is >= 'a' and <= 'z' or >= 'A' and <= 'Z' or ' ')
+            .ToArray())
+            .ToLowerInvariant()
+            .Trim();
+
+        return string.IsNullOrWhiteSpace(cleaned) ? "see message above" : cleaned;
+    }
+
     private static string StripMarkdownFences(string text)
     {
         var trimmed = text.Trim();
         if (!trimmed.StartsWith("```")) return trimmed;
 
-        // Find end of the opening fence line (may be ```json or just ```)
         var firstNewline = trimmed.IndexOfAny(['\n', '\r']);
-        if (firstNewline < 0) return trimmed; // malformed, return as-is
+        if (firstNewline < 0) return trimmed;
 
-        // Find the last ``` closing fence
         var lastFence = trimmed.LastIndexOf("```", trimmed.Length - 1, StringComparison.Ordinal);
         if (lastFence <= firstNewline) return trimmed;
 
@@ -300,11 +375,13 @@ public class ScenarioService
         }
         catch (Exception ex)
         {
-            // Log properly in production; returning empty triggers the retry loop
             Console.Error.WriteLine($"[ScenarioService] LLM call failed: {ex.Message}");
             return string.Empty;
         }
     }
+
+    private static ApiResponse<ScenarioLine> Fail(string message) =>
+        new() { Success = false, Message = message };
 
     private static string Truncate(string s, int maxLength) =>
         s.Length <= maxLength ? s : s[..maxLength] + "…";

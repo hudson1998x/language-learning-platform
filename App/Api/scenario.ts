@@ -155,6 +155,9 @@ export const startStudySession = (payload: StartStudySessionRequest): Promise<Ap
 export interface ChatMessage {
     role: string;
     content: string;
+    correct: boolean;
+    feedback: string;
+    hint: string;
 }
 
 export interface SendMessageRequest {
@@ -173,6 +176,8 @@ export interface ScenarioLine {
     pronunciation: string;
     culturalMeaning: string;
     hint: string;
+    correct: boolean;
+    feedback: string;
     isUser: boolean;
 }
 
