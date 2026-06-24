@@ -18,8 +18,8 @@ interface ConversationSummary {
 
 interface ConversationListProps {
     activeConversationId: string | null;
-    onSelectConversation: (id: string) => void;
-    onConversationCreated: (id: string) => void;
+    onSelectConversation: (id: string, profileName: string, profileAvatarUrl: string) => void;
+    onConversationCreated: (id: string, profileName: string, profileAvatarUrl: string) => void;
     refreshTrigger: number;
 }
 
@@ -134,11 +134,11 @@ export const ConversationList = ({
                     <div
                         key={conv.id}
                         className={`conv-item ${activeConversationId === conv.id ? 'active' : ''}`}
-                        onClick={() => onSelectConversation(conv.id)}
+                        onClick={() => onSelectConversation(conv.id, conv.profileName, conv.profileAvatarUrl)}
                         role={'button'}
                         tabIndex={0}
                         onKeyDown={(e) => {
-                            if (e.key === 'Enter') onSelectConversation(conv.id);
+                            if (e.key === 'Enter') onSelectConversation(conv.id, conv.profileName, conv.profileAvatarUrl);
                         }}
                     >
                         <div className={'conv-avatar'}>
@@ -174,9 +174,9 @@ export const ConversationList = ({
                             language={language}
                             userId={session?.user?.id ?? ''}
                             languageId={language?.id ?? ''}
-                            onSelected={(convId) => {
+                            onSelected={(convId, pName, pAvatar) => {
                                 setShowProfilePicker(false);
-                                onConversationCreated(convId);
+                                onConversationCreated(convId, pName, pAvatar);
                             }}
                         />
                     </div>
@@ -190,7 +190,7 @@ interface ProfilePickerContentProps {
     language: { id: string; name: string } | undefined;
     userId: string;
     languageId: string;
-    onSelected: (conversationId: string) => void;
+    onSelected: (conversationId: string, profileName: string, profileAvatarUrl: string) => void;
 }
 
 const ProfilePickerContent = ({ language, userId, languageId, onSelected }: ProfilePickerContentProps) => {
@@ -227,8 +227,12 @@ const ProfilePickerContent = ({ language, userId, languageId, onSelected }: Prof
         setStartingId(profileId);
         try {
             const res = await startConversation({ profileId });
-            if (res.success && res.data) {
-                onSelected(res.data.conversationId);
+                if (res.success && res.data) {
+                onSelected(
+                    res.data.conversationId,
+                    res.data.profileName,
+                    res.data.profileAvatarUrl ?? ''
+                );
             } else {
                 setError(res.message ?? 'Failed to start conversation');
             }

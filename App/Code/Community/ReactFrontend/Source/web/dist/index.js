@@ -23896,11 +23896,11 @@
           "div",
           {
             className: `conv-item ${activeConversationId === conv.id ? "active" : ""}`,
-            onClick: () => onSelectConversation(conv.id),
+            onClick: () => onSelectConversation(conv.id, conv.profileName, conv.profileAvatarUrl),
             role: "button",
             tabIndex: 0,
             onKeyDown: (e) => {
-              if (e.key === "Enter") onSelectConversation(conv.id);
+              if (e.key === "Enter") onSelectConversation(conv.id, conv.profileName, conv.profileAvatarUrl);
             },
             children: [
               /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("div", { className: "conv-avatar", children: conv.profileAvatarUrl ? /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("img", { src: conv.profileAvatarUrl, alt: conv.profileName }) : /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("div", { className: "avatar-placeholder", children: conv.profileName.charAt(0) }) }),
@@ -23927,9 +23927,9 @@
             language,
             userId: session?.user?.id ?? "",
             languageId: language?.id ?? "",
-            onSelected: (convId) => {
+            onSelected: (convId, pName, pAvatar) => {
               setShowProfilePicker(false);
-              onConversationCreated(convId);
+              onConversationCreated(convId, pName, pAvatar);
             }
           }
         )
@@ -23966,7 +23966,11 @@
       try {
         const res = await startConversation({ profileId });
         if (res.success && res.data) {
-          onSelected(res.data.conversationId);
+          onSelected(
+            res.data.conversationId,
+            res.data.profileName,
+            res.data.profileAvatarUrl ?? ""
+          );
         } else {
           setError(res.message ?? "Failed to start conversation");
         }
@@ -24028,8 +24032,13 @@
     const [error, setError] = (0, import_react18.useState)(null);
     const [userInput, setUserInput] = (0, import_react18.useState)("");
     const [correctionData, setCorrectionData] = (0, import_react18.useState)(null);
+    const [contextMenu, setContextMenu] = (0, import_react18.useState)(null);
+    const [isTranslating, setIsTranslating] = (0, import_react18.useState)(false);
+    const [translateQueue, setTranslateQueue] = (0, import_react18.useState)([]);
+    const [translateIndex, setTranslateIndex] = (0, import_react18.useState)(0);
     const messagesEndRef = (0, import_react18.useRef)(null);
     const inputRef = (0, import_react18.useRef)(null);
+    const menuRef = (0, import_react18.useRef)(null);
     (0, import_react18.useEffect)(() => {
       if (conversationId) {
         loadMessages();
@@ -24045,6 +24054,23 @@
         inputRef.current?.focus();
       }
     }, [isSending, conversationId]);
+    (0, import_react18.useEffect)(() => {
+      if (!contextMenu) return;
+      const handleClick = (e) => {
+        if (menuRef.current && !menuRef.current.contains(e.target)) {
+          setContextMenu(null);
+        }
+      };
+      const handleEsc = (e) => {
+        if (e.key === "Escape") setContextMenu(null);
+      };
+      window.addEventListener("mousedown", handleClick);
+      window.addEventListener("keydown", handleEsc);
+      return () => {
+        window.removeEventListener("mousedown", handleClick);
+        window.removeEventListener("keydown", handleEsc);
+      };
+    }, [contextMenu]);
     const loadMessages = async () => {
       if (!conversationId) return;
       setIsLoading(true);
@@ -24106,6 +24132,49 @@
         handleSend();
       }
     };
+    const handleContextMenu = (e, msg) => {
+      e.preventDefault();
+      setContextMenu({ x: e.clientX, y: e.clientY, message: msg });
+    };
+    const handleTranslate = (0, import_react18.useCallback)(async () => {
+      if (!contextMenu) return;
+      const msg = contextMenu.message;
+      setContextMenu(null);
+      setIsTranslating(true);
+      try {
+        const raw = await fetch("/api/lemessage/translate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: msg.content })
+        }).then((r) => r.json());
+        if (raw.success && raw.data && raw.data.pairs?.length > 0) {
+          setTranslateQueue(raw.data.pairs);
+          setTranslateIndex(0);
+        } else {
+          setError("Failed to translate message");
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to translate message");
+      } finally {
+        setIsTranslating(false);
+      }
+    }, [contextMenu]);
+    const handleTranslateCardCreated = (0, import_react18.useCallback)(() => {
+      if (translateIndex + 1 < translateQueue.length) {
+        setTranslateIndex((prev) => prev + 1);
+      } else {
+        setTranslateQueue([]);
+        setTranslateIndex(0);
+      }
+    }, [translateIndex, translateQueue]);
+    const handleTranslateCardClosed = (0, import_react18.useCallback)(() => {
+      if (translateIndex + 1 < translateQueue.length) {
+        setTranslateIndex((prev) => prev + 1);
+      } else {
+        setTranslateQueue([]);
+        setTranslateIndex(0);
+      }
+    }, [translateIndex, translateQueue]);
     const formatTime = (iso) => {
       if (!iso) return "";
       const date = new Date(iso);
@@ -24125,6 +24194,7 @@
         /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "empty-hint", children: "Choose a chat from the sidebar or start a new one" })
       ] }) });
     }
+    const currentPair = translateQueue[translateIndex];
     return /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "chat-view", children: [
       /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "chat-view-header", children: [
         /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("button", { className: "back-btn", onClick: onBack, "aria-label": "Back", children: /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("svg", { width: "20", height: "20", viewBox: "0 0 20 20", fill: "none", children: /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("path", { d: "M12 4L6 10L12 16", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }) }) }),
@@ -24142,14 +24212,26 @@
             profileName
           ] })
         ] }),
-        messages.map((msg) => /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: `msg-bubble ${msg.role === "user" ? "user" : "assistant"}`, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "msg-content", children: msg.content }),
-          /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "msg-time", children: formatTime(msg.createdAt) })
-        ] }, msg.id)),
+        messages.map((msg) => /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)(
+          "div",
+          {
+            className: `msg-bubble ${msg.role === "user" ? "user" : "assistant"}`,
+            onContextMenu: (e) => handleContextMenu(e, msg),
+            children: [
+              /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "msg-content", children: msg.content }),
+              /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "msg-time", children: formatTime(msg.createdAt) })
+            ]
+          },
+          msg.id
+        )),
         isSending && /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "msg-bubble assistant sending", children: /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(Spinner, { size: "sm" }) }),
         /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { ref: messagesEndRef })
       ] }),
       error && /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "chat-view-error", children: error }),
+      isTranslating && /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "chat-view-translating", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(Spinner, { size: "sm" }),
+        " Translating..."
+      ] }),
       /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "chat-view-input", children: [
         /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(
           "input",
@@ -24170,6 +24252,31 @@
             onClick: handleSend,
             disabled: !userInput.trim() || isSending,
             children: /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("svg", { width: "18", height: "18", viewBox: "0 0 18 18", fill: "none", children: /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("path", { d: "M2 9L16 2L9 16L7 11L2 9Z", stroke: "currentColor", strokeWidth: "1.5", strokeLinecap: "round", strokeLinejoin: "round" }) })
+          }
+        )
+      ] }),
+      contextMenu && /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)(import_jsx_runtime23.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "context-menu-backdrop" }),
+        /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(
+          "div",
+          {
+            ref: menuRef,
+            className: "context-menu",
+            style: { left: contextMenu.x, top: contextMenu.y },
+            children: /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)(
+              "button",
+              {
+                className: "context-menu-item",
+                onClick: handleTranslate,
+                children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("svg", { width: "14", height: "14", viewBox: "0 0 14 14", fill: "none", children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("path", { d: "M1 13L4 4L7 13M2 10H6", stroke: "currentColor", strokeWidth: "1.3", strokeLinecap: "round", strokeLinejoin: "round" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("path", { d: "M10 3V13M10 3L12 5M10 3L8 5", stroke: "currentColor", strokeWidth: "1.3", strokeLinecap: "round", strokeLinejoin: "round" })
+                  ] }),
+                  "Translate to English & Create Card"
+                ]
+              }
+            )
           }
         )
       ] }),
@@ -24194,7 +24301,25 @@
             onCreated: () => setCorrectionData(null)
           }
         )
-      ] }) })
+      ] }) }),
+      currentPair && /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(
+        CreateFlashCardModal,
+        {
+          userId: session?.user?.id ?? "",
+          languageId: language?.id ?? "",
+          showLanguageSelector: true,
+          initialValues: {
+            frontStatement: currentPair.original,
+            backStatement: currentPair.translated,
+            notes: `From conversation with ${profileName}${translateQueue.length > 1 ? ` (${translateIndex + 1}/${translateQueue.length})` : ""}`,
+            category: "Chat-Translation",
+            tags: "lemessage,translation"
+          },
+          onClose: handleTranslateCardClosed,
+          onCreated: handleTranslateCardCreated
+        },
+        `translate-${translateIndex}`
+      )
     ] });
   };
   var CreateFlashCardButton = ({ mistake, corrected, explanation, userId, languageId, onCreated }) => {
@@ -24233,33 +24358,30 @@
   // App/Code/Community/LeMessage/Source/web/ChatPage/index.tsx
   var import_jsx_runtime24 = __toESM(require_jsx_runtime(), 1);
   var LeMessagePage = () => {
-    const [activeConversationId, setActiveConversationId] = (0, import_react19.useState)(null);
+    const [activeConvId, setActiveConvId] = (0, import_react19.useState)(null);
+    const [activeConvInfo, setActiveConvInfo] = (0, import_react19.useState)({ profileName: "", profileAvatarUrl: "" });
     const [refreshTrigger, setRefreshTrigger] = (0, import_react19.useState)(0);
-    const [convCache, setConvCache] = (0, import_react19.useState)(/* @__PURE__ */ new Map());
-    const handleSelectConversation = (0, import_react19.useCallback)((id) => {
-      setActiveConversationId(id);
+    const handleSelectConversation = (0, import_react19.useCallback)((id, profileName, profileAvatarUrl) => {
+      setActiveConvId(id);
+      setActiveConvInfo({ profileName, profileAvatarUrl });
     }, []);
-    const handleConversationCreated = (0, import_react19.useCallback)((id) => {
-      setActiveConversationId(id);
+    const handleConversationCreated = (0, import_react19.useCallback)((id, profileName, profileAvatarUrl) => {
+      setActiveConvId(id);
+      setActiveConvInfo({ profileName, profileAvatarUrl });
       setRefreshTrigger((prev) => prev + 1);
     }, []);
     const handleMessageSent = (0, import_react19.useCallback)(() => {
       setRefreshTrigger((prev) => prev + 1);
     }, []);
     const handleBack = (0, import_react19.useCallback)(() => {
-      setActiveConversationId(null);
-    }, []);
-    const activeConversation = activeConversationId ? convCache.get(activeConversationId) : void 0;
-    const handleCacheUpdate = (0, import_react19.useCallback)((convs) => {
-      const map = /* @__PURE__ */ new Map();
-      convs.forEach((c) => map.set(c.id, c));
-      setConvCache(map);
+      setActiveConvId(null);
+      setActiveConvInfo({ profileName: "", profileAvatarUrl: "" });
     }, []);
     return /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "lemessage-page", children: [
       /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(
         ConversationList,
         {
-          activeConversationId,
+          activeConversationId: activeConvId,
           onSelectConversation: handleSelectConversation,
           onConversationCreated: handleConversationCreated,
           refreshTrigger
@@ -24268,9 +24390,9 @@
       /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(
         ChatView,
         {
-          conversationId: activeConversationId,
-          profileName: activeConversation?.profileName ?? "",
-          profileAvatarUrl: activeConversation?.profileAvatarUrl ?? "",
+          conversationId: activeConvId,
+          profileName: activeConvInfo.profileName,
+          profileAvatarUrl: activeConvInfo.profileAvatarUrl,
           onBack: handleBack,
           onMessageSent: handleMessageSent
         }

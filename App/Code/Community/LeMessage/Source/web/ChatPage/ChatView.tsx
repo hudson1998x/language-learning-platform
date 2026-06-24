@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { getMessages, ChatMessageDto } from '@api/leMessage';
 import { Spinner } from '@component/Spinner';
 import { useSession } from '@hook/session-provider';
@@ -12,10 +12,15 @@ interface Correction {
     explanation: string;
 }
 
-interface SendMessageResponse {
-    userMessage: ChatMessageDto;
-    assistantMessage: ChatMessageDto;
-    correction?: Correction | null;
+interface SentencePair {
+    original: string;
+    translated: string;
+}
+
+interface ContextMenu {
+    x: number;
+    y: number;
+    message: ChatMessageDto;
 }
 
 interface ChatViewProps {
@@ -42,9 +47,14 @@ export const ChatView = ({
     const [error, setError] = useState<string | null>(null);
     const [userInput, setUserInput] = useState('');
     const [correctionData, setCorrectionData] = useState<Correction | null>(null);
+    const [contextMenu, setContextMenu] = useState<ContextMenu | null>(null);
+    const [isTranslating, setIsTranslating] = useState(false);
+    const [translateQueue, setTranslateQueue] = useState<SentencePair[]>([]);
+    const [translateIndex, setTranslateIndex] = useState(0);
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
+    const menuRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         if (conversationId) {
@@ -63,6 +73,24 @@ export const ChatView = ({
             inputRef.current?.focus();
         }
     }, [isSending, conversationId]);
+
+    useEffect(() => {
+        if (!contextMenu) return;
+        const handleClick = (e: MouseEvent) => {
+            if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+                setContextMenu(null);
+            }
+        };
+        const handleEsc = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') setContextMenu(null);
+        };
+        window.addEventListener('mousedown', handleClick);
+        window.addEventListener('keydown', handleEsc);
+        return () => {
+            window.removeEventListener('mousedown', handleClick);
+            window.removeEventListener('keydown', handleEsc);
+        };
+    }, [contextMenu]);
 
     const loadMessages = async () => {
         if (!conversationId) return;
@@ -134,6 +162,55 @@ export const ChatView = ({
         }
     };
 
+    const handleContextMenu = (e: React.MouseEvent, msg: ChatMessageDto) => {
+        e.preventDefault();
+        setContextMenu({ x: e.clientX, y: e.clientY, message: msg });
+    };
+
+    const handleTranslate = useCallback(async () => {
+        if (!contextMenu) return;
+        const msg = contextMenu.message;
+        setContextMenu(null);
+        setIsTranslating(true);
+
+        try {
+            const raw = await fetch('/api/lemessage/translate', {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text: msg.content })
+            }).then(r => r.json());
+
+            if (raw.success && raw.data && raw.data.pairs?.length > 0) {
+                setTranslateQueue(raw.data.pairs);
+                setTranslateIndex(0);
+            } else {
+                setError('Failed to translate message');
+            }
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to translate message');
+        } finally {
+            setIsTranslating(false);
+        }
+    }, [contextMenu]);
+
+    const handleTranslateCardCreated = useCallback(() => {
+        if (translateIndex + 1 < translateQueue.length) {
+            setTranslateIndex((prev) => prev + 1);
+        } else {
+            setTranslateQueue([]);
+            setTranslateIndex(0);
+        }
+    }, [translateIndex, translateQueue]);
+
+    const handleTranslateCardClosed = useCallback(() => {
+        if (translateIndex + 1 < translateQueue.length) {
+            setTranslateIndex((prev) => prev + 1);
+        } else {
+            setTranslateQueue([]);
+            setTranslateIndex(0);
+        }
+    }, [translateIndex, translateQueue]);
+
     const formatTime = (iso?: string): string => {
         if (!iso) return '';
         const date = new Date(iso);
@@ -162,6 +239,8 @@ export const ChatView = ({
             </div>
         );
     }
+
+    const currentPair = translateQueue[translateIndex];
 
     return (
         <div className={'chat-view'}>
@@ -196,7 +275,11 @@ export const ChatView = ({
                 )}
 
                 {messages.map((msg) => (
-                    <div key={msg.id} className={`msg-bubble ${msg.role === 'user' ? 'user' : 'assistant'}`}>
+                    <div
+                        key={msg.id}
+                        className={`msg-bubble ${msg.role === 'user' ? 'user' : 'assistant'}`}
+                        onContextMenu={(e) => handleContextMenu(e, msg)}
+                    >
                         <div className={'msg-content'}>{msg.content}</div>
                         <div className={'msg-time'}>{formatTime(msg.createdAt)}</div>
                     </div>
@@ -213,6 +296,12 @@ export const ChatView = ({
 
             {error && (
                 <div className={'chat-view-error'}>{error}</div>
+            )}
+
+            {isTranslating && (
+                <div className={'chat-view-translating'}>
+                    <Spinner size={'sm'} /> Translating...
+                </div>
             )}
 
             <div className={'chat-view-input'}>
@@ -236,6 +325,28 @@ export const ChatView = ({
                 </button>
             </div>
 
+            {contextMenu && (
+                <>
+                    <div className={'context-menu-backdrop'} />
+                    <div
+                        ref={menuRef}
+                        className={'context-menu'}
+                        style={{ left: contextMenu.x, top: contextMenu.y }}
+                    >
+                        <button
+                            className={'context-menu-item'}
+                            onClick={handleTranslate}
+                        >
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                                <path d="M1 13L4 4L7 13M2 10H6" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+                                <path d="M10 3V13M10 3L12 5M10 3L8 5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                            Translate to English & Create Card
+                        </button>
+                    </div>
+                </>
+            )}
+
             {correctionData && (
                 <div className={'correction-toast'}>
                     <div className={'correction-toast-content'}>
@@ -256,6 +367,24 @@ export const ChatView = ({
                         />
                     </div>
                 </div>
+            )}
+
+            {currentPair && (
+                <CreateFlashCardModal
+                    key={`translate-${translateIndex}`}
+                    userId={session?.user?.id ?? ''}
+                    languageId={language?.id ?? ''}
+                    showLanguageSelector={true}
+                    initialValues={{
+                        frontStatement: currentPair.original,
+                        backStatement: currentPair.translated,
+                        notes: `From conversation with ${profileName}${translateQueue.length > 1 ? ` (${translateIndex + 1}/${translateQueue.length})` : ''}`,
+                        category: 'Chat-Translation',
+                        tags: 'lemessage,translation',
+                    }}
+                    onClose={handleTranslateCardClosed}
+                    onCreated={handleTranslateCardCreated}
+                />
             )}
         </div>
     );

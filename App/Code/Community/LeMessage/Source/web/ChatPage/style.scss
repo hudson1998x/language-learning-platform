@@ -1,23 +1,58 @@
-$bg: #0b0c0e;
+$bg: #0f1011;
+
+// The page scrollbar visible in the screenshot means something above
+// .lemessage-page is not constrained. Add this to your global/app styles:
+//
+//   html, body, #root { height: 100%; margin: 0; overflow: hidden; }
+//
+// Then this component will behave correctly.
 
 .lemessage-page {
     display: flex;
-    height: 100%;
     width: 100%;
-    background: $bg;
+    height: 80%;
+    overflow: hidden;
+    background: transparent;
+    position: relative;
+    
+    * {
+        font-family: system-ui;
+    }
 }
 
 @media (max-width: 768px) {
     .lemessage-page {
         .conv-list {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
             width: 100%;
             min-width: 0;
+            transition: transform 0.26s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.26s ease;
+
+            &.hidden {
+                transform: translateX(-100%);
+                opacity: 0;
+                pointer-events: none;
+            }
         }
 
         .chat-view {
-            .back-btn {
-                display: flex !important;
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            transform: translateX(100%);
+            opacity: 0;
+            transition: transform 0.26s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.26s ease;
+            pointer-events: none;
+
+            &.active {
+                transform: translateX(0);
+                opacity: 1;
+                pointer-events: auto;
             }
+
+            .back-btn { display: flex !important; }
         }
     }
 }

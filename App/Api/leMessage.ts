@@ -98,6 +98,35 @@ export const listConversations = (): Promise<ApiResponse<ListConversationsRespon
     });
 };
 
+export interface TranslateRequest {
+    text: string;
+}
+
+export interface SentencePair {
+    original: string;
+    translated: string;
+}
+
+export interface TranslateResponse {
+    pairs: SentencePair[];
+}
+
+export const translateMessage = (payload: TranslateRequest): Promise<ApiResponse<TranslateResponse>> => {
+    return fetch('/api/lemessage/translate', {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+    })
+    .then((response: Response) => {
+        if (!response.ok) {
+            throw new Error(`Request failed with status ${response.status}`);
+        }
+        return response.json();
+    });
+};
+
 export interface GetMessagesRequest {
     conversationId: string;
     page: number;

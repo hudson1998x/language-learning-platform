@@ -49,6 +49,22 @@ public class GetMessagesRequest
     public int Limit { get; set; } = 50;
 }
 
+public class TranslateRequest
+{
+    public string Text { get; set; } = string.Empty;
+}
+
+public class TranslateResponse
+{
+    public List<SentencePair> Pairs { get; set; } = new();
+}
+
+public class SentencePair
+{
+    public string Original { get; set; } = string.Empty;
+    public string Translated { get; set; } = string.Empty;
+}
+
 public class GetMessagesResponse
 {
     public List<ChatMessageDto> Messages { get; set; } = new();

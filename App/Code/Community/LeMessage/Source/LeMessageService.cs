@@ -1,4 +1,7 @@
+using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Text.Json.Nodes;
+using System.Text.RegularExpressions;
 using LLE.Kernel.Attributes;
 using LLE.Kernel.DataQL.Ast;
 using LLE.Kernel.Dto;
@@ -18,15 +21,41 @@ public class LeMessageService
 {
     private const int MaxTokens = 4096;
     private const int HistoryLimit = 10;
-    private const string CorrectionDelimiter = "---CORRECTION---";
+    private const int TranslationMaxTokens = 2048;
 
-    private static readonly string CorrectionInstruction =
-        $"When the learner makes a mistake in the target language, correct them politely and conversationally inline. " +
-        $"For example: \"You said 'Salida el avion' but it's actually 'Salió el avión' — easy mix-up! 😊\"\n" +
-        $"After your conversational response, if a correction was needed, append:\n" +
-        $"{CorrectionDelimiter}\n" +
-        $"{{\"mistake\": \"<what they said>\", \"corrected\": \"<correct version>\", \"explanation\": \"<brief grammar note>\"}}\n" +
-        $"If no correction is needed, do not include the delimiter.";
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        PropertyNameCaseInsensitive = true
+    };
+
+    private static readonly Regex ThinkBlockRegex = new(
+        @"<think>[\s\S]*?</think>",
+        RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+    private static readonly string ChatOutputSchema =
+        "You MUST respond with exactly one valid JSON object. " +
+        "Do NOT wrap your JSON response inside markdown blocks (do not use ```json). " +
+        "Do NOT include any text, preamble, or explanations outside the JSON object.\n\n" +
+        "SCHEMA:\n" +
+        "{\n" +
+        "  \"message\": \"<your natural conversational response>\",\n" +
+        "  \"correction\": null or {\n" +
+        "    \"mistake\": \"<what the learner said wrong>\",\n" +
+        "    \"corrected\": \"<the correct version>\",\n" +
+        "    \"explanation\": \"<brief grammar or vocabulary note in English>\"\n" +
+        "  }\n" +
+        "}\n\n" +
+        "STRICT RULES FOR JSON STABILITY:\n" +
+        "- NEVER use unescaped double quotes (\") inside text values. Use single quotes (') instead for examples or emphasized text.\n" +
+        "- If the learner made no mistake, set \"correction\" to null.\n" +
+        "- If the learner made a mistake, correct them politely and conversationally inline, " +
+        "AND populate the correction object.\n" +
+        "- The \"message\" field must contain ONLY your conversational response " +
+        "(the learner should never see the JSON structure).\n" +
+        "- All string values must be properly escaped for valid JSON.\n" +
+        "- Never leave fields empty. If no correction, use null.";
 
     public async Task<ApiResponse<StartConversationResponse>> StartConversationAsync(
         StartConversationRequest request, UserContext ctx)
@@ -170,19 +199,30 @@ public class LeMessageService
         var userPrompt =
             $"<conversation_history>\n{conversationHistory}\n</conversation_history>\n\n" +
             $"<current_input>\n{request.Message}\n</current_input>\n\n" +
-            $"Respond as your character would. Keep your response natural and conversational. " +
-            $"Do not wrap your response in XML tags or markdown.";
+            $"Respond as your character would. Keep your response natural and conversational.";
 
         var systemPrompt = profile?.SystemPrompt ?? string.Empty;
         if (!string.IsNullOrWhiteSpace(systemPrompt))
-            systemPrompt += "\n\n" + CorrectionInstruction;
+            systemPrompt += "\n\n" + ChatOutputSchema;
 
         var rawResponse = await QueryLlmAsync(llmService, systemPrompt, userPrompt);
 
-        if (string.IsNullOrWhiteSpace(rawResponse))
-            rawResponse = "I'm not sure how to respond to that. Could you tell me more?";
+        string displayContent;
+        Correction? correction = null;
 
-        var (displayContent, correction) = ExtractCorrection(rawResponse);
+        if (string.IsNullOrWhiteSpace(rawResponse))
+        {
+            displayContent = "I'm not sure how to respond to that. Could you tell me more?";
+        }
+        else
+        {
+            var parseResult = TryParseResponse(rawResponse);
+            displayContent = parseResult.message;
+            correction = parseResult.correction;
+
+            if (string.IsNullOrWhiteSpace(displayContent))
+                displayContent = rawResponse;
+        }
 
         var assistantMsg = await messageRepo.CreateAsync(new ChatMessage
         {
@@ -215,6 +255,175 @@ public class LeMessageService
         };
     }
 
+    public async Task<ApiResponse<TranslateResponse>> TranslateMessageAsync(
+        TranslateRequest request, UserContext ctx)
+    {
+        if (string.IsNullOrWhiteSpace(request.Text))
+            return new ApiResponse<TranslateResponse>
+            {
+                Success = false,
+                Message = "Text is required"
+            };
+
+        var llmService = ServiceCatalog.GetService<LLMService>();
+
+        var systemPrompt =
+            "You are a translation assistant. Split the given text into individual sentences. " +
+            "Translate each sentence to English. Return ONLY a valid JSON array of objects. " +
+            "Do NOT wrap in markdown blocks.\n\n" +
+            "SCHEMA:\n" +
+            "[\n" +
+            "  {\n" +
+            "    \"original\": \"<original sentence>\",\n" +
+            "    \"translated\": \"<English translation>\"\n" +
+            "  }\n" +
+            "]\n\n" +
+            "If the text has only one sentence, return an array with one object. " +
+            "Preserve the exact original wording in the \"original\" field.";
+
+        var userPrompt = $"Translate this text to English, sentence by sentence:\n\n{request.Text}";
+
+        var rawResponse = await QueryLlmAsync(llmService, systemPrompt, userPrompt);
+
+        if (string.IsNullOrWhiteSpace(rawResponse))
+            return new ApiResponse<TranslateResponse>
+            {
+                Success = false,
+                Message = "LLM returned an empty response"
+            };
+
+        var pairs = TryParseSentencePairs(rawResponse);
+
+        if (pairs.Count == 0)
+        {
+            pairs.Add(new SentencePair
+            {
+                Original = request.Text,
+                Translated = rawResponse
+            });
+        }
+
+        return new ApiResponse<TranslateResponse>
+        {
+            Success = true,
+            Data = new TranslateResponse { Pairs = pairs }
+        };
+    }
+
+    private static (string message, Correction? correction) TryParseResponse(string raw)
+    {
+        try
+        {
+            var withoutThink = ThinkBlockRegex.Replace(raw, string.Empty).Trim();
+            var json = StripMarkdownFences(withoutThink);
+
+            if (string.IsNullOrWhiteSpace(json))
+                return (raw.Trim(), null);
+
+            var jsonStart = json.IndexOf('{');
+            var jsonEnd = json.LastIndexOf('}');
+
+            if (jsonStart < 0 || jsonEnd <= jsonStart)
+                return (raw.Trim(), null);
+
+            json = json[jsonStart..(jsonEnd + 1)];
+
+            // Try standard JSON parsing first
+            try
+            {
+                var node = JsonNode.Parse(json, null, new JsonDocumentOptions { AllowTrailingCommas = true });
+                if (node is not null)
+                {
+                    var message = node["message"]?.GetValue<string>()?.Trim() ?? string.Empty;
+
+                    Correction? correction = null;
+                    var correctionNode = node["correction"];
+                    if (correctionNode is not null && correctionNode is JsonObject)
+                    {
+                        var mistake = correctionNode["mistake"]?.GetValue<string>()?.Trim() ?? string.Empty;
+                        var corrected = correctionNode["corrected"]?.GetValue<string>()?.Trim() ?? string.Empty;
+                        var explanation = correctionNode["explanation"]?.GetValue<string>()?.Trim() ?? string.Empty;
+
+                        if (!string.IsNullOrWhiteSpace(mistake) && !string.IsNullOrWhiteSpace(corrected))
+                        {
+                            correction = new Correction
+                            {
+                                Mistake = mistake,
+                                Corrected = corrected,
+                                Explanation = explanation
+                            };
+                        }
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(message))
+                        return (message, correction);
+                }
+            }
+            catch
+            {
+                // Fall through to manual regex extraction if unescaped inner quotes broke the JSON parser
+            }
+
+            // Fallback: Manually extract message content between known string boundaries
+            var messageMatch = Regex.Match(json, @"""message""\s*:\s*""([\s\S]*?)""\s*,\s*""correction""", RegexOptions.IgnoreCase);
+            if (messageMatch.Success)
+            {
+                var extractedMessage = messageMatch.Groups[1].Value.Trim();
+                if (extractedMessage.EndsWith(",")) 
+                    extractedMessage = extractedMessage.TrimEnd(',').TrimEnd('"');
+
+                return (extractedMessage, null);
+            }
+
+            return (raw.Trim(), null);
+        }
+        catch
+        {
+            return (raw.Trim(), null);
+        }
+    }
+
+    private static List<SentencePair> TryParseSentencePairs(string raw)
+    {
+        try
+        {
+            var withoutThink = ThinkBlockRegex.Replace(raw, string.Empty).Trim();
+            var json = StripMarkdownFences(withoutThink);
+
+            if (string.IsNullOrWhiteSpace(json))
+                return [];
+
+            var jsonStart = json.IndexOf('[');
+            var jsonEnd = json.LastIndexOf(']');
+
+            if (jsonStart < 0 || jsonEnd <= jsonStart)
+                return [];
+
+            json = json[jsonStart..(jsonEnd + 1)];
+
+            var array = JsonNode.Parse(json, null, new JsonDocumentOptions { AllowTrailingCommas = true })?.AsArray();
+            if (array is null || array.Count == 0) return [];
+
+            var pairs = new List<SentencePair>();
+            foreach (var item in array)
+            {
+                if (item is null) continue;
+                var original = item["original"]?.GetValue<string>()?.Trim() ?? string.Empty;
+                var translated = item["translated"]?.GetValue<string>()?.Trim() ?? string.Empty;
+                if (!string.IsNullOrWhiteSpace(original) && !string.IsNullOrWhiteSpace(translated))
+                {
+                    pairs.Add(new SentencePair { Original = original, Translated = translated });
+                }
+            }
+
+            return pairs;
+        }
+        catch
+        {
+            return [];
+        }
+    }
+
     private static async Task<string> QueryLlmAsync(
         LLMService llmService, string systemPrompt, string userPrompt)
     {
@@ -236,33 +445,18 @@ public class LeMessageService
         }
     }
 
-    private static (string displayContent, Correction? correction) ExtractCorrection(string raw)
+    private static string StripMarkdownFences(string text)
     {
-        var delimiterIndex = raw.LastIndexOf(CorrectionDelimiter, StringComparison.Ordinal);
-        if (delimiterIndex < 0)
-            return (raw.Trim(), null);
+        var trimmed = text.Trim();
+        if (!trimmed.StartsWith("```")) return trimmed;
 
-        var displayPart = raw[..delimiterIndex].Trim();
+        var firstNewline = trimmed.IndexOfAny(['\n', '\r']);
+        if (firstNewline < 0) return trimmed;
 
-        var jsonPart = raw[(delimiterIndex + CorrectionDelimiter.Length)..].Trim();
+        var lastFence = trimmed.LastIndexOf("```", trimmed.Length - 1, StringComparison.Ordinal);
+        if (lastFence <= firstNewline) return trimmed;
 
-        try
-        {
-            var correction = JsonSerializer.Deserialize<Correction>(jsonPart, new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            });
-
-            if (correction is not null &&
-                !string.IsNullOrWhiteSpace(correction.Mistake) &&
-                !string.IsNullOrWhiteSpace(correction.Corrected))
-            {
-                return (displayPart, correction);
-            }
-        }
-        catch { }
-
-        return (displayPart, null);
+        return trimmed[(firstNewline + 1)..lastFence].Trim();
     }
 
     private static ApiResponse<T> ResponseFail<T>(string message) =>

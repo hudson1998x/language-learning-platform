@@ -1,336 +1,292 @@
-$bg: #0b0c0e;
-$surface: #16181c;
-$surface-raised: #1c1f24;
-$border: #2a2d33;
-$border-strong: #383c44;
-$text: #f2f3f5;
-$text-dim: #9aa0a8;
-$text-faint: #6b7078;
-$accent: #5b8def;
-$accent-hover: #4878d9;
-$accent-soft: rgba(91, 141, 239, 0.12);
-$good: #34d399;
-$error: #e5594f;
+$bg:          #0f1011;
+$border:      rgba(255,255,255,0.07);
+$surface-2:   rgba(255,255,255,0.04);
+$surface-3:   rgba(255,255,255,0.06);
+$text:        #e8eaed;
+$text-dim:    #9aa0a8;
+$text-faint:  #4a5058;
+$accent:      #0084ff;
+$accent-hover:#006fd6;
+$accent-soft: rgba(0, 132, 255, 0.12);
+$asst-bubble: #1e2124;
+$asst-border: rgba(255,255,255,0.08);
+$good:        #31c48d;
+$error:       #e05c52;
 
 @mixin focus-ring {
-    &:focus-visible {
-        outline: 2px solid $accent;
-        outline-offset: 2px;
-    }
+    &:focus-visible { outline: 2px solid $accent; outline-offset: 2px; }
 }
 
+// ── Shell ─────────────────────────────────────────────────────────────────────
+// CRITICAL: This is a flex column that must NOT overflow its parent.
+// flex:1 + overflow:hidden means it takes remaining width.
+// The three children stack: header (fixed) | messages (scrolls) | input (fixed).
 .chat-view {
     flex: 1;
+    min-width: 0;
     display: flex;
     flex-direction: column;
-    height: 100%;
-    background: $bg;
-    min-width: 0;
+    height: 100%;          // fill the row
+    overflow: hidden;      // children manage their own scroll
+    background: transparent;
 }
 
+// ── No-conversation placeholder ───────────────────────────────────────────────
 .chat-view-empty {
     flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    color: $text-dim;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 6px;
 
-    .empty-icon {
-        color: $text-faint;
-        margin-bottom: 8px;
-    }
-
-    .empty-title {
-        font-size: 16px;
-        font-weight: 500;
-        color: $text;
-    }
-
-    .empty-hint {
-        font-size: 13px;
-    }
+    .empty-icon  { color: $text-faint; margin-bottom: 10px; opacity: 0.35; }
+    .empty-title { font-size: 15px; font-weight: 600; color: $text; }
+    .empty-hint  { font-size: 12px; color: $text-dim; }
 }
 
+// ── Header — flex-shrink: 0 so it never collapses ────────────────────────────
 .chat-view-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 16px;
+    flex-shrink: 0;
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 16px;
+    background: transparent;
     border-bottom: 1px solid $border;
-    background: $surface;
 
     .back-btn {
         display: none;
-        background: none;
-        border: none;
-        color: $text-dim;
-        cursor: pointer;
-        padding: 4px;
-        border-radius: 4px;
+        background: none; border: none; color: $text-dim;
+        cursor: pointer; padding: 6px; border-radius: 50%;
+        transition: background 0.12s, color 0.12s;
         @include focus-ring;
-
-        &:hover {
-            color: $text;
-        }
+        &:hover { background: rgba(255,255,255,0.06); color: $text; }
     }
 
     .chat-view-profile {
-        display: flex;
-        align-items: center;
-        gap: 10px;
+        display: flex; align-items: center; gap: 10px;
+        flex: 1; min-width: 0;
     }
 
     .header-avatar {
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        overflow: hidden;
+        width: 34px; height: 34px; border-radius: 50%;
+        overflow: hidden; flex-shrink: 0;
+        background: rgba(255,255,255,0.06);
 
-        img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+        img { width: 100%; height: 100%; object-fit: cover; }
 
         .avatar-placeholder {
-            width: 100%;
-            height: 100%;
-            background: $accent;
-            color: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            font-weight: 600;
+            width: 100%; height: 100%;
+            background: $accent; color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 700;
         }
     }
 
     .header-name {
-        font-size: 15px;
-        font-weight: 600;
-        color: $text;
+        font-size: 14px; font-weight: 700; color: $text;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
 }
 
+// ── Messages — THE only scrollable zone, takes all remaining height ───────────
 .chat-view-messages {
-    flex: 1;
-    overflow-y: auto;
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+    flex: 1;             // grows to fill exactly the space between header and input
+    overflow-y: auto;    // scrolls internally
+    overflow-x: hidden;
+    padding: 16px 16px 8px;
+    display: flex; flex-direction: column;
+    gap: 4px;
+
+    &::-webkit-scrollbar         { width: 3px; }
+    &::-webkit-scrollbar-track   { background: transparent; }
+    &::-webkit-scrollbar-thumb   { background: rgba(255,255,255,0.08); border-radius: 2px; }
 }
 
 .chat-view-status {
     flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 5px;
 
-    .empty-text {
-        color: $text;
-        font-size: 15px;
-        font-weight: 500;
-    }
-
-    .empty-hint {
-        color: $text-dim;
-        font-size: 13px;
-    }
+    .empty-text { font-size: 14px; font-weight: 600; color: $text; }
+    .empty-hint { font-size: 12px; color: $text-dim; }
 }
 
+// ── Bubbles ───────────────────────────────────────────────────────────────────
 .msg-bubble {
-    max-width: 80%;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
+    max-width: 65%;
+    display: flex; flex-direction: column; gap: 3px;
+    animation: msgIn 0.14s ease-out both;
+
+    @keyframes msgIn {
+        from { opacity: 0; transform: translateY(4px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
 
     &.user {
         align-self: flex-end;
-
         .msg-content {
-            background: $accent;
-            color: #fff;
-            border-radius: 16px 16px 4px 16px;
+            background: $accent; color: #fff;
+            border-radius: 18px 18px 4px 18px;
         }
-
-        .msg-time {
-            text-align: right;
-        }
+        .msg-time { text-align: right; }
     }
 
     &.assistant {
         align-self: flex-start;
-
         .msg-content {
-            background: $surface-raised;
-            color: $text;
-            border-radius: 16px 16px 16px 4px;
+            background: $asst-bubble; color: $text;
+            border-radius: 18px 18px 18px 4px;
+            border: 1px solid $asst-border;
         }
     }
 
     &.sending {
         align-self: flex-start;
-        padding: 8px 16px;
-        background: $surface-raised;
-        border-radius: 16px 16px 16px 4px;
+        .msg-content {
+            background: $asst-bubble;
+            border: 1px solid $asst-border;
+            border-radius: 18px 18px 18px 4px;
+            padding: 10px 16px; min-width: 52px;
+        }
     }
 
     .msg-content {
-        padding: 10px 14px;
-        font-size: 14px;
-        line-height: 1.5;
-        word-break: break-word;
-        white-space: pre-wrap;
+        padding: 9px 13px;
+        font-size: 14px; line-height: 1.5;
+        word-break: break-word; white-space: pre-wrap;
     }
 
     .msg-time {
-        font-size: 11px;
-        color: $text-faint;
-        padding: 0 4px;
+        font-size: 10px; color: $text-faint; padding: 0 4px;
     }
 }
 
+// ── Banners (error, translating) — flex-shrink: 0 ────────────────────────────
 .chat-view-error {
-    padding: 8px 16px;
-    background: rgba($error, 0.1);
-    color: $error;
-    font-size: 13px;
-    text-align: center;
+    flex-shrink: 0;
+    padding: 6px 16px;
+    background: rgba($error, 0.08);
+    border-top: 1px solid rgba($error, 0.15);
+    color: $error; font-size: 12px; text-align: center;
 }
 
-.chat-view-input {
-    display: flex;
-    gap: 8px;
-    padding: 12px 16px;
+.chat-view-translating {
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    gap: 8px; padding: 6px 16px;
+    font-size: 12px; color: $text-dim;
     border-top: 1px solid $border;
-    background: $surface;
+}
+
+// ── Input bar — flex-shrink: 0, always visible at bottom ─────────────────────
+.chat-view-input {
+    flex-shrink: 0;           // NEVER shrinks — this is what kept it off-screen
+    display: flex; align-items: center;
+    gap: 8px; padding: 10px 12px;
+    border-top: 1px solid $border;
 
     input {
         flex: 1;
-        padding: 10px 14px;
-        border: 1px solid $border-strong;
-        border-radius: 8px;
-        font-size: 14px;
-        font-family: inherit;
-        background: $surface-raised;
+        padding: 10px 16px;
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 24px;
+        font-size: 14px; font-family: inherit;
+        background: rgba(255,255,255,0.05);
         color: $text;
+        outline: none;
+        transition: border-color 0.15s, background 0.15s;
         @include focus-ring;
 
-        &:focus {
-            outline: none;
-            border-color: $accent;
-        }
-
-        &:disabled {
-            opacity: 0.5;
-        }
-
-        &::placeholder {
-            color: $text-faint;
-        }
+        &:focus    { border-color: $accent; background: rgba(255,255,255,0.07); }
+        &:disabled { opacity: 0.4; }
+        &::placeholder { color: $text-faint; }
     }
 
     .send-btn {
-        width: 40px;
-        height: 40px;
-        border: none;
-        border-radius: 8px;
-        background: $accent;
-        color: #fff;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-        transition: background 0.15s;
+        width: 36px; height: 36px; flex-shrink: 0;
+        border: none; border-radius: 50%;
+        background: $accent; color: #fff; cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        transition: background 0.15s, transform 0.1s;
         @include focus-ring;
 
-        &:hover {
-            background: $accent-hover;
-        }
-
-        &:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-        }
+        &:hover          { background: $accent-hover; }
+        &:active         { transform: scale(0.9); }
+        &:disabled       { opacity: 0.3; cursor: not-allowed; transform: none; }
     }
 }
 
+// ── Context menu ──────────────────────────────────────────────────────────────
+.context-menu-backdrop { position: fixed; inset: 0; z-index: 900; }
+
+.context-menu {
+    position: fixed; z-index: 901;
+    background: #1e2124;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px; padding: 4px;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.7);
+    min-width: 200px;
+    animation: menuIn 0.11s ease-out both;
+
+    @keyframes menuIn {
+        from { opacity: 0; transform: scale(0.95) translateY(-3px); }
+        to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+}
+
+.context-menu-item {
+    display: flex; align-items: center; gap: 8px;
+    width: 100%; padding: 8px 10px;
+    border: none; border-radius: 6px; background: none;
+    color: $text; font-size: 13px; cursor: pointer;
+    @include focus-ring;
+
+    svg { flex-shrink: 0; color: $text-dim; }
+    &:hover { background: rgba(255,255,255,0.06); }
+}
+
+// ── Correction toast ──────────────────────────────────────────────────────────
 .correction-toast {
-    position: fixed;
-    bottom: 80px;
-    left: 50%;
+    // absolute inside .chat-view so it floats above the input bar naturally
+    position: absolute;
+    bottom: 68px; left: 50%;
     transform: translateX(-50%);
-    z-index: 500;
-    animation: slideUp 0.2s ease-out;
-}
+    z-index: 200; white-space: nowrap;
+    animation: toastIn 0.2s cubic-bezier(0.34, 1.4, 0.64, 1) both;
 
-@keyframes slideUp {
-    from {
-        opacity: 0;
-        transform: translateX(-50%) translateY(16px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(-50%) translateY(0);
+    @keyframes toastIn {
+        from { opacity: 0; transform: translateX(-50%) translateY(12px); }
+        to   { opacity: 1; transform: translateX(-50%) translateY(0); }
     }
 }
 
 .correction-toast-content {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: $surface-raised;
-    border: 1px solid $border-strong;
-    border-radius: 10px;
-    padding: 10px 16px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    display: flex; align-items: center; gap: 8px;
+    background: #1e2124;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-left: 3px solid $good;
+    border-radius: 10px; padding: 9px 14px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.6);
 }
 
-.correction-label {
-    font-size: 13px;
-    color: $good;
-    font-weight: 500;
-}
+.correction-label { font-size: 12px; font-weight: 600; color: $good; }
 
 .correction-card-btn {
-    padding: 6px 12px;
-    border: 1px solid $border;
+    padding: 5px 10px;
+    border: 1px solid rgba(255,255,255,0.1);
     border-radius: 6px;
-    background: $surface;
-    color: $text-dim;
-    cursor: pointer;
-    font-size: 12px;
+    background: rgba(255,255,255,0.05);
+    color: $text-dim; cursor: pointer; font-size: 12px;
     @include focus-ring;
-
-    &:hover {
-        background: $border;
-        color: $text;
-    }
+    &:hover { background: rgba(255,255,255,0.09); color: $text; }
 }
 
 .create-card-btn {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
-    border: 1px solid $accent;
-    border-radius: 6px;
-    background: $accent-soft;
-    color: $accent;
-    cursor: pointer;
-    font-size: 12px;
-    font-weight: 500;
-    white-space: nowrap;
-    transition: background 0.15s;
+    display: flex; align-items: center; gap: 5px;
+    padding: 5px 10px;
+    border: 1px solid rgba(0,132,255,0.3);
+    border-radius: 6px; background: $accent-soft;
+    color: $accent; cursor: pointer;
+    font-size: 12px; font-weight: 600; white-space: nowrap;
+    transition: background 0.14s;
     @include focus-ring;
-
-    &:hover {
-        background: rgba(91, 141, 239, 0.2);
-    }
+    &:hover { background: rgba(0,132,255,0.18); }
 }

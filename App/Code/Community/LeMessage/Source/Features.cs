@@ -60,6 +60,20 @@ public static class Features
             }
         });
 
+        FeatureRegistry.Add(new Feature<TranslateRequest, ApiResponse<TranslateResponse>>
+        {
+            FeatureName = "translateMessage",
+            FeatureGroup = "leMessage",
+            Route = "/api/lemessage/translate",
+            Method = HttpMethod.Post,
+            Handler = async (request, httpContext) =>
+            {
+                var ctx = UserContext.FromHttpContext(httpContext);
+                var service = ServiceCatalog.GetService<LeMessageService>();
+                return await service.TranslateMessageAsync(request, ctx);
+            }
+        });
+
         FeatureRegistry.Add(new Feature<GetMessagesRequest, ApiResponse<GetMessagesResponse>>
         {
             FeatureName = "getMessages",

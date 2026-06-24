@@ -4,27 +4,24 @@ import { ConversationList } from './ConversationList';
 import { ChatView } from './ChatView';
 import './style.scss';
 
-interface ConversationSummary {
-    id: string;
-    profileId: string;
+interface ConvInfo {
     profileName: string;
     profileAvatarUrl: string;
-    lastMessage: string;
-    lastMessageTime: string;
-    createTime: string;
 }
 
 const LeMessagePage = () => {
-    const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
+    const [activeConvId, setActiveConvId] = useState<string | null>(null);
+    const [activeConvInfo, setActiveConvInfo] = useState<ConvInfo>({ profileName: '', profileAvatarUrl: '' });
     const [refreshTrigger, setRefreshTrigger] = useState(0);
-    const [convCache, setConvCache] = useState<Map<string, ConversationSummary>>(new Map());
 
-    const handleSelectConversation = useCallback((id: string) => {
-        setActiveConversationId(id);
+    const handleSelectConversation = useCallback((id: string, profileName: string, profileAvatarUrl: string) => {
+        setActiveConvId(id);
+        setActiveConvInfo({ profileName, profileAvatarUrl });
     }, []);
 
-    const handleConversationCreated = useCallback((id: string) => {
-        setActiveConversationId(id);
+    const handleConversationCreated = useCallback((id: string, profileName: string, profileAvatarUrl: string) => {
+        setActiveConvId(id);
+        setActiveConvInfo({ profileName, profileAvatarUrl });
         setRefreshTrigger((prev) => prev + 1);
     }, []);
 
@@ -33,31 +30,22 @@ const LeMessagePage = () => {
     }, []);
 
     const handleBack = useCallback(() => {
-        setActiveConversationId(null);
-    }, []);
-
-    const activeConversation = activeConversationId
-        ? convCache.get(activeConversationId)
-        : undefined;
-
-    const handleCacheUpdate = useCallback((convs: ConversationSummary[]) => {
-        const map = new Map<string, ConversationSummary>();
-        convs.forEach((c) => map.set(c.id, c));
-        setConvCache(map);
+        setActiveConvId(null);
+        setActiveConvInfo({ profileName: '', profileAvatarUrl: '' });
     }, []);
 
     return (
         <div className={'lemessage-page'}>
             <ConversationList
-                activeConversationId={activeConversationId}
+                activeConversationId={activeConvId}
                 onSelectConversation={handleSelectConversation}
                 onConversationCreated={handleConversationCreated}
                 refreshTrigger={refreshTrigger}
             />
             <ChatView
-                conversationId={activeConversationId}
-                profileName={activeConversation?.profileName ?? ''}
-                profileAvatarUrl={activeConversation?.profileAvatarUrl ?? ''}
+                conversationId={activeConvId}
+                profileName={activeConvInfo.profileName}
+                profileAvatarUrl={activeConvInfo.profileAvatarUrl}
                 onBack={handleBack}
                 onMessageSent={handleMessageSent}
             />
