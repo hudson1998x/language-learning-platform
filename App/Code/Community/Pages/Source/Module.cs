@@ -43,55 +43,14 @@ public class PagesModule : IModuleLoader
                         vnode.Change(canvasNode);
                         return vnode;
                     });
+
+                    canvasBuilder.WithTitle(page.Title + " | LLE");
                     
                     context.Response.ContentType = "text/html";
                     context.Response.StatusCode = 200;
                     await canvasBuilder.WriteToStreamAsync(context.Response.BodyWriter);
                 });
             }
-        });
-
-        Eventing.Eventing.Of<DatabaseEvents>().Seeding<IPageRepository>().Concurrent(async (repository) =>
-        {
-            var existingPages = await repository.FindAllAsync(UserContext.Guest, DataOptions.Bypass);
-            var existing = existingPages.FirstOrDefault(p => p.Key == "test");
-
-            var seedPage = new Page()
-            {
-                Url = "/test",
-                Key = "test",
-                Title = "Test Page"
-            };
-
-            seedPage.From(
-                new VNode(
-                    "@component/Text",
-                    new Dictionary<string, object>()
-                    {
-                        ["Text"] = "After edit 2"
-                    },
-                    []
-                )
-            );
-
-            if (existing is not null)
-            {
-                if (existing.Title != seedPage.Title ||
-                    existing.Url != seedPage.Url ||
-                    existing.PageJson != seedPage.PageJson)
-                {
-                    seedPage.Id = existing.Id;
-                    seedPage.CreateTime = existing.CreateTime;
-                    seedPage.UpdateTime = DateTime.UtcNow;
-                    await repository.UpdateAsync(seedPage, UserContext.Guest, DataOptions.Bypass);
-                }
-            }
-            else
-            {
-                await repository.CreateAsync(seedPage, UserContext.Guest, DataOptions.Bypass);
-            }
-
-            return repository;
         });
         
         return Task.CompletedTask;

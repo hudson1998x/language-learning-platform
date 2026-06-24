@@ -74,7 +74,7 @@ public class FrontendModule : IModuleLoader
 
         // TODO: Instead of Untitled, put something more useful, potentially
         //  a configuration thing.
-        builder.WithTitle(is404 ? "Page not found" : "Untitled");
+        builder.WithTitle(is404 ? "Page not found" : "Homepage");
         
         await builder.WriteToStreamAsync(context.Response.BodyWriter);
     }

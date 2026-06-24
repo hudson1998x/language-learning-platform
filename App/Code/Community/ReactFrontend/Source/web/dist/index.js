@@ -23110,6 +23110,10 @@
                 /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("div", { className: "face-body", children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("div", { className: "statement", children: card.frontStatement }) }),
                 /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("div", { className: "face-footer", children: [
                   /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("div", { className: "mastery", title: `Difficulty ${card.difficulty}/${MAX_DIFFICULTY}`, children: Array.from({ length: MAX_DIFFICULTY }).map((_, i) => /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("span", { className: `mastery-tick ${i < masteryTicks ? "filled" : ""}` }, i)) }),
+                  accuracy !== null && /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("span", { className: `stat stat-accuracy ${accuracy >= 70 ? "good" : "weak"}`, children: [
+                    accuracy,
+                    "% accurate"
+                  ] }),
                   /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("div", { className: "stat-row", children: [
                     /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("span", { className: "stat", children: [
                       card.reviewCount,
@@ -23130,13 +23134,7 @@
                   card.notes && /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("div", { className: "notes", children: card.notes }),
                   card.tags && /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("div", { className: "tag tags", children: card.tags })
                 ] }),
-                /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("div", { className: "face-footer", children: [
-                  /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("span", { className: "stat", children: formatLastReviewed(card.lastReviewedUtc) }),
-                  accuracy !== null && /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("span", { className: `stat stat-accuracy ${accuracy >= 70 ? "good" : "weak"}`, children: [
-                    accuracy,
-                    "% accurate"
-                  ] })
-                ] })
+                /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("div", { className: "face-footer", children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("span", { className: "stat", children: formatLastReviewed(card.lastReviewedUtc) }) })
               ] })
             ] })
           },

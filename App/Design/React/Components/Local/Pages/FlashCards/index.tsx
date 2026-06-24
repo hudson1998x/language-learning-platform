@@ -197,6 +197,12 @@ export const FlashCards = () => {
                                                     <span key={i} className={`mastery-tick ${i < masteryTicks ? 'filled' : ''}`} />
                                                 ))}
                                             </div>
+
+                                            {accuracy !== null && (
+                                                <span className={`stat stat-accuracy ${accuracy >= 70 ? 'good' : 'weak'}`}>
+                                                    {accuracy}% accurate
+                                                </span>
+                                            )}
                                             <div className={'stat-row'}>
                                                 <span className={'stat'}>
                                                     {card.reviewCount} {card.reviewCount === 1 ? 'review' : 'reviews'}
@@ -224,11 +230,6 @@ export const FlashCards = () => {
 
                                         <div className={'face-footer'}>
                                             <span className={'stat'}>{formatLastReviewed(card.lastReviewedUtc)}</span>
-                                            {accuracy !== null && (
-                                                <span className={`stat stat-accuracy ${accuracy >= 70 ? 'good' : 'weak'}`}>
-                                                    {accuracy}% accurate
-                                                </span>
-                                            )}
                                         </div>
                                     </div>
                                 </div>
