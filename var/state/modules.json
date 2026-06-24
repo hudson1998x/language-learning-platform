@@ -7,6 +7,10 @@
     "IsEnabled": true,
     "IsInstalled": true
   },
+  "LLE.LeMessage.LeMessageModule": {
+    "IsEnabled": true,
+    "IsInstalled": true
+  },
   "LLE.Languages.LanguageModule": {
     "IsEnabled": true,
     "IsInstalled": true

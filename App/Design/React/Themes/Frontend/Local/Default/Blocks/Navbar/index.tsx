@@ -17,7 +17,7 @@ const LINKS: NavLink[] = [
     { label: "Music translation", href: "/musiclyrics" },
     { label: "Scenarios", href: "/scenarios" },
     { label: "Leddit", href: "/leddit" },
-    { label: "LeMessage", href: "/lemessage"}
+    { label: "LeMessage", href: "/messages"}
 ];
 
 export const NavBar = ({ links = LINKS, initialActive = links[0]?.href }: NavBarProps) => {

@@ -4,18 +4,21 @@
         <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <RootNamespace>LLE.CommunityModuleRegistry</RootNamespace>
+        <RootNamespace>LLE.LeMessage</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\..\..\Core\Kernel\Source\Kernel.csproj" />
+      <ProjectReference Include="..\..\LLMFramework\Source\LLMFramework.csproj" />
       <ProjectReference Include="..\..\Languages\Source\Languages.csproj" />
-      <ProjectReference Include="..\..\LeMessage\Source\LeMessage.csproj" />
-      <ProjectReference Include="..\..\LLMProviders\Ollama\Source\Ollama.csproj" />
-      <ProjectReference Include="..\..\MusicTranslation\Source\MusicTranslation.csproj" />
       <ProjectReference Include="..\..\Pages\Source\Pages.csproj" />
       <ProjectReference Include="..\..\ReactFrontend\Source\ReactFrontend.csproj" />
-      <ProjectReference Include="..\..\SQLite\Source\SQLite.csproj" />
+      <ProjectReference Include="..\..\..\Core\Auth\Source\Auth.csproj" />
+      <ProjectReference Include="..\..\..\Core\TypeScript\Source\TypeScript.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="web\" />
     </ItemGroup>
 
 </Project>

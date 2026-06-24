@@ -1,0 +1,23 @@
+$bg: #0b0c0e;
+
+.lemessage-page {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    background: $bg;
+}
+
+@media (max-width: 768px) {
+    .lemessage-page {
+        .conv-list {
+            width: 100%;
+            min-width: 0;
+        }
+
+        .chat-view {
+            .back-btn {
+                display: flex !important;
+            }
+        }
+    }
+}

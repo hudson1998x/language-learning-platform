@@ -22209,7 +22209,7 @@
     { label: "Music translation", href: "/musiclyrics" },
     { label: "Scenarios", href: "/scenarios" },
     { label: "Leddit", href: "/leddit" },
-    { label: "LeMessage", href: "/lemessage" }
+    { label: "LeMessage", href: "/messages" }
   ];
   var NavBar = ({ links = LINKS, initialActive = links[0]?.href }) => {
     const active = links.filter((l) => l.href == location.pathname)?.[0]?.href;
@@ -23760,8 +23760,527 @@
   };
   register("@page/scenarios-page", ScenariosIndexPage);
 
-  // App/Code/Community/MusicTranslation/Source/web/TranslationPage/index.tsx
+  // App/Code/Community/LeMessage/Source/web/ChatPage/index.tsx
   var import_react19 = __toESM(require_react(), 1);
+
+  // App/Code/Community/LeMessage/Source/web/ChatPage/ConversationList.tsx
+  var import_react17 = __toESM(require_react(), 1);
+
+  // App/Api/profile.ts
+  var listAllProfile = () => {
+    return fetch("/api/profile/list", {
+      method: "GET"
+    }).then((response) => {
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+      return response.json();
+    });
+  };
+
+  // App/Api/leMessage.ts
+  var startConversation = (payload2) => {
+    return fetch("/api/lemessage/chat/start", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload2)
+    }).then((response) => {
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+      return response.json();
+    });
+  };
+  var getMessages = (payload2) => {
+    return fetch("/api/lemessage/chat/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload2)
+    }).then((response) => {
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+      return response.json();
+    });
+  };
+
+  // App/Code/Community/LeMessage/Source/web/ChatPage/ConversationList.tsx
+  var import_jsx_runtime22 = __toESM(require_jsx_runtime(), 1);
+  var ConversationList = ({
+    activeConversationId,
+    onSelectConversation,
+    onConversationCreated,
+    refreshTrigger
+  }) => {
+    const { session } = useSession();
+    const { language } = useLanguage();
+    const [conversations, setConversations] = (0, import_react17.useState)([]);
+    const [isLoading, setIsLoading] = (0, import_react17.useState)(true);
+    const [error, setError] = (0, import_react17.useState)(null);
+    const [showProfilePicker, setShowProfilePicker] = (0, import_react17.useState)(false);
+    (0, import_react17.useEffect)(() => {
+      loadConversations();
+    }, [session?.user?.id, refreshTrigger]);
+    const loadConversations = async () => {
+      if (!session?.user?.id) return;
+      setIsLoading(true);
+      setError(null);
+      try {
+        const res = await fetch("/api/lemessage/chat/conversations", { method: "GET" }).then((r) => r.json());
+        if (res.success && res.data) {
+          setConversations(res.data.conversations ?? []);
+        } else {
+          setConversations([]);
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to load conversations");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    const formatTime = (iso) => {
+      if (!iso) return "";
+      const date = new Date(iso);
+      const now = Date.now();
+      const diff = now - date.getTime();
+      const days = Math.floor(diff / 864e5);
+      if (days <= 0) {
+        const hours = Math.floor(diff / 36e5);
+        if (hours <= 0) return "Just now";
+        return `${hours}h ago`;
+      }
+      if (days === 1) return "Yesterday";
+      if (days < 7) return `${days}d ago`;
+      if (days < 30) return `${Math.floor(days / 7)}w ago`;
+      return date.toLocaleDateString();
+    };
+    if (isLoading) {
+      return /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("div", { className: "conv-list", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("div", { className: "conv-list-header", children: /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("h2", { children: "Messages" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("div", { className: "conv-list-status", children: /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(Spinner, {}) })
+      ] });
+    }
+    if (error) {
+      return /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("div", { className: "conv-list", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("div", { className: "conv-list-header", children: /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("h2", { children: "Messages" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("div", { className: "conv-list-status", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("div", { className: "error-text", children: error }),
+          /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("button", { className: "retry-btn", onClick: loadConversations, children: "Retry" })
+        ] })
+      ] });
+    }
+    return /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("div", { className: "conv-list", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("div", { className: "conv-list-header", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("h2", { children: "Messages" }),
+        /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(
+          "button",
+          {
+            className: "new-chat-btn",
+            onClick: () => setShowProfilePicker(true),
+            title: "New conversation",
+            children: /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("svg", { width: "18", height: "18", viewBox: "0 0 18 18", fill: "none", children: /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("path", { d: "M9 3V15M3 9H15", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round" }) })
+          }
+        )
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("div", { className: "conv-list-scroll", children: [
+        conversations.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("div", { className: "conv-list-empty", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("div", { className: "empty-icon", children: /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("svg", { width: "40", height: "40", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.5", strokeLinecap: "round", children: /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("path", { d: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" }) }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("div", { className: "empty-text", children: "No conversations yet" }),
+          /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("div", { className: "empty-hint", children: "Start a new chat to begin practising!" })
+        ] }),
+        conversations.map((conv) => /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)(
+          "div",
+          {
+            className: `conv-item ${activeConversationId === conv.id ? "active" : ""}`,
+            onClick: () => onSelectConversation(conv.id),
+            role: "button",
+            tabIndex: 0,
+            onKeyDown: (e) => {
+              if (e.key === "Enter") onSelectConversation(conv.id);
+            },
+            children: [
+              /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("div", { className: "conv-avatar", children: conv.profileAvatarUrl ? /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("img", { src: conv.profileAvatarUrl, alt: conv.profileName }) : /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("div", { className: "avatar-placeholder", children: conv.profileName.charAt(0) }) }),
+              /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("div", { className: "conv-info", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("div", { className: "conv-name-row", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("span", { className: "conv-name", children: conv.profileName }),
+                  /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("span", { className: "conv-time", children: formatTime(conv.lastMessageTime) })
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("div", { className: "conv-preview", children: conv.lastMessage || "No messages yet" })
+              ] })
+            ]
+          },
+          conv.id
+        ))
+      ] }),
+      showProfilePicker && /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("div", { className: "profile-picker-overlay", onClick: () => setShowProfilePicker(false), children: /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("div", { className: "profile-picker", onClick: (e) => e.stopPropagation(), children: [
+        /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("div", { className: "profile-picker-header", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("h3", { children: "New Conversation" }),
+          /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("button", { className: "modal-close", onClick: () => setShowProfilePicker(false), children: "\u2715" })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(
+          ProfilePickerContent,
+          {
+            language,
+            userId: session?.user?.id ?? "",
+            languageId: language?.id ?? "",
+            onSelected: (convId) => {
+              setShowProfilePicker(false);
+              onConversationCreated(convId);
+            }
+          }
+        )
+      ] }) })
+    ] });
+  };
+  var ProfilePickerContent = ({ language, userId, languageId, onSelected }) => {
+    const [profiles, setProfiles] = (0, import_react17.useState)([]);
+    const [isLoading, setIsLoading] = (0, import_react17.useState)(true);
+    const [error, setError] = (0, import_react17.useState)(null);
+    const [startingId, setStartingId] = (0, import_react17.useState)(null);
+    (0, import_react17.useEffect)(() => {
+      loadProfiles();
+    }, [language]);
+    const loadProfiles = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const res = await listAllProfile();
+        if (res.success && res.data) {
+          const filtered = language?.name ? res.data.filter((p) => p.languageName === language.name) : res.data;
+          setProfiles(filtered);
+        } else {
+          setError(res.message ?? "Failed to load profiles");
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to load profiles");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    const handleStart = async (profileId) => {
+      setStartingId(profileId);
+      try {
+        const res = await startConversation({ profileId });
+        if (res.success && res.data) {
+          onSelected(res.data.conversationId);
+        } else {
+          setError(res.message ?? "Failed to start conversation");
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to start conversation");
+      } finally {
+        setStartingId(null);
+      }
+    };
+    if (isLoading) {
+      return /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("div", { className: "profile-picker-status", children: /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(Spinner, {}) });
+    }
+    if (error) {
+      return /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("div", { className: "profile-picker-status", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("div", { className: "error-text", children: error }),
+        /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("button", { className: "retry-btn", onClick: loadProfiles, children: "Retry" })
+      ] });
+    }
+    if (profiles.length === 0) {
+      return /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("div", { className: "profile-picker-status", children: /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("div", { className: "empty-text", children: [
+        "No profiles available",
+        language?.name ? ` for ${language.name}` : ""
+      ] }) });
+    }
+    return /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("div", { className: "profile-grid", children: profiles.map((profile) => /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)(
+      "button",
+      {
+        className: "profile-card",
+        onClick: () => handleStart(profile.id),
+        disabled: startingId === profile.id,
+        children: [
+          /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("div", { className: "profile-card-avatar", children: profile.avatarUrl ? /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("img", { src: profile.avatarUrl, alt: profile.name }) : /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("div", { className: "avatar-placeholder", children: profile.name.charAt(0) }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("div", { className: "profile-card-info", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("div", { className: "profile-card-name", children: profile.name }),
+            /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("div", { className: "profile-card-desc", children: profile.description })
+          ] }),
+          startingId === profile.id && /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(Spinner, { size: "sm" })
+        ]
+      },
+      profile.id
+    )) });
+  };
+
+  // App/Code/Community/LeMessage/Source/web/ChatPage/ChatView.tsx
+  var import_react18 = __toESM(require_react(), 1);
+  var import_jsx_runtime23 = __toESM(require_jsx_runtime(), 1);
+  var ChatView = ({
+    conversationId,
+    profileName,
+    profileAvatarUrl,
+    onBack,
+    onMessageSent
+  }) => {
+    const { session } = useSession();
+    const { language } = useLanguage();
+    const [messages, setMessages] = (0, import_react18.useState)([]);
+    const [isLoading, setIsLoading] = (0, import_react18.useState)(false);
+    const [isSending, setIsSending] = (0, import_react18.useState)(false);
+    const [error, setError] = (0, import_react18.useState)(null);
+    const [userInput, setUserInput] = (0, import_react18.useState)("");
+    const [correctionData, setCorrectionData] = (0, import_react18.useState)(null);
+    const messagesEndRef = (0, import_react18.useRef)(null);
+    const inputRef = (0, import_react18.useRef)(null);
+    (0, import_react18.useEffect)(() => {
+      if (conversationId) {
+        loadMessages();
+      } else {
+        setMessages([]);
+      }
+    }, [conversationId]);
+    (0, import_react18.useEffect)(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [messages]);
+    (0, import_react18.useEffect)(() => {
+      if (!isSending && conversationId) {
+        inputRef.current?.focus();
+      }
+    }, [isSending, conversationId]);
+    const loadMessages = async () => {
+      if (!conversationId) return;
+      setIsLoading(true);
+      setError(null);
+      try {
+        const res = await getMessages({ conversationId, page: 1, limit: 100 });
+        if (res.success && res.data) {
+          setMessages(res.data.messages ?? []);
+        } else {
+          setError(res.message ?? "Failed to load messages");
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to load messages");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    const handleSend = async () => {
+      if (!userInput.trim() || !conversationId || isSending) return;
+      const text = userInput;
+      setUserInput("");
+      setIsSending(true);
+      setError(null);
+      const optimisticMsg = {
+        id: "temp-" + Date.now(),
+        role: "user",
+        content: text,
+        createdAt: (/* @__PURE__ */ new Date()).toISOString()
+      };
+      setMessages((prev) => [...prev, optimisticMsg]);
+      try {
+        const raw = await fetch("/api/lemessage/chat/send", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ conversationId, message: text })
+        }).then((r) => r.json());
+        if (raw.success && raw.data) {
+          setMessages(
+            (prev) => prev.filter((m) => m.id !== optimisticMsg.id).concat(raw.data.userMessage).concat(raw.data.assistantMessage)
+          );
+          if (raw.data.correction) {
+            setCorrectionData(raw.data.correction);
+          }
+          onMessageSent();
+        } else {
+          setMessages((prev) => prev.filter((m) => m.id !== optimisticMsg.id));
+          setError(raw.message ?? "Failed to get response");
+        }
+      } catch (err) {
+        setMessages((prev) => prev.filter((m) => m.id !== optimisticMsg.id));
+        setError(err instanceof Error ? err.message : "Failed to send message");
+      } finally {
+        setIsSending(false);
+      }
+    };
+    const handleKeyDown = (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        handleSend();
+      }
+    };
+    const formatTime = (iso) => {
+      if (!iso) return "";
+      const date = new Date(iso);
+      const now = Date.now();
+      const diff = now - date.getTime();
+      if (diff < 6e4) return "Just now";
+      const mins = Math.floor(diff / 6e4);
+      if (mins < 60) return `${mins}m ago`;
+      const hours = Math.floor(diff / 36e5);
+      if (hours < 24) return `${hours}h ago`;
+      return date.toLocaleDateString();
+    };
+    if (!conversationId) {
+      return /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "chat-view", children: /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "chat-view-empty", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "empty-icon", children: /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("svg", { width: "48", height: "48", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.5", strokeLinecap: "round", children: /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("path", { d: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" }) }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "empty-title", children: "Select a conversation" }),
+        /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "empty-hint", children: "Choose a chat from the sidebar or start a new one" })
+      ] }) });
+    }
+    return /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "chat-view", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "chat-view-header", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("button", { className: "back-btn", onClick: onBack, "aria-label": "Back", children: /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("svg", { width: "20", height: "20", viewBox: "0 0 20 20", fill: "none", children: /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("path", { d: "M12 4L6 10L12 16", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }) }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "chat-view-profile", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "header-avatar", children: profileAvatarUrl ? /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("img", { src: profileAvatarUrl, alt: profileName }) : /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "avatar-placeholder", children: profileName.charAt(0) }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "header-name", children: profileName })
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "chat-view-messages", children: [
+        isLoading && /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "chat-view-status", children: /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(Spinner, {}) }),
+        !isLoading && messages.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "chat-view-status", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "empty-text", children: "Start the conversation!" }),
+          /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "empty-hint", children: [
+            "Say hello to ",
+            profileName
+          ] })
+        ] }),
+        messages.map((msg) => /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: `msg-bubble ${msg.role === "user" ? "user" : "assistant"}`, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "msg-content", children: msg.content }),
+          /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "msg-time", children: formatTime(msg.createdAt) })
+        ] }, msg.id)),
+        isSending && /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "msg-bubble assistant sending", children: /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(Spinner, { size: "sm" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { ref: messagesEndRef })
+      ] }),
+      error && /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "chat-view-error", children: error }),
+      /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "chat-view-input", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(
+          "input",
+          {
+            ref: inputRef,
+            type: "text",
+            value: userInput,
+            onChange: (e) => setUserInput(e.target.value),
+            onKeyDown: handleKeyDown,
+            placeholder: `Message ${profileName}...`,
+            disabled: isSending
+          }
+        ),
+        /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(
+          "button",
+          {
+            className: "send-btn",
+            onClick: handleSend,
+            disabled: !userInput.trim() || isSending,
+            children: /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("svg", { width: "18", height: "18", viewBox: "0 0 18 18", fill: "none", children: /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("path", { d: "M2 9L16 2L9 16L7 11L2 9Z", stroke: "currentColor", strokeWidth: "1.5", strokeLinecap: "round", strokeLinejoin: "round" }) })
+          }
+        )
+      ] }),
+      correctionData && /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "correction-toast", children: /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "correction-toast-content", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("span", { className: "correction-label", children: "Correction detected!" }),
+        /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(
+          "button",
+          {
+            className: "correction-card-btn",
+            onClick: () => setCorrectionData(null),
+            children: "Dismiss"
+          }
+        ),
+        /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(
+          CreateFlashCardButton,
+          {
+            mistake: correctionData.mistake,
+            corrected: correctionData.corrected,
+            explanation: correctionData.explanation,
+            userId: session?.user?.id ?? "",
+            languageId: language?.id ?? "",
+            onCreated: () => setCorrectionData(null)
+          }
+        )
+      ] }) })
+    ] });
+  };
+  var CreateFlashCardButton = ({ mistake, corrected, explanation, userId, languageId, onCreated }) => {
+    const [show, setShow] = (0, import_react18.useState)(false);
+    return /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)(import_jsx_runtime23.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("button", { className: "create-card-btn", onClick: () => setShow(true), children: [
+        /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("svg", { width: "14", height: "14", viewBox: "0 0 14 14", fill: "none", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("rect", { x: "1", y: "3", width: "12", height: "10", rx: "1.5", stroke: "currentColor", strokeWidth: "1.3" }),
+          /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("path", { d: "M4 1V3M10 1V3M1 6H13", stroke: "currentColor", strokeWidth: "1.3", strokeLinecap: "round" })
+        ] }),
+        "Create Flash Card"
+      ] }),
+      show && /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(
+        CreateFlashCardModal,
+        {
+          userId,
+          languageId,
+          showLanguageSelector: true,
+          initialValues: {
+            frontStatement: mistake,
+            backStatement: corrected,
+            notes: explanation,
+            category: "Chat-Correction",
+            tags: "lemessage,correction"
+          },
+          onClose: () => setShow(false),
+          onCreated: () => {
+            setShow(false);
+            onCreated();
+          }
+        }
+      )
+    ] });
+  };
+
+  // App/Code/Community/LeMessage/Source/web/ChatPage/index.tsx
+  var import_jsx_runtime24 = __toESM(require_jsx_runtime(), 1);
+  var LeMessagePage = () => {
+    const [activeConversationId, setActiveConversationId] = (0, import_react19.useState)(null);
+    const [refreshTrigger, setRefreshTrigger] = (0, import_react19.useState)(0);
+    const [convCache, setConvCache] = (0, import_react19.useState)(/* @__PURE__ */ new Map());
+    const handleSelectConversation = (0, import_react19.useCallback)((id) => {
+      setActiveConversationId(id);
+    }, []);
+    const handleConversationCreated = (0, import_react19.useCallback)((id) => {
+      setActiveConversationId(id);
+      setRefreshTrigger((prev) => prev + 1);
+    }, []);
+    const handleMessageSent = (0, import_react19.useCallback)(() => {
+      setRefreshTrigger((prev) => prev + 1);
+    }, []);
+    const handleBack = (0, import_react19.useCallback)(() => {
+      setActiveConversationId(null);
+    }, []);
+    const activeConversation = activeConversationId ? convCache.get(activeConversationId) : void 0;
+    const handleCacheUpdate = (0, import_react19.useCallback)((convs) => {
+      const map = /* @__PURE__ */ new Map();
+      convs.forEach((c) => map.set(c.id, c));
+      setConvCache(map);
+    }, []);
+    return /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "lemessage-page", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(
+        ConversationList,
+        {
+          activeConversationId,
+          onSelectConversation: handleSelectConversation,
+          onConversationCreated: handleConversationCreated,
+          refreshTrigger
+        }
+      ),
+      /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(
+        ChatView,
+        {
+          conversationId: activeConversationId,
+          profileName: activeConversation?.profileName ?? "",
+          profileAvatarUrl: activeConversation?.profileAvatarUrl ?? "",
+          onBack: handleBack,
+          onMessageSent: handleMessageSent
+        }
+      )
+    ] });
+  };
+  register("@page/lemessage-chat", LeMessagePage);
+
+  // App/Code/Community/MusicTranslation/Source/web/TranslationPage/index.tsx
+  var import_react22 = __toESM(require_react(), 1);
 
   // App/Api/track.ts
   var listTrackPagedSorted = (pageNum, size, sortField, sortDir) => {
@@ -23830,7 +24349,7 @@
   };
 
   // App/Code/Community/MusicTranslation/Source/web/TranslationPage/CreateSongModal.tsx
-  var import_react17 = __toESM(require_react(), 1);
+  var import_react20 = __toESM(require_react(), 1);
 
   // App/Api/musicTranslation.ts
   var translateSong = (payload2) => {
@@ -23849,7 +24368,7 @@
   };
 
   // App/Code/Community/MusicTranslation/Source/web/TranslationPage/CreateSongModal.tsx
-  var import_jsx_runtime22 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime25 = __toESM(require_jsx_runtime(), 1);
   var emptyForm3 = {
     lyrics: "",
     title: "",
@@ -23857,9 +24376,9 @@
     album: ""
   };
   var CreateSongModal = ({ onClose, onCreated }) => {
-    const [form, setForm] = (0, import_react17.useState)(emptyForm3);
-    const [isSubmitting, setIsSubmitting] = (0, import_react17.useState)(false);
-    const [error, setError] = (0, import_react17.useState)(null);
+    const [form, setForm] = (0, import_react20.useState)(emptyForm3);
+    const [isSubmitting, setIsSubmitting] = (0, import_react20.useState)(false);
+    const [error, setError] = (0, import_react20.useState)(null);
     const updateField = (field, value) => {
       setForm((prev) => ({ ...prev, [field]: value }));
     };
@@ -23889,15 +24408,15 @@
         setIsSubmitting(false);
       }
     };
-    return /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("div", { className: "modal-overlay", onClick: onClose, children: /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("div", { className: "modal", onClick: (e) => e.stopPropagation(), children: [
-      /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("div", { className: "modal-header", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("h2", { children: "Translate a song" }),
-        /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("button", { className: "modal-close", onClick: onClose, children: "\u2715" })
+    return /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("div", { className: "modal-overlay", onClick: onClose, children: /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)("div", { className: "modal", onClick: (e) => e.stopPropagation(), children: [
+      /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)("div", { className: "modal-header", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("h2", { children: "Translate a song" }),
+        /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("button", { className: "modal-close", onClick: onClose, children: "\u2715" })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("form", { onSubmit: handleSubmit, className: "modal-body", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("label", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)("form", { onSubmit: handleSubmit, className: "modal-body", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)("label", { children: [
           "Song lyrics",
-          /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(
             "textarea",
             {
               value: form.lyrics,
@@ -23907,9 +24426,9 @@
             }
           )
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("label", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)("label", { children: [
           "Title",
-          /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(
             "input",
             {
               type: "text",
@@ -23920,9 +24439,9 @@
             }
           )
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("label", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)("label", { children: [
           "Artist",
-          /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(
             "input",
             {
               type: "text",
@@ -23933,9 +24452,9 @@
             }
           )
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("label", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)("label", { children: [
           "Album",
-          /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(
             "input",
             {
               type: "text",
@@ -23946,31 +24465,31 @@
             }
           )
         ] }),
-        error && /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("div", { className: "modal-error", children: error }),
-        /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("div", { className: "modal-actions", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("button", { type: "button", onClick: onClose, disabled: isSubmitting, children: "Cancel" }),
-          /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("button", { type: "submit", disabled: isSubmitting, children: isSubmitting ? "Translating..." : "Translate" })
+        error && /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("div", { className: "modal-error", children: error }),
+        /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)("div", { className: "modal-actions", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("button", { type: "button", onClick: onClose, disabled: isSubmitting, children: "Cancel" }),
+          /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("button", { type: "submit", disabled: isSubmitting, children: isSubmitting ? "Translating..." : "Translate" })
         ] })
       ] })
     ] }) });
   };
 
   // App/Code/Community/MusicTranslation/Source/web/TranslationPage/SongDetailDialog.tsx
-  var import_react18 = __toESM(require_react(), 1);
-  var import_jsx_runtime23 = __toESM(require_jsx_runtime(), 1);
+  var import_react21 = __toESM(require_react(), 1);
+  var import_jsx_runtime26 = __toESM(require_jsx_runtime(), 1);
   var SongDetailDialog = ({ trackId, onClose }) => {
     const { session } = useSession();
     const { language } = useLanguage();
-    const [track, setTrack] = (0, import_react18.useState)(null);
-    const [artist, setArtist] = (0, import_react18.useState)(null);
-    const [album, setAlbum] = (0, import_react18.useState)(null);
-    const [lines, setLines] = (0, import_react18.useState)([]);
-    const [expandedIndex, setExpandedIndex] = (0, import_react18.useState)(null);
-    const [isLoading, setIsLoading] = (0, import_react18.useState)(false);
-    const [error, setError] = (0, import_react18.useState)(null);
-    const [openMenuIndex, setOpenMenuIndex] = (0, import_react18.useState)(null);
-    const [flashcardLineIndex, setFlashcardLineIndex] = (0, import_react18.useState)(null);
-    (0, import_react18.useEffect)(() => {
+    const [track, setTrack] = (0, import_react21.useState)(null);
+    const [artist, setArtist] = (0, import_react21.useState)(null);
+    const [album, setAlbum] = (0, import_react21.useState)(null);
+    const [lines, setLines] = (0, import_react21.useState)([]);
+    const [expandedIndex, setExpandedIndex] = (0, import_react21.useState)(null);
+    const [isLoading, setIsLoading] = (0, import_react21.useState)(false);
+    const [error, setError] = (0, import_react21.useState)(null);
+    const [openMenuIndex, setOpenMenuIndex] = (0, import_react21.useState)(null);
+    const [flashcardLineIndex, setFlashcardLineIndex] = (0, import_react21.useState)(null);
+    (0, import_react21.useEffect)(() => {
       if (!trackId) return;
       setIsLoading(true);
       setError(null);
@@ -24008,28 +24527,28 @@
       setOpenMenuIndex(null);
     };
     const flashcardLine = flashcardLineIndex !== null ? lines[flashcardLineIndex] : null;
-    return /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "detail-overlay", onClick: onClose, children: /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "detail-dialog", onClick: (e) => {
+    return /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("div", { className: "detail-overlay", onClick: onClose, children: /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)("div", { className: "detail-dialog", onClick: (e) => {
       e.stopPropagation();
       setOpenMenuIndex(null);
     }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "detail-header", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "detail-meta", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("h2", { children: track?.title ?? "Loading..." }),
-          /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "detail-artist", children: artist?.name ?? "..." }),
-          /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "detail-album", children: album?.title ?? "..." })
+      /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)("div", { className: "detail-header", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)("div", { className: "detail-meta", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("h2", { children: track?.title ?? "Loading..." }),
+          /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("div", { className: "detail-artist", children: artist?.name ?? "..." }),
+          /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("div", { className: "detail-album", children: album?.title ?? "..." })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("button", { className: "detail-close", onClick: onClose, children: "\u2715" })
+        /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("button", { className: "detail-close", onClick: onClose, children: "\u2715" })
       ] }),
-      isLoading && /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "detail-loading", children: /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(Spinner, {}) }),
-      error && /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "detail-loading", children: /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "error", children: error }) }),
-      !isLoading && !error && lines.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "detail-loading", children: /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "notice-body", children: "No lyrics available" }) }),
-      !isLoading && !error && lines.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "detail-lyrics", children: lines.map((line, i) => /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)(
+      isLoading && /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("div", { className: "detail-loading", children: /* @__PURE__ */ (0, import_jsx_runtime26.jsx)(Spinner, {}) }),
+      error && /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("div", { className: "detail-loading", children: /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("div", { className: "error", children: error }) }),
+      !isLoading && !error && lines.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("div", { className: "detail-loading", children: /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("div", { className: "notice-body", children: "No lyrics available" }) }),
+      !isLoading && !error && lines.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("div", { className: "detail-lyrics", children: lines.map((line, i) => /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)(
         "div",
         {
           className: `lyric-line ${expandedIndex === i ? "expanded" : ""}`,
           children: [
-            /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "line-header", children: [
-              /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(
+            /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)("div", { className: "line-header", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime26.jsx)(
                 "div",
                 {
                   className: "line-original",
@@ -24045,8 +24564,8 @@
                   children: line.lineContents
                 }
               ),
-              /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "line-actions", children: [
-                /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(
+              /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)("div", { className: "line-actions", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime26.jsx)(
                   "button",
                   {
                     className: `line-action-btn${openMenuIndex === i ? " active" : ""}`,
@@ -24055,10 +24574,10 @@
                       setOpenMenuIndex((prev) => prev === i ? null : i);
                     },
                     "aria-label": "Actions",
-                    children: /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("svg", { width: "14", height: "14", viewBox: "0 0 14 14", fill: "none", children: /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("path", { d: "M7 3V3.01M7 7V7.01M7 11V11.01", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round" }) })
+                    children: /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("svg", { width: "14", height: "14", viewBox: "0 0 14 14", fill: "none", children: /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("path", { d: "M7 3V3.01M7 7V7.01M7 11V11.01", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round" }) })
                   }
                 ),
-                openMenuIndex === i && /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "line-dropdown", children: /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)(
+                openMenuIndex === i && /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("div", { className: "line-dropdown", children: /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)(
                   "button",
                   {
                     className: "line-dropdown-item",
@@ -24068,9 +24587,9 @@
                       setFlashcardLineIndex(i);
                     },
                     children: [
-                      /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("svg", { width: "14", height: "14", viewBox: "0 0 14 14", fill: "none", children: [
-                        /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("rect", { x: "1", y: "3", width: "12", height: "10", rx: "1.5", stroke: "currentColor", strokeWidth: "1.3" }),
-                        /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("path", { d: "M4 1V3M10 1V3M1 6H13", stroke: "currentColor", strokeWidth: "1.3", strokeLinecap: "round" })
+                      /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)("svg", { width: "14", height: "14", viewBox: "0 0 14 14", fill: "none", children: [
+                        /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("rect", { x: "1", y: "3", width: "12", height: "10", rx: "1.5", stroke: "currentColor", strokeWidth: "1.3" }),
+                        /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("path", { d: "M4 1V3M10 1V3M1 6H13", stroke: "currentColor", strokeWidth: "1.3", strokeLinecap: "round" })
                       ] }),
                       "Create Flash Card"
                     ]
@@ -24078,25 +24597,25 @@
                 ) })
               ] })
             ] }),
-            expandedIndex === i && /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "line-details", children: [
-              /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "detail-row translation", children: [
-                /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("span", { className: "detail-label", children: "Translation:" }),
-                /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("span", { className: "detail-value", children: line.translationToUserLanguage })
+            expandedIndex === i && /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)("div", { className: "line-details", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)("div", { className: "detail-row translation", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("span", { className: "detail-label", children: "Translation:" }),
+                /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("span", { className: "detail-value", children: line.translationToUserLanguage })
               ] }),
-              line.pronunciations.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "detail-row", children: [
-                /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("span", { className: "detail-label", children: "Pronunciation:" }),
-                /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("span", { className: "detail-value", children: line.pronunciations.join(", ") })
+              line.pronunciations.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)("div", { className: "detail-row", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("span", { className: "detail-label", children: "Pronunciation:" }),
+                /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("span", { className: "detail-value", children: line.pronunciations.join(", ") })
               ] }),
-              line.culturalMeaning && /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "detail-row", children: [
-                /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("span", { className: "detail-label", children: "Cultural meaning:" }),
-                /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("span", { className: "detail-value", children: line.culturalMeaning })
+              line.culturalMeaning && /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)("div", { className: "detail-row", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("span", { className: "detail-label", children: "Cultural meaning:" }),
+                /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("span", { className: "detail-value", children: line.culturalMeaning })
               ] })
             ] })
           ]
         },
         i
       )) }),
-      flashcardLine && /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(
+      flashcardLine && /* @__PURE__ */ (0, import_jsx_runtime26.jsx)(
         CreateFlashCardModal,
         {
           userId: session?.user?.id ?? "",
@@ -24118,37 +24637,37 @@
   };
 
   // App/Code/Community/MusicTranslation/Source/web/TranslationPage/index.tsx
-  var import_jsx_runtime24 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime27 = __toESM(require_jsx_runtime(), 1);
   var SORT_OPTIONS3 = [
     { value: "createTime", label: "Date added" },
     { value: "title", label: "Title" }
   ];
   var MusicTranslationIndexPage = () => {
-    const [isCreateOpen, setIsCreateOpen] = (0, import_react19.useState)(false);
-    const [detailTrackId, setDetailTrackId] = (0, import_react19.useState)(null);
-    const [refreshKey, setRefreshKey] = (0, import_react19.useState)(0);
-    const [selectedArtist, setSelectedArtist] = (0, import_react19.useState)("");
-    const [selectedAlbum, setSelectedAlbum] = (0, import_react19.useState)("");
-    const [searchQuery, setSearchQuery] = (0, import_react19.useState)("");
+    const [isCreateOpen, setIsCreateOpen] = (0, import_react22.useState)(false);
+    const [detailTrackId, setDetailTrackId] = (0, import_react22.useState)(null);
+    const [refreshKey, setRefreshKey] = (0, import_react22.useState)(0);
+    const [selectedArtist, setSelectedArtist] = (0, import_react22.useState)("");
+    const [selectedAlbum, setSelectedAlbum] = (0, import_react22.useState)("");
+    const [searchQuery, setSearchQuery] = (0, import_react22.useState)("");
     const [allArtists] = usePromise(() => listAllArtist(), []);
     const [allAlbums] = usePromise(() => listAllAlbum(), []);
-    const artistMap = (0, import_react19.useMemo)(() => {
+    const artistMap = (0, import_react22.useMemo)(() => {
       const map = /* @__PURE__ */ new Map();
       const data = allArtists?.data ?? [];
       for (const a of data) map.set(a.id, a.name);
       return map;
     }, [allArtists]);
-    const albumMap = (0, import_react19.useMemo)(() => {
+    const albumMap = (0, import_react22.useMemo)(() => {
       const map = /* @__PURE__ */ new Map();
       const data = allAlbums?.data ?? [];
       for (const a of data) map.set(a.id, a.title);
       return map;
     }, [allAlbums]);
-    const artistNames = (0, import_react19.useMemo)(() => {
+    const artistNames = (0, import_react22.useMemo)(() => {
       const names = new Set(artistMap.values());
       return Array.from(names).sort();
     }, [artistMap]);
-    const albumNames = (0, import_react19.useMemo)(() => {
+    const albumNames = (0, import_react22.useMemo)(() => {
       const names = new Set(albumMap.values());
       return Array.from(names).sort();
     }, [albumMap]);
@@ -24165,7 +24684,7 @@
       setSortField,
       setSortDir
     } = usePagination(listTrackPagedSorted, [refreshKey]);
-    const filteredTracks = (0, import_react19.useMemo)(() => {
+    const filteredTracks = (0, import_react22.useMemo)(() => {
       let list = tracks ?? [];
       if (selectedArtist) {
         list = list.filter((t) => artistMap.get(t.artistId) === selectedArtist);
@@ -24186,36 +24705,36 @@
       setDetailTrackId(trackId);
     };
     if (tracksLoading) {
-      return /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("div", { className: "music-translation-status", children: /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(Spinner, {}) });
+      return /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("div", { className: "music-translation-status", children: /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(Spinner, {}) });
     }
     if (tracksError) {
-      return /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("div", { className: "music-translation-status", children: /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("div", { className: "error", children: `Couldn't load songs: ${tracksError}` }) });
+      return /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("div", { className: "music-translation-status", children: /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("div", { className: "error", children: `Couldn't load songs: ${tracksError}` }) });
     }
     const trackList = filteredTracks;
-    return /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "music-translation", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "library-actions", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "pagination", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("button", { onClick: prevPage, disabled: page <= 1, children: "Previous" }),
-          /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("span", { children: `Page ${page}` }),
-          /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("button", { onClick: nextPage, disabled: !mayHaveNextPage, children: "Next" })
+    return /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "music-translation", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "library-actions", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "pagination", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("button", { onClick: prevPage, disabled: page <= 1, children: "Previous" }),
+          /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("span", { children: `Page ${page}` }),
+          /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("button", { onClick: nextPage, disabled: !mayHaveNextPage, children: "Next" })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "sort-controls", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("select", { value: sortField ?? "", onChange: (e) => setSortField(e.target.value || void 0), children: SORT_OPTIONS3.map((opt) => /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("option", { value: opt.value, children: opt.label }, opt.value)) }),
-          /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("select", { value: sortDir ?? "desc", onChange: (e) => setSortDir(e.target.value), children: [
-            /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("option", { value: "asc", children: "Asc" }),
-            /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("option", { value: "desc", children: "Desc" })
+        /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "sort-controls", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("select", { value: sortField ?? "", onChange: (e) => setSortField(e.target.value || void 0), children: SORT_OPTIONS3.map((opt) => /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("option", { value: opt.value, children: opt.label }, opt.value)) }),
+          /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("select", { value: sortDir ?? "desc", onChange: (e) => setSortDir(e.target.value), children: [
+            /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("option", { value: "asc", children: "Asc" }),
+            /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("option", { value: "desc", children: "Desc" })
           ] })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "filter-controls", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("select", { value: selectedArtist, onChange: (e) => setSelectedArtist(e.target.value), children: [
-            /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("option", { value: "", children: "All artists" }),
-            artistNames.map((name) => /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("option", { value: name, children: name }, name))
+        /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "filter-controls", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("select", { value: selectedArtist, onChange: (e) => setSelectedArtist(e.target.value), children: [
+            /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("option", { value: "", children: "All artists" }),
+            artistNames.map((name) => /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("option", { value: name, children: name }, name))
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("select", { value: selectedAlbum, onChange: (e) => setSelectedAlbum(e.target.value), children: [
-            /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("option", { value: "", children: "All albums" }),
-            albumNames.map((name) => /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("option", { value: name, children: name }, name))
+          /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("select", { value: selectedAlbum, onChange: (e) => setSelectedAlbum(e.target.value), children: [
+            /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("option", { value: "", children: "All albums" }),
+            albumNames.map((name) => /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("option", { value: name, children: name }, name))
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(
             "input",
             {
               type: "text",
@@ -24225,7 +24744,7 @@
             }
           )
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(
           "button",
           {
             className: "create-button",
@@ -24234,17 +24753,17 @@
           }
         )
       ] }),
-      trackList.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "notice", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("div", { className: "notice-title", children: "No songs yet" }),
-        /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("div", { className: "notice-body", children: 'Click "Add song" to translate your first track.' })
+      trackList.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "notice", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("div", { className: "notice-title", children: "No songs yet" }),
+        /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("div", { className: "notice-body", children: 'Click "Add song" to translate your first track.' })
       ] }),
-      trackList.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("table", { className: "song-table", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("tr", { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("th", { children: "Title" }),
-          /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("th", { children: "Artist" }),
-          /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("th", { children: "Album" })
+      trackList.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("table", { className: "song-table", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("tr", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("th", { children: "Title" }),
+          /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("th", { children: "Artist" }),
+          /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("th", { children: "Album" })
         ] }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("tbody", { children: trackList.map((track) => /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)(
+        /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("tbody", { children: trackList.map((track) => /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)(
           "tr",
           {
             className: "song-row",
@@ -24258,22 +24777,22 @@
               }
             },
             children: [
-              /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("td", { className: "song-title", children: track.title }),
-              /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("td", { className: "song-artist", children: artistMap.get(track.artistId) ?? "..." }),
-              /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("td", { className: "song-album", children: albumMap.get(track.albumId) ?? "..." })
+              /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("td", { className: "song-title", children: track.title }),
+              /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("td", { className: "song-artist", children: artistMap.get(track.artistId) ?? "..." }),
+              /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("td", { className: "song-album", children: albumMap.get(track.albumId) ?? "..." })
             ]
           },
           track.id
         )) })
       ] }),
-      isCreateOpen && /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(
+      isCreateOpen && /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(
         CreateSongModal,
         {
           onClose: () => setIsCreateOpen(false),
           onCreated: handleCreated
         }
       ),
-      detailTrackId && /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(
+      detailTrackId && /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(
         SongDetailDialog,
         {
           trackId: detailTrackId,
@@ -24292,10 +24811,10 @@
   register("@component/Spinner", Spinner);
 
   // App/Code/Community/ReactFrontend/Source/web/index.tsx
-  var import_jsx_runtime25 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime28 = __toESM(require_jsx_runtime(), 1);
   var root = (0, import_client.createRoot)(document.getElementById("app"));
   root.render(
-    /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(Default_default, { children: /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(Canvas, { children: window.canvasState }) })
+    /* @__PURE__ */ (0, import_jsx_runtime28.jsx)(Default_default, { children: /* @__PURE__ */ (0, import_jsx_runtime28.jsx)(Canvas, { children: window.canvasState }) })
   );
 })();
 /*! Bundled license information:

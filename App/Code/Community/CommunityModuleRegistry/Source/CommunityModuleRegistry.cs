@@ -1,5 +1,6 @@
 using LLE.Kernel;
 using LLE.Languages;
+using LLE.LeMessage;
 using LLE.LLMProviders.Ollama;
 using LLE.MusicTranslation;
 using LLE.Pages;
@@ -18,5 +19,6 @@ public static class CommunityModuleRegistry
         ApplicationLoader.AddModule(new LanguageModule());
         ApplicationLoader.AddModule(new OllamaModule());
         ApplicationLoader.AddModule(new MusicTranslationModule());
+        ApplicationLoader.AddModule(new LeMessageModule());
     }
 }

@@ -21,4 +21,5 @@ register('@component/Spinner', Spinner)
 // auto imports
 import '../../../../../.././App/Code/Local/Scenarios/Source/web/Pages/Scenarios/index.tsx';
 import '../../../../../.././App/Code/Local/Scenarios/Source/web/Pages/ScenarioSession/index.tsx';
+import '../../../../../.././App/Code/Community/LeMessage/Source/web/ChatPage/index.tsx';
 import '../../../../../.././App/Code/Community/MusicTranslation/Source/web/TranslationPage/index.tsx';
