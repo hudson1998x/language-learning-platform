@@ -22208,7 +22208,7 @@
     { label: "Flash cards", href: "/flashcards" },
     { label: "Music translation", href: "/musiclyrics" },
     { label: "Scenarios", href: "/scenarios" },
-    { label: "Leddit", href: "/leddit" },
+    // { label: "Leddit", href: "/leddit" }, // disabled for now, future feature.
     { label: "LeMessage", href: "/messages" }
   ];
   var NavBar = ({ links = LINKS, initialActive = links[0]?.href }) => {
