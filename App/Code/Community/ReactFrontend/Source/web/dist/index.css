@@ -743,6 +743,55 @@ body {
   margin-top: -2px;
 }
 
+/* App/Design/React/Themes/Frontend/Local/Default/DefaultPages/LanguageSelectionInterstitial/style.scss */
+.lw-backdrop {
+  position: absolute;
+  inset: 0;
+  background: #0b0c0e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Inter",
+    "Segoe UI",
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
+}
+.lw-card {
+  background: #16181c;
+  border: 1px solid #2a2d33;
+  border-radius: 12px;
+  padding: 40px 36px;
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.lw-icon {
+  font-size: 32px;
+  margin-bottom: 4px;
+}
+.lw-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #f2f3f5;
+  margin: 0;
+  text-align: center;
+}
+.lw-subtitle {
+  font-size: 14px;
+  color: #9aa0a8;
+  text-align: center;
+  margin: 0 0 12px;
+  line-height: 1.5;
+}
+
 /* App/Design/React/Components/Core/Spinner/style.scss */
 .spinner {
   --spinner-color: #4f46e5;

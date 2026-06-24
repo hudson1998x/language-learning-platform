@@ -22367,31 +22367,51 @@
     ] });
   };
 
-  // App/Design/React/Themes/Frontend/Local/Default/index.tsx
+  // App/Design/React/Themes/Frontend/Local/Default/DefaultPages/LanguageSelectionInterstitial/index.tsx
   var import_jsx_runtime11 = __toESM(require_jsx_runtime(), 1);
+  var LanguageWelcome = ({ onLanguageChange }) => {
+    const { setLanguage } = useLanguage();
+    const handleLanguageChange = (lang) => {
+      setLanguage(lang);
+      onLanguageChange(lang);
+    };
+    return /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "lw-backdrop", children: /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "lw-card", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "lw-icon", children: "\u{1F30D}" }),
+      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("h1", { className: "lw-title", children: "Choose a language" }),
+      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("p", { className: "lw-subtitle", children: "Select the language you'd like to learn and we'll get you started." }),
+      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(LanguageSelector, { onChange: handleLanguageChange })
+    ] }) });
+  };
+
+  // App/Design/React/Themes/Frontend/Local/Default/index.tsx
+  var import_jsx_runtime12 = __toESM(require_jsx_runtime(), 1);
   var LLEThemeWrapper = (props) => {
-    return /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(SessionProvider, { children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(LanguageProvider, { children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(LLETheme, { ...props }) }) });
+    return /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(SessionProvider, { children: /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(LanguageProvider, { children: /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(LLETheme, { ...props }) }) });
   };
   var LLETheme = (props) => {
     const { session } = useSession();
     const [page, setPage] = (0, import_react9.useState)(0 /* SignIn */);
+    const { language } = useLanguage();
     if (!session?.user) {
       if (page == 0 /* SignIn */) {
-        return /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(AppSignin, { onSwitchToRegister: () => setPage(1 /* Register */) });
+        return /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(AppSignin, { onSwitchToRegister: () => setPage(1 /* Register */) });
       }
       if (page == 1 /* Register */) {
-        return /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(AppRegister, { onSwitchToSignIn: () => setPage(0 /* SignIn */) });
+        return /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(AppRegister, { onSwitchToSignIn: () => setPage(0 /* SignIn */) });
       }
     }
-    return /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "lle-default-theme", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Topbar, {}),
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: "lle-default-page-content", children: props.children })
+    if (!language) {
+      return /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("div", { className: "lle-default-theme", children: /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(LanguageWelcome, {}) });
+    }
+    return /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "lle-default-theme", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Topbar, {}),
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("div", { className: "lle-default-page-content", children: props.children })
     ] });
   };
   var Default_default = LLEThemeWrapper;
 
   // App/Design/React/Themes/Admin/Core/Default/index.tsx
-  var import_jsx_runtime12 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime13 = __toESM(require_jsx_runtime(), 1);
 
   // App/Design/React/Components/Local/Pages/FlashCards/index.tsx
   var import_react13 = __toESM(require_react(), 1);
@@ -22492,10 +22512,10 @@
   };
 
   // App/Design/React/Components/Core/Spinner/index.tsx
-  var import_jsx_runtime13 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime14 = __toESM(require_jsx_runtime(), 1);
   var Spinner = ({ size = "md", color, label = "Loading" }) => {
     const style = color ? { "--spinner-color": color } : void 0;
-    return /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(
+    return /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)(
       "div",
       {
         className: `spinner spinner--${size}`,
@@ -22503,8 +22523,8 @@
         role: "status",
         "aria-label": label,
         children: [
-          /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("span", { className: "spinner__circle" }),
-          /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("span", { className: "spinner__sr-only", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("span", { className: "spinner__circle" }),
+          /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("span", { className: "spinner__sr-only", children: [
             label,
             "\u2026"
           ] })
@@ -22515,7 +22535,7 @@
 
   // App/Design/React/Components/Local/Pages/FlashCards/CreateFlashCardModal.tsx
   var import_react11 = __toESM(require_react(), 1);
-  var import_jsx_runtime14 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime15 = __toESM(require_jsx_runtime(), 1);
   var emptyForm = {
     frontStatement: "",
     backStatement: "",
@@ -22579,24 +22599,24 @@
         setIsSubmitting(false);
       }
     };
-    return /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("div", { className: "modal-overlay", onClick: onClose, children: /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("div", { className: "modal", onClick: (e) => e.stopPropagation(), children: [
-      /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("div", { className: "modal-header", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("h2", { children: "Create flash card" }),
-        /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("button", { className: "modal-close", onClick: onClose, children: "\u2715" })
+    return /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "modal-overlay", onClick: onClose, children: /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "modal", onClick: (e) => e.stopPropagation(), children: [
+      /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "modal-header", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("h2", { children: "Create flash card" }),
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("button", { className: "modal-close", onClick: onClose, children: "\u2715" })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("form", { onSubmit: handleSubmit, className: "modal-body", children: [
-        showLanguageSelector && /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("label", { className: "language-field", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("form", { onSubmit: handleSubmit, className: "modal-body", children: [
+        showLanguageSelector && /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("label", { className: "language-field", children: [
           "Language",
-          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
             LanguageSelector,
             {
               onLanguageChange: (lang) => setSelectedLanguageId(lang.id)
             }
           )
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("label", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("label", { children: [
           "Front statement",
-          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
             "textarea",
             {
               value: form.frontStatement,
@@ -22605,9 +22625,9 @@
             }
           )
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("label", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("label", { children: [
           "Back statement",
-          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
             "textarea",
             {
               value: form.backStatement,
@@ -22616,9 +22636,9 @@
             }
           )
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("label", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("label", { children: [
           "Pronunciation",
-          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
             "input",
             {
               type: "text",
@@ -22627,9 +22647,9 @@
             }
           )
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("label", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("label", { children: [
           "Notes",
-          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
             "textarea",
             {
               value: form.notes,
@@ -22637,9 +22657,9 @@
             }
           )
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("label", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("label", { children: [
           "Category",
-          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
             "input",
             {
               type: "text",
@@ -22648,9 +22668,9 @@
             }
           )
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("label", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("label", { children: [
           "Tags",
-          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
             "input",
             {
               type: "text",
@@ -22660,21 +22680,21 @@
             }
           )
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("label", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("label", { children: [
           "Difficulty",
-          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
             "select",
             {
               value: form.difficulty,
               onChange: (e) => updateField("difficulty", Number(e.target.value)),
-              children: DIFFICULTY_OPTIONS.map((option) => /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("option", { value: option.value, children: option.label }, option.value))
+              children: DIFFICULTY_OPTIONS.map((option) => /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("option", { value: option.value, children: option.label }, option.value))
             }
           )
         ] }),
-        error && /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("div", { className: "modal-error", children: error }),
-        /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("div", { className: "modal-actions", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("button", { type: "button", onClick: onClose, disabled: isSubmitting, children: "Cancel" }),
-          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("button", { type: "submit", disabled: isSubmitting, children: isSubmitting ? "Creating..." : "Create" })
+        error && /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "modal-error", children: error }),
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "modal-actions", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("button", { type: "button", onClick: onClose, disabled: isSubmitting, children: "Cancel" }),
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("button", { type: "submit", disabled: isSubmitting, children: isSubmitting ? "Creating..." : "Create" })
         ] })
       ] })
     ] }) });
@@ -22682,7 +22702,7 @@
 
   // App/Design/React/Components/Local/Pages/FlashCards/Study/index.tsx
   var import_react12 = __toESM(require_react(), 1);
-  var import_jsx_runtime15 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime16 = __toESM(require_jsx_runtime(), 1);
   var PRESETS = [5, 10, 20, 50, 100];
   var MAX_CUSTOM = 200;
   var normalize = (s) => s.trim().toLowerCase().replace(/\s+/g, " ");
@@ -22786,13 +22806,13 @@
     }, [phase, checked, currentIndex]);
     const missedCount = (0, import_react12.useMemo)(() => results.filter((r) => !r.wasCorrect).length, [results]);
     if (phase === "pick") {
-      return /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "modal-overlay", onClick: onClose, children: /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "modal study-pick", onClick: (e) => e.stopPropagation(), children: [
-        /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "modal-header", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("h2", { children: "How many cards?" }),
-          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("button", { className: "modal-close", onClick: onClose, children: "\u2715" })
+      return /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "modal-overlay", onClick: onClose, children: /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "modal study-pick", onClick: (e) => e.stopPropagation(), children: [
+        /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "modal-header", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("h2", { children: "How many cards?" }),
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("button", { className: "modal-close", onClick: onClose, children: "\u2715" })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "modal-body", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "preset-grid", children: PRESETS.map((n) => /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "modal-body", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "preset-grid", children: PRESETS.map((n) => /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
             "button",
             {
               className: `preset-btn ${cardCount === n && !customCount ? "active" : ""}`,
@@ -22804,8 +22824,8 @@
             },
             n
           )) }),
-          /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "custom-row", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "custom-row", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
               "input",
               {
                 type: "number",
@@ -22819,7 +22839,7 @@
                 }
               }
             ),
-            /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
+            /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
               "button",
               {
                 className: "start-btn",
@@ -22829,89 +22849,89 @@
               }
             )
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "hint-row", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "hint-row", children: [
             "Up to ",
             MAX_CUSTOM,
             " cards per session"
           ] }),
-          error && /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "modal-error", children: error })
+          error && /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "modal-error", children: error })
         ] })
       ] }) });
     }
     if (phase === "results") {
       const correctCount = results.filter((r) => r.wasCorrect).length;
       const pct = results.length ? Math.round(correctCount / results.length * 100) : 0;
-      return /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "study-results study-fullscreen", children: /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "results-content", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "results-header", children: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("h2", { children: "Session complete" }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "results-summary", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: `summary-pct ${pct >= 70 ? "summary-good" : "summary-bad"}`, children: [
+      return /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "study-results study-fullscreen", children: /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "results-content", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "results-header", children: /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("h2", { children: "Session complete" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "results-summary", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: `summary-pct ${pct >= 70 ? "summary-good" : "summary-bad"}`, children: [
             pct,
             "%"
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "summary-detail", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "summary-detail", children: [
             correctCount,
             " of ",
             results.length,
             " correct"
           ] })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "results-list", children: results.map((r, i) => /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: `result-item ${r.wasCorrect ? "correct" : "incorrect"}`, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("span", { className: "result-icon", children: r.wasCorrect ? "\u2713" : "\u2717" }),
-          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("span", { className: "result-front", children: r.showedFront ? r.card.frontStatement : r.card.backStatement }),
-          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("span", { className: "result-arrow", children: "\u2192" }),
-          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("span", { className: "result-back", children: r.showedFront ? r.card.backStatement : r.card.frontStatement })
+        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "results-list", children: results.map((r, i) => /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: `result-item ${r.wasCorrect ? "correct" : "incorrect"}`, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("span", { className: "result-icon", children: r.wasCorrect ? "\u2713" : "\u2717" }),
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("span", { className: "result-front", children: r.showedFront ? r.card.frontStatement : r.card.backStatement }),
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("span", { className: "result-arrow", children: "\u2192" }),
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("span", { className: "result-back", children: r.showedFront ? r.card.backStatement : r.card.frontStatement })
         ] }, i)) }),
-        /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "results-actions", children: [
-          missedCount > 0 && /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("button", { onClick: handleRetryMissed, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "results-actions", children: [
+          missedCount > 0 && /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("button", { onClick: handleRetryMissed, children: [
             "Retry ",
             missedCount,
             " missed"
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("button", { className: "primary", onClick: onClose, children: "Done" })
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("button", { className: "primary", onClick: onClose, children: "Done" })
         ] })
       ] }) });
     }
     if (isLoading) {
-      return /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "study-fullscreen", children: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "session-status", children: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Spinner, {}) }) });
+      return /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "study-fullscreen", children: /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "session-status", children: /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Spinner, {}) }) });
     }
     if (error) {
-      return /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "study-fullscreen", children: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "session-status", children: /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "modal-error", children: error }),
-        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "results-actions", style: { marginTop: 16 }, children: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("button", { className: "primary", onClick: onClose, children: "Close" }) })
+      return /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "study-fullscreen", children: /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "session-status", children: /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "modal-error", children: error }),
+        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "results-actions", style: { marginTop: 16 }, children: /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("button", { className: "primary", onClick: onClose, children: "Close" }) })
       ] }) }) });
     }
     if (!card) return null;
     const shown = showFront ? card.frontStatement : card.backStatement;
-    return /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "study-fullscreen", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "session-track", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "track-top", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("span", { className: "track-meta", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("strong", { children: currentIndex + 1 }),
+    return /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "study-fullscreen", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "session-track", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "track-top", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("span", { className: "track-meta", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("strong", { children: currentIndex + 1 }),
             " / ",
             cards.length
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("button", { className: "exit-btn", onClick: () => setPhase("results"), children: "End session" })
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("button", { className: "exit-btn", onClick: () => setPhase("results"), children: "End session" })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "track-bar", children: cards.map((_, i) => {
+        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "track-bar", children: cards.map((_, i) => {
           const result = results[i];
           let segClass = "";
           if (result) segClass = result.wasCorrect ? "done-correct" : "done-incorrect";
           else if (i === currentIndex) segClass = "current";
-          return /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: `track-seg ${segClass}` }, i);
+          return /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: `track-seg ${segClass}` }, i);
         }) })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "session-stage", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "session-card", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "card-label", children: showFront ? "Front" : "Back" }),
-          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "card-text", children: shown })
+      /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "session-stage", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "session-card", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "card-label", children: showFront ? "Front" : "Back" }),
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "card-text", children: shown })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "session-input-area", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("label", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "session-input-area", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("label", { children: [
             "Type the ",
             showFront ? "back" : "front",
             ":"
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
             "input",
             {
               ref: inputRef,
@@ -22923,28 +22943,28 @@
               className: checked ? isAnswerCorrect ? "input-correct" : "input-incorrect" : ""
             }
           ),
-          checked && /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: `answer-feedback ${isAnswerCorrect ? "is-correct" : "is-incorrect"}`, children: [
-            /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("span", { className: "feedback-label", children: isAnswerCorrect ? "Matched" : "Answer:" }),
-            !isAnswerCorrect && /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("span", { className: "feedback-value", children: expectedAnswer })
+          checked && /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: `answer-feedback ${isAnswerCorrect ? "is-correct" : "is-incorrect"}`, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("span", { className: "feedback-label", children: isAnswerCorrect ? "Matched" : "Answer:" }),
+            !isAnswerCorrect && /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("span", { className: "feedback-value", children: expectedAnswer })
           ] })
         ] })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "session-actions", children: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "actions-inner", children: !checked ? /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)(import_jsx_runtime15.Fragment, { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("button", { className: "check-btn", onClick: handleCheck, disabled: !userAnswer.trim(), children: "Check answer" }),
-        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("span", { className: "kbd-hint", children: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("kbd", { children: "Enter" }) })
-      ] }) : /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)(import_jsx_runtime15.Fragment, { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("button", { className: "incorrect-btn", onClick: () => handleGrade(false), children: "Incorrect" }),
-        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("button", { className: "correct-btn", onClick: () => handleGrade(true), children: "Correct" }),
-        /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("span", { className: "kbd-hint", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("kbd", { children: "1" }),
-          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("kbd", { children: "2" })
+      /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "session-actions", children: /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "actions-inner", children: !checked ? /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)(import_jsx_runtime16.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("button", { className: "check-btn", onClick: handleCheck, disabled: !userAnswer.trim(), children: "Check answer" }),
+        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("span", { className: "kbd-hint", children: /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("kbd", { children: "Enter" }) })
+      ] }) : /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)(import_jsx_runtime16.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("button", { className: "incorrect-btn", onClick: () => handleGrade(false), children: "Incorrect" }),
+        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("button", { className: "correct-btn", onClick: () => handleGrade(true), children: "Correct" }),
+        /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("span", { className: "kbd-hint", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("kbd", { children: "1" }),
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("kbd", { children: "2" })
         ] })
       ] }) }) })
     ] });
   };
 
   // App/Design/React/Components/Local/Pages/FlashCards/index.tsx
-  var import_jsx_runtime16 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime17 = __toESM(require_jsx_runtime(), 1);
   var MAX_DIFFICULTY = 5;
   var SORT_OPTIONS = [
     { value: "createTime", label: "Date created" },
@@ -23009,31 +23029,31 @@
       }
     };
     if (flashCardsLoading) {
-      return /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "flashcards-status", children: /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Spinner, {}) });
+      return /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("div", { className: "flashcards-status", children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Spinner, {}) });
     }
     if (flashCardsError) {
-      return /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "flashcards-status", children: /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "error", children: `Couldn't load your flashcards: ${flashCardsError}` }) });
+      return /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("div", { className: "flashcards-status", children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("div", { className: "error", children: `Couldn't load your flashcards: ${flashCardsError}` }) });
     }
     const cards = flashCards ?? [];
     const userId = session?.user?.id;
     const languageId = language?.id;
     const mayHaveNextPage = cards.length === size;
-    return /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "flashcards", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "card-actions", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "pagination", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("button", { onClick: prevPage, disabled: page <= 1, children: "Previous" }),
-          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("span", { children: `Page ${page}` }),
-          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("button", { onClick: nextPage, disabled: !mayHaveNextPage, children: "Next" })
+    return /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("div", { className: "flashcards", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("div", { className: "card-actions", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("div", { className: "pagination", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("button", { onClick: prevPage, disabled: page <= 1, children: "Previous" }),
+          /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("span", { children: `Page ${page}` }),
+          /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("button", { onClick: nextPage, disabled: !mayHaveNextPage, children: "Next" })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "sort-controls", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("select", { value: sortField ?? "", onChange: (e) => setSortField(e.target.value || void 0), children: SORT_OPTIONS.map((opt) => /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("option", { value: opt.value, children: opt.label }, opt.value)) }),
-          /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("select", { value: sortDir ?? "desc", onChange: (e) => setSortDir(e.target.value), children: [
-            /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("option", { value: "asc", children: "Asc" }),
-            /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("option", { value: "desc", children: "Desc" })
+        /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("div", { className: "sort-controls", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("select", { value: sortField ?? "", onChange: (e) => setSortField(e.target.value || void 0), children: SORT_OPTIONS.map((opt) => /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("option", { value: opt.value, children: opt.label }, opt.value)) }),
+          /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("select", { value: sortDir ?? "desc", onChange: (e) => setSortDir(e.target.value), children: [
+            /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("option", { value: "asc", children: "Asc" }),
+            /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("option", { value: "desc", children: "Desc" })
           ] })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "primary-actions", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("div", { className: "primary-actions", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
             "button",
             {
               className: "create-button",
@@ -23042,7 +23062,7 @@
               children: "Create new"
             }
           ),
-          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
             "button",
             {
               className: "study-button",
@@ -23053,15 +23073,15 @@
           )
         ] })
       ] }),
-      cards.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "notice", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "notice-title", children: "No flashcards yet" }),
-        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "notice-body", children: 'Click "Create new" to add your first card.' })
+      cards.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("div", { className: "notice", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("div", { className: "notice-title", children: "No flashcards yet" }),
+        /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("div", { className: "notice-body", children: 'Click "Create new" to add your first card.' })
       ] }),
-      cards.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "card-grid", children: cards.map((card) => {
+      cards.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("div", { className: "card-grid", children: cards.map((card) => {
         const isFlipped = flippedIds.has(card.id);
         const masteryTicks = Math.max(0, Math.min(MAX_DIFFICULTY, MAX_DIFFICULTY - card.difficulty));
         const accuracy = accuracyOf(card);
-        return /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
+        return /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
           "div",
           {
             className: `flashcard ${isFlipped ? "flipped" : ""}`,
@@ -23074,9 +23094,9 @@
                 toggleFlip(card.id);
               }
             },
-            children: /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "flashcard-inner", children: [
-              /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "flashcard-face flashcard-front", children: [
-                /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
+            children: /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("div", { className: "flashcard-inner", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("div", { className: "flashcard-face flashcard-front", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
                   "button",
                   {
                     className: "delete-button",
@@ -23086,33 +23106,33 @@
                     children: isDeleting === card.id ? "..." : "\u2715"
                   }
                 ),
-                card.category && /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "tag category", children: card.category }),
-                /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "face-body", children: /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "statement", children: card.frontStatement }) }),
-                /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "face-footer", children: [
-                  /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "mastery", title: `Difficulty ${card.difficulty}/${MAX_DIFFICULTY}`, children: Array.from({ length: MAX_DIFFICULTY }).map((_, i) => /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("span", { className: `mastery-tick ${i < masteryTicks ? "filled" : ""}` }, i)) }),
-                  /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "stat-row", children: [
-                    /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("span", { className: "stat", children: [
+                card.category && /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("div", { className: "tag category", children: card.category }),
+                /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("div", { className: "face-body", children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("div", { className: "statement", children: card.frontStatement }) }),
+                /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("div", { className: "face-footer", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("div", { className: "mastery", title: `Difficulty ${card.difficulty}/${MAX_DIFFICULTY}`, children: Array.from({ length: MAX_DIFFICULTY }).map((_, i) => /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("span", { className: `mastery-tick ${i < masteryTicks ? "filled" : ""}` }, i)) }),
+                  /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("div", { className: "stat-row", children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("span", { className: "stat", children: [
                       card.reviewCount,
                       " ",
                       card.reviewCount === 1 ? "review" : "reviews"
                     ] }),
-                    card.streak > 0 && /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("span", { className: "stat stat-streak", children: [
+                    card.streak > 0 && /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("span", { className: "stat stat-streak", children: [
                       "\u{1F525} ",
                       card.streak
                     ] })
                   ] })
                 ] })
               ] }),
-              /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "flashcard-face flashcard-back", children: [
-                /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "face-body", children: [
-                  /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "statement", children: card.backStatement }),
-                  card.pronunciation && /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "pronunciation", children: card.pronunciation }),
-                  card.notes && /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "notes", children: card.notes }),
-                  card.tags && /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "tag tags", children: card.tags })
+              /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("div", { className: "flashcard-face flashcard-back", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("div", { className: "face-body", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("div", { className: "statement", children: card.backStatement }),
+                  card.pronunciation && /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("div", { className: "pronunciation", children: card.pronunciation }),
+                  card.notes && /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("div", { className: "notes", children: card.notes }),
+                  card.tags && /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("div", { className: "tag tags", children: card.tags })
                 ] }),
-                /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "face-footer", children: [
-                  /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("span", { className: "stat", children: formatLastReviewed(card.lastReviewedUtc) }),
-                  accuracy !== null && /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("span", { className: `stat stat-accuracy ${accuracy >= 70 ? "good" : "weak"}`, children: [
+                /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("div", { className: "face-footer", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("span", { className: "stat", children: formatLastReviewed(card.lastReviewedUtc) }),
+                  accuracy !== null && /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("span", { className: `stat stat-accuracy ${accuracy >= 70 ? "good" : "weak"}`, children: [
                     accuracy,
                     "% accurate"
                   ] })
@@ -23123,7 +23143,7 @@
           card.id
         );
       }) }),
-      isModalOpen && userId && languageId && /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
+      isModalOpen && userId && languageId && /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
         CreateFlashCardModal,
         {
           userId,
@@ -23132,14 +23152,14 @@
           onCreated: () => setIsModalOpen(false)
         }
       ),
-      isStudyActive && /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Study, { onClose: () => setIsStudyActive(false) })
+      isStudyActive && /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Study, { onClose: () => setIsStudyActive(false) })
     ] });
   };
 
   // App/Design/React/Components/Core/Text/index.tsx
-  var import_jsx_runtime17 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime18 = __toESM(require_jsx_runtime(), 1);
   var Text = (props) => {
-    return /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("p", { children: props.text });
+    return /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("p", { children: props.text });
   };
 
   // App/Code/Community/MusicTranslation/Source/web/TranslationPage/index.tsx
@@ -23231,7 +23251,7 @@
   };
 
   // App/Code/Community/MusicTranslation/Source/web/TranslationPage/CreateSongModal.tsx
-  var import_jsx_runtime18 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime19 = __toESM(require_jsx_runtime(), 1);
   var emptyForm2 = {
     lyrics: "",
     title: "",
@@ -23271,15 +23291,15 @@
         setIsSubmitting(false);
       }
     };
-    return /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("div", { className: "modal-overlay", onClick: onClose, children: /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)("div", { className: "modal", onClick: (e) => e.stopPropagation(), children: [
-      /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)("div", { className: "modal-header", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("h2", { children: "Translate a song" }),
-        /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("button", { className: "modal-close", onClick: onClose, children: "\u2715" })
+    return /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("div", { className: "modal-overlay", onClick: onClose, children: /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "modal", onClick: (e) => e.stopPropagation(), children: [
+      /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "modal-header", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("h2", { children: "Translate a song" }),
+        /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("button", { className: "modal-close", onClick: onClose, children: "\u2715" })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)("form", { onSubmit: handleSubmit, className: "modal-body", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)("label", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("form", { onSubmit: handleSubmit, className: "modal-body", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("label", { children: [
           "Song lyrics",
-          /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(
             "textarea",
             {
               value: form.lyrics,
@@ -23289,9 +23309,9 @@
             }
           )
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)("label", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("label", { children: [
           "Title",
-          /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(
             "input",
             {
               type: "text",
@@ -23302,9 +23322,9 @@
             }
           )
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)("label", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("label", { children: [
           "Artist",
-          /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(
             "input",
             {
               type: "text",
@@ -23315,9 +23335,9 @@
             }
           )
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)("label", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("label", { children: [
           "Album",
-          /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(
             "input",
             {
               type: "text",
@@ -23328,10 +23348,10 @@
             }
           )
         ] }),
-        error && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("div", { className: "modal-error", children: error }),
-        /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)("div", { className: "modal-actions", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("button", { type: "button", onClick: onClose, disabled: isSubmitting, children: "Cancel" }),
-          /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("button", { type: "submit", disabled: isSubmitting, children: isSubmitting ? "Translating..." : "Translate" })
+        error && /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("div", { className: "modal-error", children: error }),
+        /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "modal-actions", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("button", { type: "button", onClick: onClose, disabled: isSubmitting, children: "Cancel" }),
+          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("button", { type: "submit", disabled: isSubmitting, children: isSubmitting ? "Translating..." : "Translate" })
         ] })
       ] })
     ] }) });
@@ -23339,7 +23359,7 @@
 
   // App/Code/Community/MusicTranslation/Source/web/TranslationPage/SongDetailDialog.tsx
   var import_react15 = __toESM(require_react(), 1);
-  var import_jsx_runtime19 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime20 = __toESM(require_jsx_runtime(), 1);
   var SongDetailDialog = ({ trackId, onClose }) => {
     const { session } = useSession();
     const { language } = useLanguage();
@@ -23390,28 +23410,28 @@
       setOpenMenuIndex(null);
     };
     const flashcardLine = flashcardLineIndex !== null ? lines[flashcardLineIndex] : null;
-    return /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("div", { className: "detail-overlay", onClick: onClose, children: /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "detail-dialog", onClick: (e) => {
+    return /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("div", { className: "detail-overlay", onClick: onClose, children: /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "detail-dialog", onClick: (e) => {
       e.stopPropagation();
       setOpenMenuIndex(null);
     }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "detail-header", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "detail-meta", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("h2", { children: track?.title ?? "Loading..." }),
-          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("div", { className: "detail-artist", children: artist?.name ?? "..." }),
-          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("div", { className: "detail-album", children: album?.title ?? "..." })
+      /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "detail-header", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "detail-meta", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("h2", { children: track?.title ?? "Loading..." }),
+          /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("div", { className: "detail-artist", children: artist?.name ?? "..." }),
+          /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("div", { className: "detail-album", children: album?.title ?? "..." })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("button", { className: "detail-close", onClick: onClose, children: "\u2715" })
+        /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("button", { className: "detail-close", onClick: onClose, children: "\u2715" })
       ] }),
-      isLoading && /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("div", { className: "detail-loading", children: /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(Spinner, {}) }),
-      error && /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("div", { className: "detail-loading", children: /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("div", { className: "error", children: error }) }),
-      !isLoading && !error && lines.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("div", { className: "detail-loading", children: /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("div", { className: "notice-body", children: "No lyrics available" }) }),
-      !isLoading && !error && lines.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("div", { className: "detail-lyrics", children: lines.map((line, i) => /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)(
+      isLoading && /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("div", { className: "detail-loading", children: /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(Spinner, {}) }),
+      error && /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("div", { className: "detail-loading", children: /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("div", { className: "error", children: error }) }),
+      !isLoading && !error && lines.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("div", { className: "detail-loading", children: /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("div", { className: "notice-body", children: "No lyrics available" }) }),
+      !isLoading && !error && lines.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("div", { className: "detail-lyrics", children: lines.map((line, i) => /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)(
         "div",
         {
           className: `lyric-line ${expandedIndex === i ? "expanded" : ""}`,
           children: [
-            /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "line-header", children: [
-              /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(
+            /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "line-header", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(
                 "div",
                 {
                   className: "line-original",
@@ -23427,8 +23447,8 @@
                   children: line.lineContents
                 }
               ),
-              /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "line-actions", children: [
-                /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(
+              /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "line-actions", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(
                   "button",
                   {
                     className: `line-action-btn${openMenuIndex === i ? " active" : ""}`,
@@ -23437,10 +23457,10 @@
                       setOpenMenuIndex((prev) => prev === i ? null : i);
                     },
                     "aria-label": "Actions",
-                    children: /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("svg", { width: "14", height: "14", viewBox: "0 0 14 14", fill: "none", children: /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("path", { d: "M7 3V3.01M7 7V7.01M7 11V11.01", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round" }) })
+                    children: /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("svg", { width: "14", height: "14", viewBox: "0 0 14 14", fill: "none", children: /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("path", { d: "M7 3V3.01M7 7V7.01M7 11V11.01", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round" }) })
                   }
                 ),
-                openMenuIndex === i && /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("div", { className: "line-dropdown", children: /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)(
+                openMenuIndex === i && /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("div", { className: "line-dropdown", children: /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)(
                   "button",
                   {
                     className: "line-dropdown-item",
@@ -23450,9 +23470,9 @@
                       setFlashcardLineIndex(i);
                     },
                     children: [
-                      /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("svg", { width: "14", height: "14", viewBox: "0 0 14 14", fill: "none", children: [
-                        /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("rect", { x: "1", y: "3", width: "12", height: "10", rx: "1.5", stroke: "currentColor", strokeWidth: "1.3" }),
-                        /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("path", { d: "M4 1V3M10 1V3M1 6H13", stroke: "currentColor", strokeWidth: "1.3", strokeLinecap: "round" })
+                      /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("svg", { width: "14", height: "14", viewBox: "0 0 14 14", fill: "none", children: [
+                        /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("rect", { x: "1", y: "3", width: "12", height: "10", rx: "1.5", stroke: "currentColor", strokeWidth: "1.3" }),
+                        /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("path", { d: "M4 1V3M10 1V3M1 6H13", stroke: "currentColor", strokeWidth: "1.3", strokeLinecap: "round" })
                       ] }),
                       "Create Flash Card"
                     ]
@@ -23460,25 +23480,25 @@
                 ) })
               ] })
             ] }),
-            expandedIndex === i && /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "line-details", children: [
-              /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "detail-row translation", children: [
-                /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("span", { className: "detail-label", children: "Translation:" }),
-                /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("span", { className: "detail-value", children: line.translationToUserLanguage })
+            expandedIndex === i && /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "line-details", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "detail-row translation", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("span", { className: "detail-label", children: "Translation:" }),
+                /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("span", { className: "detail-value", children: line.translationToUserLanguage })
               ] }),
-              line.pronunciations.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "detail-row", children: [
-                /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("span", { className: "detail-label", children: "Pronunciation:" }),
-                /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("span", { className: "detail-value", children: line.pronunciations.join(", ") })
+              line.pronunciations.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "detail-row", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("span", { className: "detail-label", children: "Pronunciation:" }),
+                /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("span", { className: "detail-value", children: line.pronunciations.join(", ") })
               ] }),
-              line.culturalMeaning && /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "detail-row", children: [
-                /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("span", { className: "detail-label", children: "Cultural meaning:" }),
-                /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("span", { className: "detail-value", children: line.culturalMeaning })
+              line.culturalMeaning && /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "detail-row", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("span", { className: "detail-label", children: "Cultural meaning:" }),
+                /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("span", { className: "detail-value", children: line.culturalMeaning })
               ] })
             ] })
           ]
         },
         i
       )) }),
-      flashcardLine && /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(
+      flashcardLine && /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(
         CreateFlashCardModal,
         {
           userId: session?.user?.id ?? "",
@@ -23500,7 +23520,7 @@
   };
 
   // App/Code/Community/MusicTranslation/Source/web/TranslationPage/index.tsx
-  var import_jsx_runtime20 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime21 = __toESM(require_jsx_runtime(), 1);
   var SORT_OPTIONS2 = [
     { value: "createTime", label: "Date added" },
     { value: "title", label: "Title" }
@@ -23568,36 +23588,36 @@
       setDetailTrackId(trackId);
     };
     if (tracksLoading) {
-      return /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("div", { className: "music-translation-status", children: /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(Spinner, {}) });
+      return /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("div", { className: "music-translation-status", children: /* @__PURE__ */ (0, import_jsx_runtime21.jsx)(Spinner, {}) });
     }
     if (tracksError) {
-      return /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("div", { className: "music-translation-status", children: /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("div", { className: "error", children: `Couldn't load songs: ${tracksError}` }) });
+      return /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("div", { className: "music-translation-status", children: /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("div", { className: "error", children: `Couldn't load songs: ${tracksError}` }) });
     }
     const trackList = filteredTracks;
-    return /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "music-translation", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "library-actions", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "pagination", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("button", { onClick: prevPage, disabled: page <= 1, children: "Previous" }),
-          /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("span", { children: `Page ${page}` }),
-          /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("button", { onClick: nextPage, disabled: !mayHaveNextPage, children: "Next" })
+    return /* @__PURE__ */ (0, import_jsx_runtime21.jsxs)("div", { className: "music-translation", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime21.jsxs)("div", { className: "library-actions", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime21.jsxs)("div", { className: "pagination", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("button", { onClick: prevPage, disabled: page <= 1, children: "Previous" }),
+          /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("span", { children: `Page ${page}` }),
+          /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("button", { onClick: nextPage, disabled: !mayHaveNextPage, children: "Next" })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "sort-controls", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("select", { value: sortField ?? "", onChange: (e) => setSortField(e.target.value || void 0), children: SORT_OPTIONS2.map((opt) => /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("option", { value: opt.value, children: opt.label }, opt.value)) }),
-          /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("select", { value: sortDir ?? "desc", onChange: (e) => setSortDir(e.target.value), children: [
-            /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("option", { value: "asc", children: "Asc" }),
-            /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("option", { value: "desc", children: "Desc" })
+        /* @__PURE__ */ (0, import_jsx_runtime21.jsxs)("div", { className: "sort-controls", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("select", { value: sortField ?? "", onChange: (e) => setSortField(e.target.value || void 0), children: SORT_OPTIONS2.map((opt) => /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("option", { value: opt.value, children: opt.label }, opt.value)) }),
+          /* @__PURE__ */ (0, import_jsx_runtime21.jsxs)("select", { value: sortDir ?? "desc", onChange: (e) => setSortDir(e.target.value), children: [
+            /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("option", { value: "asc", children: "Asc" }),
+            /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("option", { value: "desc", children: "Desc" })
           ] })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "filter-controls", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("select", { value: selectedArtist, onChange: (e) => setSelectedArtist(e.target.value), children: [
-            /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("option", { value: "", children: "All artists" }),
-            artistNames.map((name) => /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("option", { value: name, children: name }, name))
+        /* @__PURE__ */ (0, import_jsx_runtime21.jsxs)("div", { className: "filter-controls", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime21.jsxs)("select", { value: selectedArtist, onChange: (e) => setSelectedArtist(e.target.value), children: [
+            /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("option", { value: "", children: "All artists" }),
+            artistNames.map((name) => /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("option", { value: name, children: name }, name))
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("select", { value: selectedAlbum, onChange: (e) => setSelectedAlbum(e.target.value), children: [
-            /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("option", { value: "", children: "All albums" }),
-            albumNames.map((name) => /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("option", { value: name, children: name }, name))
+          /* @__PURE__ */ (0, import_jsx_runtime21.jsxs)("select", { value: selectedAlbum, onChange: (e) => setSelectedAlbum(e.target.value), children: [
+            /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("option", { value: "", children: "All albums" }),
+            albumNames.map((name) => /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("option", { value: name, children: name }, name))
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime21.jsx)(
             "input",
             {
               type: "text",
@@ -23607,7 +23627,7 @@
             }
           )
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime21.jsx)(
           "button",
           {
             className: "create-button",
@@ -23616,17 +23636,17 @@
           }
         )
       ] }),
-      trackList.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "notice", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("div", { className: "notice-title", children: "No songs yet" }),
-        /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("div", { className: "notice-body", children: 'Click "Add song" to translate your first track.' })
+      trackList.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime21.jsxs)("div", { className: "notice", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("div", { className: "notice-title", children: "No songs yet" }),
+        /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("div", { className: "notice-body", children: 'Click "Add song" to translate your first track.' })
       ] }),
-      trackList.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("table", { className: "song-table", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("tr", { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("th", { children: "Title" }),
-          /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("th", { children: "Artist" }),
-          /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("th", { children: "Album" })
+      trackList.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime21.jsxs)("table", { className: "song-table", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime21.jsxs)("tr", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("th", { children: "Title" }),
+          /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("th", { children: "Artist" }),
+          /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("th", { children: "Album" })
         ] }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("tbody", { children: trackList.map((track) => /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)(
+        /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("tbody", { children: trackList.map((track) => /* @__PURE__ */ (0, import_jsx_runtime21.jsxs)(
           "tr",
           {
             className: "song-row",
@@ -23640,22 +23660,22 @@
               }
             },
             children: [
-              /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("td", { className: "song-title", children: track.title }),
-              /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("td", { className: "song-artist", children: artistMap.get(track.artistId) ?? "..." }),
-              /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("td", { className: "song-album", children: albumMap.get(track.albumId) ?? "..." })
+              /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("td", { className: "song-title", children: track.title }),
+              /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("td", { className: "song-artist", children: artistMap.get(track.artistId) ?? "..." }),
+              /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("td", { className: "song-album", children: albumMap.get(track.albumId) ?? "..." })
             ]
           },
           track.id
         )) })
       ] }),
-      isCreateOpen && /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(
+      isCreateOpen && /* @__PURE__ */ (0, import_jsx_runtime21.jsx)(
         CreateSongModal,
         {
           onClose: () => setIsCreateOpen(false),
           onCreated: handleCreated
         }
       ),
-      detailTrackId && /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(
+      detailTrackId && /* @__PURE__ */ (0, import_jsx_runtime21.jsx)(
         SongDetailDialog,
         {
           trackId: detailTrackId,
@@ -23674,10 +23694,10 @@
   register("@component/Spinner", Spinner);
 
   // App/Code/Community/ReactFrontend/Source/web/index.tsx
-  var import_jsx_runtime21 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime22 = __toESM(require_jsx_runtime(), 1);
   var root = (0, import_client.createRoot)(document.getElementById("app"));
   root.render(
-    /* @__PURE__ */ (0, import_jsx_runtime21.jsx)(Default_default, { children: /* @__PURE__ */ (0, import_jsx_runtime21.jsx)(Canvas, { children: window.canvasState }) })
+    /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(Default_default, { children: /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(Canvas, { children: window.canvasState }) })
   );
 })();
 /*! Bundled license information:
