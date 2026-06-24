@@ -1700,6 +1700,589 @@ body {
   }
 }
 
+/* App/Code/Local/Scenarios/Source/web/Pages/Scenarios/modal-style.scss */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+}
+.modal {
+  background: #fff;
+  border-radius: 8px;
+  width: 480px;
+  max-width: 90vw;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e5e7eb;
+}
+.modal-header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+.modal-header .modal-close {
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #999;
+  cursor: pointer;
+}
+.modal-header .modal-close:hover {
+  color: #333;
+}
+.modal-body {
+  padding: 20px;
+}
+.modal-body label {
+  display: block;
+  margin-bottom: 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+.modal-body label input,
+.modal-body label textarea {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: inherit;
+}
+.modal-body label input:focus,
+.modal-body label textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+.modal-body label textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+.modal-body .modal-error {
+  color: #ef4444;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+.modal-body .modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 20px;
+}
+.modal-body .modal-actions button {
+  padding: 8px 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+}
+.modal-body .modal-actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.modal-body .modal-actions button:first-child {
+  background: #fff;
+}
+.modal-body .modal-actions button:last-child {
+  background: #3b82f6;
+  color: #fff;
+  border-color: #3b82f6;
+}
+.modal-body .modal-actions button:last-child:hover {
+  background: #2563eb;
+}
+
+/* App/Code/Local/Scenarios/Source/web/Pages/ScenarioSession/style.scss */
+.session-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #f9fafb;
+}
+.difficulty-picker {
+  text-align: center;
+  padding: 40px;
+  position: relative;
+}
+.difficulty-picker .close-x {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #999;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+.difficulty-picker .close-x:hover {
+  color: #333;
+  background: #f3f4f6;
+}
+.difficulty-picker h2 {
+  margin: 0 0 24px;
+  font-size: 22px;
+  font-weight: 600;
+}
+.difficulty-picker .difficulty-options {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.difficulty-picker .difficulty-options .difficulty-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 20px 28px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  min-width: 140px;
+}
+.difficulty-picker .difficulty-options .difficulty-btn:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+}
+.difficulty-picker .difficulty-options .difficulty-btn .diff-label {
+  font-size: 16px;
+  font-weight: 600;
+}
+.difficulty-picker .difficulty-options .difficulty-btn .diff-desc {
+  font-size: 12px;
+  color: #666;
+}
+.difficulty-picker .back-btn {
+  padding: 8px 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+}
+.difficulty-picker .back-btn:hover {
+  background: #f3f4f6;
+}
+.session-error {
+  text-align: center;
+}
+.session-error .error-text {
+  color: #ef4444;
+  margin-bottom: 16px;
+}
+.session-error button {
+  padding: 8px 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+}
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 720px;
+  height: 100vh;
+  background: #fff;
+}
+.chat-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #fff;
+}
+.chat-header .close-btn {
+  padding: 4px 8px;
+  border: none;
+  border-radius: 4px;
+  background: none;
+  cursor: pointer;
+  font-size: 16px;
+  color: #666;
+}
+.chat-header .close-btn:hover {
+  background: #f3f4f6;
+  color: #333;
+}
+.chat-header .chat-title {
+  flex: 1;
+  font-weight: 600;
+  font-size: 15px;
+}
+.chat-header .chat-difficulty {
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background: #e5e7eb;
+  color: #666;
+}
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+.chat-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  color: #666;
+}
+.chat-empty .empty-text {
+  font-size: 15px;
+  margin-bottom: 24px;
+}
+.chat-empty .scenario-steps {
+  text-align: left;
+  max-width: 400px;
+  font-size: 13px;
+  background: #f9fafb;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+.chat-empty .scenario-steps strong {
+  display: block;
+  margin-bottom: 8px;
+}
+.chat-empty .scenario-steps .step-line {
+  margin-bottom: 4px;
+  color: #333;
+}
+.chat-bubble {
+  margin-bottom: 12px;
+  max-width: 85%;
+}
+.chat-bubble.user {
+  margin-left: auto;
+}
+.chat-bubble.user .bubble-message {
+  background: #3b82f6;
+  color: #fff;
+  border-radius: 16px 16px 4px 16px;
+}
+.chat-bubble.assistant {
+  margin-right: auto;
+}
+.chat-bubble.assistant .bubble-message {
+  background: #f3f4f6;
+  color: #333;
+  border-radius: 16px 16px 16px 4px;
+}
+.chat-bubble.assistant.sending {
+  padding: 8px 16px;
+}
+.chat-bubble .bubble-message {
+  padding: 10px 14px;
+  font-size: 14px;
+  line-height: 1.5;
+  word-break: break-word;
+}
+.chat-bubble .line-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 4px;
+  position: relative;
+}
+.chat-bubble .line-actions .line-action-btn {
+  padding: 2px 6px;
+  border: none;
+  border-radius: 4px;
+  background: none;
+  color: #999;
+  cursor: pointer;
+}
+.chat-bubble .line-actions .line-action-btn:hover,
+.chat-bubble .line-actions .line-action-btn.active {
+  background: #e5e7eb;
+  color: #333;
+}
+.chat-bubble .line-actions .line-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  min-width: 180px;
+}
+.chat-bubble .line-actions .line-dropdown .line-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 13px;
+  color: #333;
+  text-align: left;
+}
+.chat-bubble .line-actions .line-dropdown .line-dropdown-item:hover {
+  background: #f3f4f6;
+}
+.chat-bubble .bubble-details {
+  margin-top: 6px;
+  padding: 8px 12px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 12px;
+}
+.chat-bubble .bubble-details .detail-row {
+  margin-bottom: 4px;
+  line-height: 1.5;
+}
+.chat-bubble .bubble-details .detail-row:last-child {
+  margin-bottom: 0;
+}
+.chat-bubble .bubble-details .detail-row .detail-label {
+  font-weight: 600;
+  color: #666;
+  margin-right: 4px;
+}
+.chat-bubble .bubble-details .detail-row.pronunciation {
+  color: #7c3aed;
+}
+.chat-bubble .bubble-details .detail-row.cultural {
+  color: #059669;
+}
+.chat-bubble .bubble-details .detail-row.hint {
+  color: #d97706;
+}
+.chat-error {
+  padding: 8px 16px;
+  background: #fef2f2;
+  color: #ef4444;
+  font-size: 13px;
+  text-align: center;
+}
+.chat-input-area {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid #e5e7eb;
+  background: #fff;
+}
+.chat-input-area input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+}
+.chat-input-area input:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+.chat-input-area input:disabled {
+  background: #f9fafb;
+}
+.chat-input-area .send-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  background: #3b82f6;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.chat-input-area .send-btn:hover {
+  background: #2563eb;
+}
+.chat-input-area .send-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* App/Code/Local/Scenarios/Source/web/Pages/Scenarios/style.scss */
+.scenarios {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.scenarios-header {
+  margin-bottom: 24px;
+}
+.scenarios-header h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+}
+.card-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pagination button {
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+}
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.pagination span {
+  font-size: 14px;
+  color: #666;
+}
+.sort-controls {
+  display: flex;
+  gap: 8px;
+}
+.sort-controls select {
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #fff;
+}
+.primary-actions {
+  margin-left: auto;
+}
+.primary-actions .create-button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  background: #3b82f6;
+  color: #fff;
+  font-weight: 500;
+  cursor: pointer;
+}
+.primary-actions .create-button:hover {
+  background: #2563eb;
+}
+.notice {
+  text-align: center;
+  padding: 48px;
+  color: #999;
+}
+.notice .notice-title {
+  font-size: 18px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+.notice .notice-body {
+  font-size: 14px;
+}
+.scenario-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+.scenario-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.scenario-card:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+}
+.scenario-card .card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+.scenario-card .card-header .scenario-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+.scenario-card .card-header .delete-button {
+  background: none;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 14px;
+}
+.scenario-card .card-header .delete-button:hover {
+  color: #ef4444;
+  background: #fef2f2;
+}
+.scenario-card .card-body {
+  margin-bottom: 12px;
+}
+.scenario-card .card-body .steps-preview {
+  font-size: 13px;
+  color: #666;
+}
+.scenario-card .card-body .steps-preview .step-item {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+.scenario-card .card-body .steps-preview .step-item .step-number {
+  color: #999;
+  min-width: 18px;
+}
+.scenario-card .card-body .steps-preview .step-item .step-text {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.scenario-card .card-body .steps-preview .more-steps {
+  color: #999;
+  font-size: 12px;
+  margin-top: 4px;
+}
+.scenario-card .card-footer .create-time {
+  font-size: 12px;
+  color: #999;
+}
+.scenarios-status {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 48px;
+}
+.scenarios-status .error {
+  color: #ef4444;
+}
+
 /* App/Code/Community/MusicTranslation/Source/web/TranslationPage/style.scss */
 .music-translation-status {
   display: flex;

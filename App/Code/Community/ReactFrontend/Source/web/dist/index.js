@@ -23160,8 +23160,551 @@
     return /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("p", { children: props.text });
   };
 
-  // App/Code/Community/MusicTranslation/Source/web/TranslationPage/index.tsx
+  // App/Code/Local/Scenarios/Source/web/Pages/Scenarios/index.tsx
   var import_react16 = __toESM(require_react(), 1);
+
+  // App/Api/scenario.ts
+  var createScenario = (payload2) => {
+    return fetch("/api/scenario/create", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload2)
+    }).then((response) => {
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+      return response.json();
+    });
+  };
+  var deleteScenario = (payload2) => {
+    return fetch("/api/scenario/delete", {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload2)
+    }).then((response) => {
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+      return response.json();
+    });
+  };
+  var listScenarioPagedSorted = (pageNum, size, sortField, sortDir) => {
+    return fetch(`/api/scenario/list/${pageNum}/${size}/${sortField}/${sortDir}`, {
+      method: "GET"
+    }).then((response) => {
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+      return response.json();
+    });
+  };
+  var startStudySession = (payload2) => {
+    return fetch("/api/scenario/studysession/start", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload2)
+    }).then((response) => {
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+      return response.json();
+    });
+  };
+  var sendMessage = (payload2) => {
+    return fetch("/api/scenario/studysession/send", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload2)
+    }).then((response) => {
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+      return response.json();
+    });
+  };
+
+  // App/Code/Local/Scenarios/Source/web/Pages/Scenarios/CreateScenarioModal.tsx
+  var import_react14 = __toESM(require_react(), 1);
+  var import_jsx_runtime19 = __toESM(require_jsx_runtime(), 1);
+  var emptyForm2 = {
+    title: "",
+    steps: ""
+  };
+  var CreateScenarioModal = ({ onClose, onCreated }) => {
+    const [form, setForm] = (0, import_react14.useState)(emptyForm2);
+    const [isSubmitting, setIsSubmitting] = (0, import_react14.useState)(false);
+    const [error, setError] = (0, import_react14.useState)(null);
+    const updateField = (field, value) => {
+      setForm((prev) => ({ ...prev, [field]: value }));
+    };
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      if (!form.title.trim() || !form.steps.trim()) {
+        setError("Title and steps are required");
+        return;
+      }
+      setIsSubmitting(true);
+      setError(null);
+      try {
+        const payload2 = {
+          title: form.title,
+          steps: form.steps
+        };
+        const response = await createScenario(payload2);
+        if (!response.success) {
+          setError(response.message ?? "Failed to create scenario");
+          return;
+        }
+        onCreated();
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to create scenario");
+      } finally {
+        setIsSubmitting(false);
+      }
+    };
+    return /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("div", { className: "modal-overlay", onClick: onClose, children: /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "modal", onClick: (e) => e.stopPropagation(), children: [
+      /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "modal-header", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("h2", { children: "Create new scenario" }),
+        /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("button", { className: "modal-close", onClick: onClose, children: "\u2715" })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("form", { onSubmit: handleSubmit, className: "modal-body", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("label", { children: [
+          "Title",
+          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(
+            "input",
+            {
+              type: "text",
+              value: form.title,
+              onChange: (e) => updateField("title", e.target.value),
+              required: true
+            }
+          )
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("label", { children: [
+          "Steps",
+          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(
+            "textarea",
+            {
+              value: form.steps,
+              onChange: (e) => updateField("steps", e.target.value),
+              required: true,
+              placeholder: "Enter each step on a new line..."
+            }
+          )
+        ] }),
+        error && /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("div", { className: "modal-error", children: error }),
+        /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "modal-actions", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("button", { type: "button", onClick: onClose, disabled: isSubmitting, children: "Cancel" }),
+          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("button", { type: "submit", disabled: isSubmitting, children: isSubmitting ? "Creating..." : "Create" })
+        ] })
+      ] })
+    ] }) });
+  };
+
+  // App/Code/Local/Scenarios/Source/web/Pages/ScenarioSession/index.tsx
+  var import_react15 = __toESM(require_react(), 1);
+  var import_jsx_runtime20 = __toESM(require_jsx_runtime(), 1);
+  var DIFFICULTIES = [
+    { value: 1, label: "Easy", desc: "Simple vocabulary, short sentences" },
+    { value: 2, label: "Medium", desc: "Moderate vocabulary, natural pacing" },
+    { value: 3, label: "Hard", desc: "Complex vocabulary, idiomatic expressions" }
+  ];
+  var ScenarioSession = ({ scenarioId, onClose }) => {
+    const { session } = useSession();
+    const { language } = useLanguage();
+    const [phase, setPhase] = (0, import_react15.useState)("pick-difficulty");
+    const [scenario, setScenario] = (0, import_react15.useState)(null);
+    const [chatEntries, setChatEntries] = (0, import_react15.useState)([]);
+    const [userInput, setUserInput] = (0, import_react15.useState)("");
+    const [isSending, setIsSending] = (0, import_react15.useState)(false);
+    const [error, setError] = (0, import_react15.useState)(null);
+    const [openMenuIndex, setOpenMenuIndex] = (0, import_react15.useState)(null);
+    const [flashcardIndex, setFlashcardIndex] = (0, import_react15.useState)(null);
+    const messagesEndRef = (0, import_react15.useRef)(null);
+    const inputRef = (0, import_react15.useRef)(null);
+    (0, import_react15.useEffect)(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [chatEntries]);
+    (0, import_react15.useEffect)(() => {
+      if (phase === "chat" && !isSending) {
+        inputRef.current?.focus();
+      }
+    }, [phase, isSending]);
+    (0, import_react15.useEffect)(() => {
+      const handleEsc = (e) => {
+        if (e.key === "Escape") {
+          if (openMenuIndex !== null) {
+            setOpenMenuIndex(null);
+          } else {
+            onClose();
+          }
+        }
+      };
+      window.addEventListener("keydown", handleEsc);
+      return () => window.removeEventListener("keydown", handleEsc);
+    }, [onClose, openMenuIndex]);
+    (0, import_react15.useEffect)(() => {
+      if (openMenuIndex === null) return;
+      const handleClick = () => setOpenMenuIndex(null);
+      window.addEventListener("click", handleClick);
+      return () => window.removeEventListener("click", handleClick);
+    }, [openMenuIndex]);
+    const handleStartSession = async (difficulty) => {
+      setIsSending(true);
+      setError(null);
+      try {
+        const res = await startStudySession({ scenarioId, difficulty });
+        if (!res.success || !res.data) {
+          setError(res.message ?? "Failed to start session");
+          return;
+        }
+        setScenario(res.data);
+        setChatEntries([]);
+        setPhase("chat");
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to start session");
+      } finally {
+        setIsSending(false);
+      }
+    };
+    const handleSend = async () => {
+      if (!userInput.trim() || !scenario || isSending) return;
+      const userLine = {
+        original: userInput,
+        message: userInput,
+        translation: "",
+        pronunciation: "",
+        culturalMeaning: "",
+        hint: "",
+        isUser: true
+      };
+      setChatEntries((prev) => [...prev, { line: userLine }]);
+      const messageText = userInput;
+      setUserInput("");
+      setIsSending(true);
+      setError(null);
+      try {
+        const history = chatEntries.map((entry) => ({
+          role: entry.line.isUser ? "user" : "assistant",
+          content: entry.line.isUser ? entry.line.original : entry.line.message
+        }));
+        const res = await sendMessage({
+          message: messageText,
+          scenarioTitle: scenario.title,
+          scenarioSteps: scenario.steps,
+          difficulty: scenario.difficulty,
+          history
+        });
+        if (!res.success || !res.data) {
+          setError(res.message ?? "Failed to get response");
+          return;
+        }
+        setChatEntries((prev) => [...prev, { line: res.data }]);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to send message");
+      } finally {
+        setIsSending(false);
+      }
+    };
+    const handleKeyDown = (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        handleSend();
+      }
+    };
+    if (phase === "error" && error) {
+      return /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("div", { className: "session-overlay", children: /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "session-error", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("div", { className: "error-text", children: error }),
+        /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("button", { onClick: onClose, children: "Close" })
+      ] }) });
+    }
+    if (phase === "pick-difficulty") {
+      return /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("div", { className: "session-overlay", children: /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "difficulty-picker", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("button", { className: "close-x", onClick: onClose, children: "\u2715" }),
+        /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("h2", { children: "Choose difficulty" }),
+        /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("div", { className: "difficulty-options", children: DIFFICULTIES.map((d) => /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)(
+          "button",
+          {
+            className: "difficulty-btn",
+            onClick: () => handleStartSession(d.value),
+            disabled: isSending,
+            children: [
+              /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("span", { className: "diff-label", children: d.label }),
+              /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("span", { className: "diff-desc", children: d.desc })
+            ]
+          },
+          d.value
+        )) }),
+        isSending && /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(Spinner, {})
+      ] }) });
+    }
+    return /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "session-overlay", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "chat-container", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "chat-header", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("button", { className: "close-btn", onClick: onClose, children: "\u2715" }),
+          /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("div", { className: "chat-title", children: scenario?.title ?? "Scenario" }),
+          /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("div", { className: "chat-difficulty", children: DIFFICULTIES.find((d) => d.value === scenario?.difficulty)?.label ?? "Medium" })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "chat-messages", children: [
+          chatEntries.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "chat-empty", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("div", { className: "empty-text", children: "Start the conversation. Type something in the learning language." }),
+            /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "scenario-steps", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("strong", { children: "Scenario steps:" }),
+              scenario?.steps.split("\n").filter(Boolean).map((step, i) => /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "step-line", children: [
+                i + 1,
+                ". ",
+                step
+              ] }, i))
+            ] })
+          ] }),
+          chatEntries.map((entry, i) => /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: `chat-bubble ${entry.line.isUser ? "user" : "assistant"}`, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("div", { className: "bubble-message", children: entry.line.isUser ? entry.line.original : entry.line.message }),
+            !entry.line.isUser && /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)(import_jsx_runtime20.Fragment, { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "line-actions", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(
+                  "button",
+                  {
+                    className: `line-action-btn${openMenuIndex === i ? " active" : ""}`,
+                    onClick: (e) => {
+                      e.stopPropagation();
+                      setOpenMenuIndex((prev) => prev === i ? null : i);
+                    },
+                    "aria-label": "Actions",
+                    children: /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("svg", { width: "14", height: "14", viewBox: "0 0 14 14", fill: "none", children: /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("path", { d: "M7 3V3.01M7 7V7.01M7 11V11.01", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round" }) })
+                  }
+                ),
+                openMenuIndex === i && /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("div", { className: "line-dropdown", children: /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)(
+                  "button",
+                  {
+                    className: "line-dropdown-item",
+                    onClick: (e) => {
+                      e.stopPropagation();
+                      setOpenMenuIndex(null);
+                      setFlashcardIndex(i);
+                    },
+                    children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("svg", { width: "14", height: "14", viewBox: "0 0 14 14", fill: "none", children: [
+                        /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("rect", { x: "1", y: "3", width: "12", height: "10", rx: "1.5", stroke: "currentColor", strokeWidth: "1.3" }),
+                        /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("path", { d: "M4 1V3M10 1V3M1 6H13", stroke: "currentColor", strokeWidth: "1.3", strokeLinecap: "round" })
+                      ] }),
+                      "Create Flash Card"
+                    ]
+                  }
+                ) })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "bubble-details", children: [
+                entry.line.translation && /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "detail-row", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("span", { className: "detail-label", children: "Translation:" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("span", { children: entry.line.translation })
+                ] }),
+                entry.line.pronunciation && /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "detail-row pronunciation", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("span", { className: "detail-label", children: "Pronunciation:" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("span", { children: entry.line.pronunciation })
+                ] }),
+                entry.line.culturalMeaning && /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "detail-row cultural", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("span", { className: "detail-label", children: "Culture:" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("span", { children: entry.line.culturalMeaning })
+                ] }),
+                entry.line.hint && /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "detail-row hint", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("span", { className: "detail-label", children: "Tip:" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("span", { children: entry.line.hint })
+                ] })
+              ] })
+            ] })
+          ] }, i)),
+          isSending && /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("div", { className: "chat-bubble assistant sending", children: /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(Spinner, {}) }),
+          /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("div", { ref: messagesEndRef })
+        ] }),
+        error && /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("div", { className: "chat-error", children: error }),
+        /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "chat-input-area", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(
+            "input",
+            {
+              ref: inputRef,
+              type: "text",
+              value: userInput,
+              onChange: (e) => setUserInput(e.target.value),
+              onKeyDown: handleKeyDown,
+              placeholder: "Type your message...",
+              disabled: isSending
+            }
+          ),
+          /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(
+            "button",
+            {
+              className: "send-btn",
+              onClick: handleSend,
+              disabled: !userInput.trim() || isSending,
+              children: "Send"
+            }
+          )
+        ] })
+      ] }),
+      flashcardIndex !== null && chatEntries[flashcardIndex] && /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(
+        CreateFlashCardModal,
+        {
+          userId: session?.user?.id ?? "",
+          languageId: language?.id ?? "",
+          showLanguageSelector: true,
+          initialValues: {
+            frontStatement: chatEntries[flashcardIndex].line.original,
+            backStatement: chatEntries[flashcardIndex].line.message,
+            pronunciation: chatEntries[flashcardIndex].line.pronunciation,
+            notes: chatEntries[flashcardIndex].line.culturalMeaning || `From scenario: ${scenario?.title ?? "Unknown"}`,
+            category: "Scenario",
+            tags: "scenario"
+          },
+          onClose: () => setFlashcardIndex(null),
+          onCreated: () => setFlashcardIndex(null)
+        }
+      )
+    ] });
+  };
+
+  // App/Code/Local/Scenarios/Source/web/Pages/Scenarios/index.tsx
+  var import_jsx_runtime21 = __toESM(require_jsx_runtime(), 1);
+  var SORT_OPTIONS2 = [
+    { value: "createTime", label: "Date created" },
+    { value: "title", label: "Title" }
+  ];
+  var ScenariosIndexPage = () => {
+    const { session } = useSession();
+    const [isModalOpen, setIsModalOpen] = (0, import_react16.useState)(false);
+    const [isDeleting, setIsDeleting] = (0, import_react16.useState)(null);
+    const [activeScenarioId, setActiveScenarioId] = (0, import_react16.useState)(null);
+    const {
+      page,
+      size,
+      nextPage,
+      prevPage,
+      results: scenarios,
+      isLoading: scenariosLoading,
+      error: scenariosError,
+      sortField,
+      sortDir,
+      setSortField,
+      setSortDir
+    } = usePagination(listScenarioPagedSorted, [isModalOpen, isDeleting]);
+    const handleDelete = async (scenario, e) => {
+      e.stopPropagation();
+      setIsDeleting(scenario.id);
+      try {
+        await deleteScenario(scenario);
+      } finally {
+        setIsDeleting(null);
+      }
+    };
+    if (scenariosLoading) {
+      return /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("div", { className: "scenarios-status", children: /* @__PURE__ */ (0, import_jsx_runtime21.jsx)(Spinner, {}) });
+    }
+    if (scenariosError) {
+      return /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("div", { className: "scenarios-status", children: /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("div", { className: "error", children: `Couldn't load scenarios: ${scenariosError}` }) });
+    }
+    const cards = scenarios ?? [];
+    const mayHaveNextPage = cards.length === size;
+    const formatTime = (iso) => {
+      if (!iso) return "";
+      const days = Math.floor((Date.now() - new Date(iso).getTime()) / 864e5);
+      if (days <= 0) return "Today";
+      if (days === 1) return "Yesterday";
+      if (days < 30) return `${days}d ago`;
+      return `${Math.floor(days / 30)}mo ago`;
+    };
+    return /* @__PURE__ */ (0, import_jsx_runtime21.jsxs)("div", { className: "scenarios", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("div", { className: "scenarios-header", children: /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("h1", { children: "Scenarios" }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime21.jsxs)("div", { className: "card-actions", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime21.jsxs)("div", { className: "pagination", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("button", { onClick: prevPage, disabled: page <= 1, children: "Previous" }),
+          /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("span", { children: `Page ${page}` }),
+          /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("button", { onClick: nextPage, disabled: !mayHaveNextPage, children: "Next" })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime21.jsxs)("div", { className: "sort-controls", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("select", { value: sortField ?? "", onChange: (e) => setSortField(e.target.value || void 0), children: SORT_OPTIONS2.map((opt) => /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("option", { value: opt.value, children: opt.label }, opt.value)) }),
+          /* @__PURE__ */ (0, import_jsx_runtime21.jsxs)("select", { value: sortDir ?? "desc", onChange: (e) => setSortDir(e.target.value), children: [
+            /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("option", { value: "asc", children: "Asc" }),
+            /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("option", { value: "desc", children: "Desc" })
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("div", { className: "primary-actions", children: /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("button", { className: "create-button", onClick: () => setIsModalOpen(true), children: "Create new" }) })
+      ] }),
+      cards.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime21.jsxs)("div", { className: "notice", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("div", { className: "notice-title", children: "No scenarios yet" }),
+        /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("div", { className: "notice-body", children: 'Click "Create new" to add your first scenario.' })
+      ] }),
+      cards.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("div", { className: "scenario-grid", children: cards.map((scenario) => /* @__PURE__ */ (0, import_jsx_runtime21.jsxs)(
+        "div",
+        {
+          className: "scenario-card",
+          onClick: () => setActiveScenarioId(scenario.id),
+          role: "button",
+          tabIndex: 0,
+          onKeyDown: (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              setActiveScenarioId(scenario.id);
+            }
+          },
+          children: [
+            /* @__PURE__ */ (0, import_jsx_runtime21.jsxs)("div", { className: "card-header", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("h3", { className: "scenario-title", children: scenario.title }),
+              /* @__PURE__ */ (0, import_jsx_runtime21.jsx)(
+                "button",
+                {
+                  className: "delete-button",
+                  onClick: (e) => handleDelete(scenario, e),
+                  disabled: isDeleting === scenario.id,
+                  "aria-label": "Delete scenario",
+                  children: isDeleting === scenario.id ? "..." : "\u2715"
+                }
+              )
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("div", { className: "card-body", children: /* @__PURE__ */ (0, import_jsx_runtime21.jsxs)("div", { className: "steps-preview", children: [
+              scenario.steps.split("\n").filter(Boolean).slice(0, 3).map((step, index) => /* @__PURE__ */ (0, import_jsx_runtime21.jsxs)("div", { className: "step-item", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime21.jsxs)("span", { className: "step-number", children: [
+                  index + 1,
+                  "."
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("span", { className: "step-text", children: step })
+              ] }, index)),
+              scenario.steps.split("\n").filter(Boolean).length > 3 && /* @__PURE__ */ (0, import_jsx_runtime21.jsxs)("div", { className: "more-steps", children: [
+                "+",
+                scenario.steps.split("\n").filter(Boolean).length - 3,
+                " more steps"
+              ] })
+            ] }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("div", { className: "card-footer", children: /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("span", { className: "create-time", children: formatTime(scenario.createTime) }) })
+          ]
+        },
+        scenario.id
+      )) }),
+      isModalOpen && /* @__PURE__ */ (0, import_jsx_runtime21.jsx)(
+        CreateScenarioModal,
+        {
+          onClose: () => setIsModalOpen(false),
+          onCreated: () => setIsModalOpen(false)
+        }
+      ),
+      activeScenarioId && /* @__PURE__ */ (0, import_jsx_runtime21.jsx)(
+        ScenarioSession,
+        {
+          scenarioId: activeScenarioId,
+          onClose: () => setActiveScenarioId(null)
+        }
+      )
+    ] });
+  };
+  register("@page/scenarios-page", ScenariosIndexPage);
+
+  // App/Code/Community/MusicTranslation/Source/web/TranslationPage/index.tsx
+  var import_react19 = __toESM(require_react(), 1);
 
   // App/Api/track.ts
   var listTrackPagedSorted = (pageNum, size, sortField, sortDir) => {
@@ -23230,7 +23773,7 @@
   };
 
   // App/Code/Community/MusicTranslation/Source/web/TranslationPage/CreateSongModal.tsx
-  var import_react14 = __toESM(require_react(), 1);
+  var import_react17 = __toESM(require_react(), 1);
 
   // App/Api/musicTranslation.ts
   var translateSong = (payload2) => {
@@ -23249,17 +23792,17 @@
   };
 
   // App/Code/Community/MusicTranslation/Source/web/TranslationPage/CreateSongModal.tsx
-  var import_jsx_runtime19 = __toESM(require_jsx_runtime(), 1);
-  var emptyForm2 = {
+  var import_jsx_runtime22 = __toESM(require_jsx_runtime(), 1);
+  var emptyForm3 = {
     lyrics: "",
     title: "",
     artist: "",
     album: ""
   };
   var CreateSongModal = ({ onClose, onCreated }) => {
-    const [form, setForm] = (0, import_react14.useState)(emptyForm2);
-    const [isSubmitting, setIsSubmitting] = (0, import_react14.useState)(false);
-    const [error, setError] = (0, import_react14.useState)(null);
+    const [form, setForm] = (0, import_react17.useState)(emptyForm3);
+    const [isSubmitting, setIsSubmitting] = (0, import_react17.useState)(false);
+    const [error, setError] = (0, import_react17.useState)(null);
     const updateField = (field, value) => {
       setForm((prev) => ({ ...prev, [field]: value }));
     };
@@ -23289,15 +23832,15 @@
         setIsSubmitting(false);
       }
     };
-    return /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("div", { className: "modal-overlay", onClick: onClose, children: /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "modal", onClick: (e) => e.stopPropagation(), children: [
-      /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "modal-header", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("h2", { children: "Translate a song" }),
-        /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("button", { className: "modal-close", onClick: onClose, children: "\u2715" })
+    return /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("div", { className: "modal-overlay", onClick: onClose, children: /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("div", { className: "modal", onClick: (e) => e.stopPropagation(), children: [
+      /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("div", { className: "modal-header", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("h2", { children: "Translate a song" }),
+        /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("button", { className: "modal-close", onClick: onClose, children: "\u2715" })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("form", { onSubmit: handleSubmit, className: "modal-body", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("label", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("form", { onSubmit: handleSubmit, className: "modal-body", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("label", { children: [
           "Song lyrics",
-          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(
             "textarea",
             {
               value: form.lyrics,
@@ -23307,9 +23850,9 @@
             }
           )
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("label", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("label", { children: [
           "Title",
-          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(
             "input",
             {
               type: "text",
@@ -23320,9 +23863,9 @@
             }
           )
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("label", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("label", { children: [
           "Artist",
-          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(
             "input",
             {
               type: "text",
@@ -23333,9 +23876,9 @@
             }
           )
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("label", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("label", { children: [
           "Album",
-          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(
             "input",
             {
               type: "text",
@@ -23346,31 +23889,31 @@
             }
           )
         ] }),
-        error && /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("div", { className: "modal-error", children: error }),
-        /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "modal-actions", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("button", { type: "button", onClick: onClose, disabled: isSubmitting, children: "Cancel" }),
-          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("button", { type: "submit", disabled: isSubmitting, children: isSubmitting ? "Translating..." : "Translate" })
+        error && /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("div", { className: "modal-error", children: error }),
+        /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("div", { className: "modal-actions", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("button", { type: "button", onClick: onClose, disabled: isSubmitting, children: "Cancel" }),
+          /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("button", { type: "submit", disabled: isSubmitting, children: isSubmitting ? "Translating..." : "Translate" })
         ] })
       ] })
     ] }) });
   };
 
   // App/Code/Community/MusicTranslation/Source/web/TranslationPage/SongDetailDialog.tsx
-  var import_react15 = __toESM(require_react(), 1);
-  var import_jsx_runtime20 = __toESM(require_jsx_runtime(), 1);
+  var import_react18 = __toESM(require_react(), 1);
+  var import_jsx_runtime23 = __toESM(require_jsx_runtime(), 1);
   var SongDetailDialog = ({ trackId, onClose }) => {
     const { session } = useSession();
     const { language } = useLanguage();
-    const [track, setTrack] = (0, import_react15.useState)(null);
-    const [artist, setArtist] = (0, import_react15.useState)(null);
-    const [album, setAlbum] = (0, import_react15.useState)(null);
-    const [lines, setLines] = (0, import_react15.useState)([]);
-    const [expandedIndex, setExpandedIndex] = (0, import_react15.useState)(null);
-    const [isLoading, setIsLoading] = (0, import_react15.useState)(false);
-    const [error, setError] = (0, import_react15.useState)(null);
-    const [openMenuIndex, setOpenMenuIndex] = (0, import_react15.useState)(null);
-    const [flashcardLineIndex, setFlashcardLineIndex] = (0, import_react15.useState)(null);
-    (0, import_react15.useEffect)(() => {
+    const [track, setTrack] = (0, import_react18.useState)(null);
+    const [artist, setArtist] = (0, import_react18.useState)(null);
+    const [album, setAlbum] = (0, import_react18.useState)(null);
+    const [lines, setLines] = (0, import_react18.useState)([]);
+    const [expandedIndex, setExpandedIndex] = (0, import_react18.useState)(null);
+    const [isLoading, setIsLoading] = (0, import_react18.useState)(false);
+    const [error, setError] = (0, import_react18.useState)(null);
+    const [openMenuIndex, setOpenMenuIndex] = (0, import_react18.useState)(null);
+    const [flashcardLineIndex, setFlashcardLineIndex] = (0, import_react18.useState)(null);
+    (0, import_react18.useEffect)(() => {
       if (!trackId) return;
       setIsLoading(true);
       setError(null);
@@ -23408,28 +23951,28 @@
       setOpenMenuIndex(null);
     };
     const flashcardLine = flashcardLineIndex !== null ? lines[flashcardLineIndex] : null;
-    return /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("div", { className: "detail-overlay", onClick: onClose, children: /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "detail-dialog", onClick: (e) => {
+    return /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "detail-overlay", onClick: onClose, children: /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "detail-dialog", onClick: (e) => {
       e.stopPropagation();
       setOpenMenuIndex(null);
     }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "detail-header", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "detail-meta", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("h2", { children: track?.title ?? "Loading..." }),
-          /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("div", { className: "detail-artist", children: artist?.name ?? "..." }),
-          /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("div", { className: "detail-album", children: album?.title ?? "..." })
+      /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "detail-header", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "detail-meta", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("h2", { children: track?.title ?? "Loading..." }),
+          /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "detail-artist", children: artist?.name ?? "..." }),
+          /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "detail-album", children: album?.title ?? "..." })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("button", { className: "detail-close", onClick: onClose, children: "\u2715" })
+        /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("button", { className: "detail-close", onClick: onClose, children: "\u2715" })
       ] }),
-      isLoading && /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("div", { className: "detail-loading", children: /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(Spinner, {}) }),
-      error && /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("div", { className: "detail-loading", children: /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("div", { className: "error", children: error }) }),
-      !isLoading && !error && lines.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("div", { className: "detail-loading", children: /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("div", { className: "notice-body", children: "No lyrics available" }) }),
-      !isLoading && !error && lines.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("div", { className: "detail-lyrics", children: lines.map((line, i) => /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)(
+      isLoading && /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "detail-loading", children: /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(Spinner, {}) }),
+      error && /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "detail-loading", children: /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "error", children: error }) }),
+      !isLoading && !error && lines.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "detail-loading", children: /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "notice-body", children: "No lyrics available" }) }),
+      !isLoading && !error && lines.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "detail-lyrics", children: lines.map((line, i) => /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)(
         "div",
         {
           className: `lyric-line ${expandedIndex === i ? "expanded" : ""}`,
           children: [
-            /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "line-header", children: [
-              /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(
+            /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "line-header", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(
                 "div",
                 {
                   className: "line-original",
@@ -23445,8 +23988,8 @@
                   children: line.lineContents
                 }
               ),
-              /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "line-actions", children: [
-                /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(
+              /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "line-actions", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(
                   "button",
                   {
                     className: `line-action-btn${openMenuIndex === i ? " active" : ""}`,
@@ -23455,10 +23998,10 @@
                       setOpenMenuIndex((prev) => prev === i ? null : i);
                     },
                     "aria-label": "Actions",
-                    children: /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("svg", { width: "14", height: "14", viewBox: "0 0 14 14", fill: "none", children: /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("path", { d: "M7 3V3.01M7 7V7.01M7 11V11.01", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round" }) })
+                    children: /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("svg", { width: "14", height: "14", viewBox: "0 0 14 14", fill: "none", children: /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("path", { d: "M7 3V3.01M7 7V7.01M7 11V11.01", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round" }) })
                   }
                 ),
-                openMenuIndex === i && /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("div", { className: "line-dropdown", children: /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)(
+                openMenuIndex === i && /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "line-dropdown", children: /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)(
                   "button",
                   {
                     className: "line-dropdown-item",
@@ -23468,9 +24011,9 @@
                       setFlashcardLineIndex(i);
                     },
                     children: [
-                      /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("svg", { width: "14", height: "14", viewBox: "0 0 14 14", fill: "none", children: [
-                        /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("rect", { x: "1", y: "3", width: "12", height: "10", rx: "1.5", stroke: "currentColor", strokeWidth: "1.3" }),
-                        /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("path", { d: "M4 1V3M10 1V3M1 6H13", stroke: "currentColor", strokeWidth: "1.3", strokeLinecap: "round" })
+                      /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("svg", { width: "14", height: "14", viewBox: "0 0 14 14", fill: "none", children: [
+                        /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("rect", { x: "1", y: "3", width: "12", height: "10", rx: "1.5", stroke: "currentColor", strokeWidth: "1.3" }),
+                        /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("path", { d: "M4 1V3M10 1V3M1 6H13", stroke: "currentColor", strokeWidth: "1.3", strokeLinecap: "round" })
                       ] }),
                       "Create Flash Card"
                     ]
@@ -23478,25 +24021,25 @@
                 ) })
               ] })
             ] }),
-            expandedIndex === i && /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "line-details", children: [
-              /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "detail-row translation", children: [
-                /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("span", { className: "detail-label", children: "Translation:" }),
-                /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("span", { className: "detail-value", children: line.translationToUserLanguage })
+            expandedIndex === i && /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "line-details", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "detail-row translation", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("span", { className: "detail-label", children: "Translation:" }),
+                /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("span", { className: "detail-value", children: line.translationToUserLanguage })
               ] }),
-              line.pronunciations.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "detail-row", children: [
-                /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("span", { className: "detail-label", children: "Pronunciation:" }),
-                /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("span", { className: "detail-value", children: line.pronunciations.join(", ") })
+              line.pronunciations.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "detail-row", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("span", { className: "detail-label", children: "Pronunciation:" }),
+                /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("span", { className: "detail-value", children: line.pronunciations.join(", ") })
               ] }),
-              line.culturalMeaning && /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "detail-row", children: [
-                /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("span", { className: "detail-label", children: "Cultural meaning:" }),
-                /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("span", { className: "detail-value", children: line.culturalMeaning })
+              line.culturalMeaning && /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "detail-row", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("span", { className: "detail-label", children: "Cultural meaning:" }),
+                /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("span", { className: "detail-value", children: line.culturalMeaning })
               ] })
             ] })
           ]
         },
         i
       )) }),
-      flashcardLine && /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(
+      flashcardLine && /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(
         CreateFlashCardModal,
         {
           userId: session?.user?.id ?? "",
@@ -23518,37 +24061,37 @@
   };
 
   // App/Code/Community/MusicTranslation/Source/web/TranslationPage/index.tsx
-  var import_jsx_runtime21 = __toESM(require_jsx_runtime(), 1);
-  var SORT_OPTIONS2 = [
+  var import_jsx_runtime24 = __toESM(require_jsx_runtime(), 1);
+  var SORT_OPTIONS3 = [
     { value: "createTime", label: "Date added" },
     { value: "title", label: "Title" }
   ];
   var MusicTranslationIndexPage = () => {
-    const [isCreateOpen, setIsCreateOpen] = (0, import_react16.useState)(false);
-    const [detailTrackId, setDetailTrackId] = (0, import_react16.useState)(null);
-    const [refreshKey, setRefreshKey] = (0, import_react16.useState)(0);
-    const [selectedArtist, setSelectedArtist] = (0, import_react16.useState)("");
-    const [selectedAlbum, setSelectedAlbum] = (0, import_react16.useState)("");
-    const [searchQuery, setSearchQuery] = (0, import_react16.useState)("");
+    const [isCreateOpen, setIsCreateOpen] = (0, import_react19.useState)(false);
+    const [detailTrackId, setDetailTrackId] = (0, import_react19.useState)(null);
+    const [refreshKey, setRefreshKey] = (0, import_react19.useState)(0);
+    const [selectedArtist, setSelectedArtist] = (0, import_react19.useState)("");
+    const [selectedAlbum, setSelectedAlbum] = (0, import_react19.useState)("");
+    const [searchQuery, setSearchQuery] = (0, import_react19.useState)("");
     const [allArtists] = usePromise(() => listAllArtist(), []);
     const [allAlbums] = usePromise(() => listAllAlbum(), []);
-    const artistMap = (0, import_react16.useMemo)(() => {
+    const artistMap = (0, import_react19.useMemo)(() => {
       const map = /* @__PURE__ */ new Map();
       const data = allArtists?.data ?? [];
       for (const a of data) map.set(a.id, a.name);
       return map;
     }, [allArtists]);
-    const albumMap = (0, import_react16.useMemo)(() => {
+    const albumMap = (0, import_react19.useMemo)(() => {
       const map = /* @__PURE__ */ new Map();
       const data = allAlbums?.data ?? [];
       for (const a of data) map.set(a.id, a.title);
       return map;
     }, [allAlbums]);
-    const artistNames = (0, import_react16.useMemo)(() => {
+    const artistNames = (0, import_react19.useMemo)(() => {
       const names = new Set(artistMap.values());
       return Array.from(names).sort();
     }, [artistMap]);
-    const albumNames = (0, import_react16.useMemo)(() => {
+    const albumNames = (0, import_react19.useMemo)(() => {
       const names = new Set(albumMap.values());
       return Array.from(names).sort();
     }, [albumMap]);
@@ -23565,7 +24108,7 @@
       setSortField,
       setSortDir
     } = usePagination(listTrackPagedSorted, [refreshKey]);
-    const filteredTracks = (0, import_react16.useMemo)(() => {
+    const filteredTracks = (0, import_react19.useMemo)(() => {
       let list = tracks ?? [];
       if (selectedArtist) {
         list = list.filter((t) => artistMap.get(t.artistId) === selectedArtist);
@@ -23586,36 +24129,36 @@
       setDetailTrackId(trackId);
     };
     if (tracksLoading) {
-      return /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("div", { className: "music-translation-status", children: /* @__PURE__ */ (0, import_jsx_runtime21.jsx)(Spinner, {}) });
+      return /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("div", { className: "music-translation-status", children: /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(Spinner, {}) });
     }
     if (tracksError) {
-      return /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("div", { className: "music-translation-status", children: /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("div", { className: "error", children: `Couldn't load songs: ${tracksError}` }) });
+      return /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("div", { className: "music-translation-status", children: /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("div", { className: "error", children: `Couldn't load songs: ${tracksError}` }) });
     }
     const trackList = filteredTracks;
-    return /* @__PURE__ */ (0, import_jsx_runtime21.jsxs)("div", { className: "music-translation", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime21.jsxs)("div", { className: "library-actions", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime21.jsxs)("div", { className: "pagination", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("button", { onClick: prevPage, disabled: page <= 1, children: "Previous" }),
-          /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("span", { children: `Page ${page}` }),
-          /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("button", { onClick: nextPage, disabled: !mayHaveNextPage, children: "Next" })
+    return /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "music-translation", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "library-actions", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "pagination", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("button", { onClick: prevPage, disabled: page <= 1, children: "Previous" }),
+          /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("span", { children: `Page ${page}` }),
+          /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("button", { onClick: nextPage, disabled: !mayHaveNextPage, children: "Next" })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime21.jsxs)("div", { className: "sort-controls", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("select", { value: sortField ?? "", onChange: (e) => setSortField(e.target.value || void 0), children: SORT_OPTIONS2.map((opt) => /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("option", { value: opt.value, children: opt.label }, opt.value)) }),
-          /* @__PURE__ */ (0, import_jsx_runtime21.jsxs)("select", { value: sortDir ?? "desc", onChange: (e) => setSortDir(e.target.value), children: [
-            /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("option", { value: "asc", children: "Asc" }),
-            /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("option", { value: "desc", children: "Desc" })
+        /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "sort-controls", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("select", { value: sortField ?? "", onChange: (e) => setSortField(e.target.value || void 0), children: SORT_OPTIONS3.map((opt) => /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("option", { value: opt.value, children: opt.label }, opt.value)) }),
+          /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("select", { value: sortDir ?? "desc", onChange: (e) => setSortDir(e.target.value), children: [
+            /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("option", { value: "asc", children: "Asc" }),
+            /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("option", { value: "desc", children: "Desc" })
           ] })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime21.jsxs)("div", { className: "filter-controls", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime21.jsxs)("select", { value: selectedArtist, onChange: (e) => setSelectedArtist(e.target.value), children: [
-            /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("option", { value: "", children: "All artists" }),
-            artistNames.map((name) => /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("option", { value: name, children: name }, name))
+        /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "filter-controls", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("select", { value: selectedArtist, onChange: (e) => setSelectedArtist(e.target.value), children: [
+            /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("option", { value: "", children: "All artists" }),
+            artistNames.map((name) => /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("option", { value: name, children: name }, name))
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime21.jsxs)("select", { value: selectedAlbum, onChange: (e) => setSelectedAlbum(e.target.value), children: [
-            /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("option", { value: "", children: "All albums" }),
-            albumNames.map((name) => /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("option", { value: name, children: name }, name))
+          /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("select", { value: selectedAlbum, onChange: (e) => setSelectedAlbum(e.target.value), children: [
+            /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("option", { value: "", children: "All albums" }),
+            albumNames.map((name) => /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("option", { value: name, children: name }, name))
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime21.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(
             "input",
             {
               type: "text",
@@ -23625,7 +24168,7 @@
             }
           )
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime21.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(
           "button",
           {
             className: "create-button",
@@ -23634,17 +24177,17 @@
           }
         )
       ] }),
-      trackList.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime21.jsxs)("div", { className: "notice", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("div", { className: "notice-title", children: "No songs yet" }),
-        /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("div", { className: "notice-body", children: 'Click "Add song" to translate your first track.' })
+      trackList.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "notice", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("div", { className: "notice-title", children: "No songs yet" }),
+        /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("div", { className: "notice-body", children: 'Click "Add song" to translate your first track.' })
       ] }),
-      trackList.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime21.jsxs)("table", { className: "song-table", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime21.jsxs)("tr", { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("th", { children: "Title" }),
-          /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("th", { children: "Artist" }),
-          /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("th", { children: "Album" })
+      trackList.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("table", { className: "song-table", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("tr", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("th", { children: "Title" }),
+          /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("th", { children: "Artist" }),
+          /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("th", { children: "Album" })
         ] }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("tbody", { children: trackList.map((track) => /* @__PURE__ */ (0, import_jsx_runtime21.jsxs)(
+        /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("tbody", { children: trackList.map((track) => /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)(
           "tr",
           {
             className: "song-row",
@@ -23658,22 +24201,22 @@
               }
             },
             children: [
-              /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("td", { className: "song-title", children: track.title }),
-              /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("td", { className: "song-artist", children: artistMap.get(track.artistId) ?? "..." }),
-              /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("td", { className: "song-album", children: albumMap.get(track.albumId) ?? "..." })
+              /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("td", { className: "song-title", children: track.title }),
+              /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("td", { className: "song-artist", children: artistMap.get(track.artistId) ?? "..." }),
+              /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("td", { className: "song-album", children: albumMap.get(track.albumId) ?? "..." })
             ]
           },
           track.id
         )) })
       ] }),
-      isCreateOpen && /* @__PURE__ */ (0, import_jsx_runtime21.jsx)(
+      isCreateOpen && /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(
         CreateSongModal,
         {
           onClose: () => setIsCreateOpen(false),
           onCreated: handleCreated
         }
       ),
-      detailTrackId && /* @__PURE__ */ (0, import_jsx_runtime21.jsx)(
+      detailTrackId && /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(
         SongDetailDialog,
         {
           trackId: detailTrackId,
@@ -23692,10 +24235,10 @@
   register("@component/Spinner", Spinner);
 
   // App/Code/Community/ReactFrontend/Source/web/index.tsx
-  var import_jsx_runtime22 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime25 = __toESM(require_jsx_runtime(), 1);
   var root = (0, import_client.createRoot)(document.getElementById("app"));
   root.render(
-    /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(Default_default, { children: /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(Canvas, { children: window.canvasState }) })
+    /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(Default_default, { children: /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(Canvas, { children: window.canvasState }) })
   );
 })();
 /*! Bundled license information:

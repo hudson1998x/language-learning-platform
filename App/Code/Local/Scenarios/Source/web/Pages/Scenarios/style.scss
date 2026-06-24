@@ -1,0 +1,191 @@
+.scenarios {
+    padding: 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.scenarios-header {
+    margin-bottom: 24px;
+
+    h1 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 600;
+    }
+}
+
+.card-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.pagination {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    button {
+        padding: 6px 12px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        background: #fff;
+        cursor: pointer;
+
+        &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    }
+
+    span {
+        font-size: 14px;
+        color: #666;
+    }
+}
+
+.sort-controls {
+    display: flex;
+    gap: 8px;
+
+    select {
+        padding: 6px 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        background: #fff;
+    }
+}
+
+.primary-actions {
+    margin-left: auto;
+
+    .create-button {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        background: #3b82f6;
+        color: #fff;
+        font-weight: 500;
+        cursor: pointer;
+
+        &:hover {
+            background: #2563eb;
+        }
+    }
+}
+
+.notice {
+    text-align: center;
+    padding: 48px;
+    color: #999;
+
+    .notice-title {
+        font-size: 18px;
+        font-weight: 500;
+        margin-bottom: 8px;
+    }
+
+    .notice-body {
+        font-size: 14px;
+    }
+}
+
+.scenario-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+}
+
+.scenario-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 16px;
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s;
+
+    &:hover {
+        border-color: #3b82f6;
+        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 12px;
+
+        .scenario-title {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .delete-button {
+            background: none;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 14px;
+
+            &:hover {
+                color: #ef4444;
+                background: #fef2f2;
+            }
+        }
+    }
+
+    .card-body {
+        margin-bottom: 12px;
+
+        .steps-preview {
+            font-size: 13px;
+            color: #666;
+
+            .step-item {
+                display: flex;
+                gap: 6px;
+                margin-bottom: 4px;
+
+                .step-number {
+                    color: #999;
+                    min-width: 18px;
+                }
+
+                .step-text {
+                    flex: 1;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+            }
+
+            .more-steps {
+                color: #999;
+                font-size: 12px;
+                margin-top: 4px;
+            }
+        }
+    }
+
+    .card-footer {
+        .create-time {
+            font-size: 12px;
+            color: #999;
+        }
+    }
+}
+
+.scenarios-status {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 48px;
+
+    .error {
+        color: #ef4444;
+    }
+}

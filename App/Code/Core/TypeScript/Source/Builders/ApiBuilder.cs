@@ -7,6 +7,7 @@ namespace LLE.TypeScript.Builders;
 public class ApiBuilder : IDisposable
 {
     private readonly Dictionary<string, StringBuilder> _sourceBuilder = [];
+    private readonly HashSet<(string Group, string Name)> _emittedFeatures = [];
     private readonly TypeScriptTypeMapper _typeMapper = new();
 
     private static readonly Regex ParamPattern = new(@"\{(\w+)\}", RegexOptions.Compiled);
@@ -27,6 +28,9 @@ public class ApiBuilder : IDisposable
 
     public void AddFeature(FeatureDefinition feature)
     {
+        if (!_emittedFeatures.Add((feature.FeatureGroup, feature.FeatureName)))
+            return;
+
         var builder = GetSourceBuilder(feature);
         var isGet = feature.Method == HttpMethod.Get;
         var pathParams = ExtractPathParams(feature.Route);
@@ -112,5 +116,6 @@ public class ApiBuilder : IDisposable
     public void Dispose()
     {
         _sourceBuilder.Clear();
+        _emittedFeatures.Clear();
     }
 }

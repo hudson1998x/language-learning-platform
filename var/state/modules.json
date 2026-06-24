@@ -31,6 +31,10 @@
     "IsEnabled": true,
     "IsInstalled": true
   },
+  "LLE.Scenarios.ScenarioModule": {
+    "IsEnabled": true,
+    "IsInstalled": true
+  },
   "LLE.MusicTranslation.MusicTranslationModule": {
     "IsEnabled": true,
     "IsInstalled": true

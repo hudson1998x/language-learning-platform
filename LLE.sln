@@ -44,6 +44,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ollama", "App\Code\Communit
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MusicTranslation", "App\Code\Community\MusicTranslation\Source\MusicTranslation.csproj", "{A6FE12A6-209C-46B8-BB1E-C6E2AA4D3086}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scenarios", "App\Code\Local\Scenarios\Source\Scenarios.csproj", "{CEE5F85E-152A-41B8-BB1B-5FC593852374}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -170,5 +172,9 @@ Global
 		{A6FE12A6-209C-46B8-BB1E-C6E2AA4D3086}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A6FE12A6-209C-46B8-BB1E-C6E2AA4D3086}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A6FE12A6-209C-46B8-BB1E-C6E2AA4D3086}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CEE5F85E-152A-41B8-BB1B-5FC593852374}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CEE5F85E-152A-41B8-BB1B-5FC593852374}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CEE5F85E-152A-41B8-BB1B-5FC593852374}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CEE5F85E-152A-41B8-BB1B-5FC593852374}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

@@ -2,7 +2,6 @@ using System.Text.Json;
 using LLE.Frontend.Builders;
 using LLE.Kernel.AutoEntity;
 using LLE.Kernel.Contracts;
-using LLE.Kernel.Events;
 using LLE.Kernel.Registry;
 using LLE.Kernel.Security;
 using LLE.Sockets.Events;
@@ -26,6 +25,10 @@ public class PagesModule : IModuleLoader
 
             foreach (var page in allPages)
             {
+                if (string.IsNullOrEmpty(page.Url))
+                {
+                    continue;
+                }
                 builder.MapGet(page.Url, async context =>
                 {
                     var canvasNode = JsonSerializer.Deserialize<VNode>(page.PageJson);
