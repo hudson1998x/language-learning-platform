@@ -48,6 +48,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scenarios", "App\Code\Local
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeMessage", "App\Code\Community\LeMessage\Source\LeMessage.csproj", "{C969611C-B8B0-49BF-810A-3F7B891B5E58}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeChat", "App\Code\Community\HomeChat\Source\HomeChat.csproj", "{BDB1F574-0818-4D9E-86D1-0A3764294FA6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -182,5 +184,9 @@ Global
 		{C969611C-B8B0-49BF-810A-3F7B891B5E58}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C969611C-B8B0-49BF-810A-3F7B891B5E58}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C969611C-B8B0-49BF-810A-3F7B891B5E58}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BDB1F574-0818-4D9E-86D1-0A3764294FA6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BDB1F574-0818-4D9E-86D1-0A3764294FA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BDB1F574-0818-4D9E-86D1-0A3764294FA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BDB1F574-0818-4D9E-86D1-0A3764294FA6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

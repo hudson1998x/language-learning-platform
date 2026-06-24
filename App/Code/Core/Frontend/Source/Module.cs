@@ -59,10 +59,7 @@ public class FrontendModule : IModuleLoader
                 else
                 {
                     rootVNode.AddChild(
-                        VNode.Create("@component/Text", new Dictionary<string, object>
-                        {
-                            ["Text"] = "Homepage"
-                        })
+                        VNode.Create("@component/Pages/Homepage", [], [])
                     );   
                 }
                 

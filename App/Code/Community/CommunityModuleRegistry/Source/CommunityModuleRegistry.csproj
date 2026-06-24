@@ -9,6 +9,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\..\Core\Kernel\Source\Kernel.csproj" />
+      <ProjectReference Include="..\..\HomeChat\Source\HomeChat.csproj" />
       <ProjectReference Include="..\..\Languages\Source\Languages.csproj" />
       <ProjectReference Include="..\..\LeMessage\Source\LeMessage.csproj" />
       <ProjectReference Include="..\..\LLMProviders\Ollama\Source\Ollama.csproj" />
