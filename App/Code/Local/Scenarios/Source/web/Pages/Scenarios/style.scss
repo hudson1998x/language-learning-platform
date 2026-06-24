@@ -1,7 +1,29 @@
+$bg: #0e0e0e;
+$surface: #161616;
+$surface-raised: #1a1a1a;
+$border: #2a2a2a;
+$border-strong: #333;
+$text: #e5e5e5;
+$text-dim: #999;
+$text-faint: #777;
+$accent: #5b8def;
+$accent-hover: #4878d9;
+$accent-soft: rgba(91, 141, 239, 0.12);
+$good: #34d399;
+$weak: #f87171;
+
+@mixin focus-ring {
+  &:focus-visible {
+    outline: 2px solid $accent;
+    outline-offset: 2px;
+  }
+}
+
 .scenarios {
     padding: 24px;
     max-width: 1200px;
     margin: 0 auto;
+    color: $text;
 }
 
 .scenarios-header {
@@ -29,10 +51,16 @@
 
     button {
         padding: 6px 12px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        background: #fff;
+        border: 1px solid $border-strong;
+        border-radius: 6px;
+        background: $surface-raised;
+        color: $text;
         cursor: pointer;
+        @include focus-ring;
+
+        &:hover:not(:disabled) {
+            background: #262626;
+        }
 
         &:disabled {
             opacity: 0.5;
@@ -42,7 +70,7 @@
 
     span {
         font-size: 14px;
-        color: #666;
+        color: $text-dim;
     }
 }
 
@@ -52,9 +80,11 @@
 
     select {
         padding: 6px 10px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        background: #fff;
+        border: 1px solid $border-strong;
+        border-radius: 6px;
+        background: $surface-raised;
+        color: $text;
+        @include focus-ring;
     }
 }
 
@@ -64,14 +94,15 @@
     .create-button {
         padding: 8px 16px;
         border: none;
-        border-radius: 4px;
-        background: #3b82f6;
+        border-radius: 6px;
+        background: $accent;
         color: #fff;
         font-weight: 500;
         cursor: pointer;
+        @include focus-ring;
 
         &:hover {
-            background: #2563eb;
+            background: $accent-hover;
         }
     }
 }
@@ -79,7 +110,7 @@
 .notice {
     text-align: center;
     padding: 48px;
-    color: #999;
+    color: $text-faint;
 
     .notice-title {
         font-size: 18px;
@@ -99,15 +130,17 @@
 }
 
 .scenario-card {
-    border: 1px solid #e5e7eb;
+    border: 1px solid $border;
     border-radius: 8px;
     padding: 16px;
     cursor: pointer;
+    color: $text;
     transition: border-color 0.15s, box-shadow 0.15s;
+    @include focus-ring;
 
     &:hover {
-        border-color: #3b82f6;
-        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+        border-color: $accent;
+        box-shadow: 0 2px 8px $accent-soft;
     }
 
     .card-header {
@@ -125,15 +158,16 @@
         .delete-button {
             background: none;
             border: none;
-            color: #999;
+            color: $text-dim;
             cursor: pointer;
             padding: 2px 6px;
             border-radius: 4px;
             font-size: 14px;
+            @include focus-ring;
 
             &:hover {
-                color: #ef4444;
-                background: #fef2f2;
+                color: $weak;
+                background: rgba(248, 113, 113, 0.1);
             }
         }
     }
@@ -143,7 +177,7 @@
 
         .steps-preview {
             font-size: 13px;
-            color: #666;
+            color: $text-dim;
 
             .step-item {
                 display: flex;
@@ -151,7 +185,7 @@
                 margin-bottom: 4px;
 
                 .step-number {
-                    color: #999;
+                    color: $text-faint;
                     min-width: 18px;
                 }
 
@@ -164,7 +198,7 @@
             }
 
             .more-steps {
-                color: #999;
+                color: $text-faint;
                 font-size: 12px;
                 margin-top: 4px;
             }
@@ -174,7 +208,7 @@
     .card-footer {
         .create-time {
             font-size: 12px;
-            color: #999;
+            color: $text-faint;
         }
     }
 }
@@ -186,6 +220,6 @@
     padding: 48px;
 
     .error {
-        color: #ef4444;
+        color: $weak;
     }
 }

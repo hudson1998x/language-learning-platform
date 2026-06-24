@@ -6,6 +6,7 @@ namespace LLE.Scenarios;
 [Entity]
 public class Scenario : ContentWithId
 {
+    [Unique]
     public string Title { get; set; }
     
     public string Steps { get; set; }

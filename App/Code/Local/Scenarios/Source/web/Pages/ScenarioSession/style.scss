@@ -1,3 +1,24 @@
+$bg: #0e0e0e;
+$surface: #161616;
+$surface-raised: #1a1a1a;
+$border: #2a2a2a;
+$border-strong: #333;
+$text: #e5e5e5;
+$text-dim: #999;
+$text-faint: #777;
+$accent: #5b8def;
+$accent-hover: #4878d9;
+$accent-soft: rgba(91, 141, 239, 0.12);
+$good: #34d399;
+$weak: #f87171;
+
+@mixin focus-ring {
+  &:focus-visible {
+    outline: 2px solid $accent;
+    outline-offset: 2px;
+  }
+}
+
 .session-overlay {
     position: fixed;
     inset: 0;
@@ -5,7 +26,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    background: #f9fafb;
+    background: rgba(0, 0, 0, 0.6);
 }
 
 .difficulty-picker {
@@ -20,14 +41,15 @@
         background: none;
         border: none;
         font-size: 20px;
-        color: #999;
+        color: $text-dim;
         cursor: pointer;
         padding: 4px 8px;
-        border-radius: 4px;
+        border-radius: 6px;
+        @include focus-ring;
 
         &:hover {
-            color: #333;
-            background: #f3f4f6;
+            color: $text;
+            background: $surface-raised;
         }
     }
 
@@ -48,16 +70,18 @@
             align-items: center;
             gap: 6px;
             padding: 20px 28px;
-            border: 2px solid #e5e7eb;
+            border: 2px solid $border;
             border-radius: 8px;
-            background: #fff;
+            background: $surface;
             cursor: pointer;
+            color: $text;
             transition: border-color 0.15s, box-shadow 0.15s;
             min-width: 140px;
+            @include focus-ring;
 
             &:hover {
-                border-color: #3b82f6;
-                box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+                border-color: $accent;
+                box-shadow: 0 2px 8px $accent-soft;
             }
 
             .diff-label {
@@ -67,20 +91,22 @@
 
             .diff-desc {
                 font-size: 12px;
-                color: #666;
+                color: $text-dim;
             }
         }
     }
 
     .back-btn {
         padding: 8px 16px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        background: #fff;
+        border: 1px solid $border-strong;
+        border-radius: 6px;
+        background: $surface-raised;
+        color: $text;
         cursor: pointer;
+        @include focus-ring;
 
         &:hover {
-            background: #f3f4f6;
+            background: #262626;
         }
     }
 }
@@ -89,16 +115,22 @@
     text-align: center;
 
     .error-text {
-        color: #ef4444;
+        color: $weak;
         margin-bottom: 16px;
     }
 
     button {
         padding: 8px 16px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        background: #fff;
+        border: 1px solid $border-strong;
+        border-radius: 6px;
+        background: $surface-raised;
+        color: $text;
         cursor: pointer;
+        @include focus-ring;
+
+        &:hover {
+            background: #262626;
+        }
     }
 }
 
@@ -108,7 +140,7 @@
     width: 100%;
     max-width: 720px;
     height: 100vh;
-    background: #fff;
+    background: $surface;
 }
 
 .chat-header {
@@ -116,21 +148,22 @@
     align-items: center;
     gap: 12px;
     padding: 12px 16px;
-    border-bottom: 1px solid #e5e7eb;
-    background: #fff;
+    border-bottom: 1px solid $border;
+    background: $surface;
 
     .close-btn {
         padding: 4px 8px;
         border: none;
-        border-radius: 4px;
+        border-radius: 6px;
         background: none;
         cursor: pointer;
         font-size: 16px;
-        color: #666;
+        color: $text-dim;
+        @include focus-ring;
 
         &:hover {
-            background: #f3f4f6;
-            color: #333;
+            background: $surface-raised;
+            color: $text;
         }
     }
 
@@ -138,14 +171,15 @@
         flex: 1;
         font-weight: 600;
         font-size: 15px;
+        color: $text;
     }
 
     .chat-difficulty {
         font-size: 12px;
         padding: 2px 8px;
         border-radius: 12px;
-        background: #e5e7eb;
-        color: #666;
+        background: $surface-raised;
+        color: $text-dim;
     }
 }
 
@@ -162,7 +196,7 @@
     justify-content: center;
     height: 100%;
     text-align: center;
-    color: #666;
+    color: $text-dim;
 
     .empty-text {
         font-size: 15px;
@@ -173,10 +207,11 @@
         text-align: left;
         max-width: 400px;
         font-size: 13px;
-        background: #f9fafb;
+        background: $surface;
         padding: 12px 16px;
         border-radius: 8px;
-        border: 1px solid #e5e7eb;
+        border: 1px solid $border;
+        color: $text;
 
         strong {
             display: block;
@@ -185,7 +220,7 @@
 
         .step-line {
             margin-bottom: 4px;
-            color: #333;
+            color: $text;
         }
     }
 }
@@ -198,7 +233,7 @@
         margin-left: auto;
 
         .bubble-message {
-            background: #3b82f6;
+            background: $accent;
             color: #fff;
             border-radius: 16px 16px 4px 16px;
         }
@@ -208,8 +243,8 @@
         margin-right: auto;
 
         .bubble-message {
-            background: #f3f4f6;
-            color: #333;
+            background: $surface-raised;
+            color: $text;
             border-radius: 16px 16px 16px 4px;
         }
 
@@ -236,13 +271,14 @@
             border: none;
             border-radius: 4px;
             background: none;
-            color: #999;
+            color: $text-dim;
             cursor: pointer;
+            @include focus-ring;
 
             &:hover,
             &.active {
-                background: #e5e7eb;
-                color: #333;
+                background: $border;
+                color: $text;
             }
         }
 
@@ -251,10 +287,10 @@
             top: 100%;
             right: 0;
             margin-top: 4px;
-            background: #fff;
-            border: 1px solid #e5e7eb;
+            background: $surface;
+            border: 1px solid $border;
             border-radius: 6px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
             z-index: 10;
             min-width: 180px;
 
@@ -268,11 +304,12 @@
                 background: none;
                 cursor: pointer;
                 font-size: 13px;
-                color: #333;
+                color: $text;
                 text-align: left;
+                @include focus-ring;
 
                 &:hover {
-                    background: #f3f4f6;
+                    background: $surface-raised;
                 }
             }
         }
@@ -281,8 +318,8 @@
     .bubble-details {
         margin-top: 6px;
         padding: 8px 12px;
-        background: #f9fafb;
-        border: 1px solid #e5e7eb;
+        background: $bg;
+        border: 1px solid $border;
         border-radius: 8px;
         font-size: 12px;
 
@@ -296,27 +333,27 @@
 
             .detail-label {
                 font-weight: 600;
-                color: #666;
+                color: $text-dim;
                 margin-right: 4px;
             }
 
             &.pronunciation {
-                color: #7c3aed;
+                color: #a78bfa;
             }
 
             &.cultural {
-                color: #059669;
+                color: $good;
             }
 
             &.hint {
-                color: #d97706;
+                color: #fbbf24;
             }
 
             &.feedback {
-                color: #dc2626;
+                color: $weak;
 
                 .detail-label {
-                    color: #dc2626;
+                    color: $weak;
                 }
             }
         }
@@ -331,15 +368,15 @@
     font-weight: 600;
 
     &.correct {
-        background: #f0fdf4;
-        color: #16a34a;
-        border: 1px solid #bbf7d0;
+        background: rgba(52, 211, 153, 0.1);
+        color: $good;
+        border: 1px solid rgba(52, 211, 153, 0.2);
     }
 
     &.incorrect {
-        background: #fef2f2;
-        color: #dc2626;
-        border: 1px solid #fecaca;
+        background: rgba(248, 113, 113, 0.1);
+        color: $weak;
+        border: 1px solid rgba(248, 113, 113, 0.2);
     }
 
     .eval-badge {
@@ -351,8 +388,8 @@
 
 .chat-error {
     padding: 8px 16px;
-    background: #fef2f2;
-    color: #ef4444;
+    background: rgba(248, 113, 113, 0.1);
+    color: $weak;
     font-size: 13px;
     text-align: center;
 }
@@ -361,24 +398,27 @@
     display: flex;
     gap: 8px;
     padding: 12px 16px;
-    border-top: 1px solid #e5e7eb;
-    background: #fff;
+    border-top: 1px solid $border;
+    background: $surface;
 
     input {
         flex: 1;
         padding: 10px 14px;
-        border: 1px solid #ccc;
+        border: 1px solid $border-strong;
         border-radius: 8px;
         font-size: 14px;
         font-family: inherit;
+        background: $surface-raised;
+        color: $text;
+        @include focus-ring;
 
         &:focus {
             outline: none;
-            border-color: #3b82f6;
+            border-color: $accent;
         }
 
         &:disabled {
-            background: #f9fafb;
+            background: $bg;
         }
     }
 
@@ -386,14 +426,15 @@
         padding: 10px 20px;
         border: none;
         border-radius: 8px;
-        background: #3b82f6;
+        background: $accent;
         color: #fff;
         font-size: 14px;
         font-weight: 500;
         cursor: pointer;
+        @include focus-ring;
 
         &:hover {
-            background: #2563eb;
+            background: $accent-hover;
         }
 
         &:disabled {
