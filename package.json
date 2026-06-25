@@ -1,6 +1,7 @@
 {
   "type": "module",
   "scripts": {
+    "start": "dotnet run --project App/Code/Core/Application",
     "esbuild:watch": "node App/Code/Community/ReactFrontend/Source/scripts/esbuild.js --index=App/Code/Community/ReactFrontend/Source/web/index.tsx --watch",
     "esbuild:build": "node App/Code/Community/ReactFrontend/Source/scripts/esbuild.js --index=App/Code/Community/ReactFrontend/Source/web/index.tsx"
   },

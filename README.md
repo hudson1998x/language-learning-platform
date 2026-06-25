@@ -1,3 +1,15 @@
+# How to run:
+```bash
+npm start
+```
+1. open your browser, http://localhost:8080
+2. create an account (it's all offline, just for multiple learners to share an instance)
+3. Begin learning
+
+Prerequisites:
+ - Ollama https://ollama.com/ - for the LLM's 
+   - Qwen3 model
+
 # LLE Language Learning Platform
 
 **Learn languages through real experiences, not vocabulary lists.**
