@@ -13,7 +13,7 @@ public static class Features
 {
     public static void LoadFeatures()
     {
-        FeatureRegistry.Add(new Feature<object, ApiResponse<Dictionary<string, object>>>
+        FeatureRegistry.Add(new Feature<object, ApiResponse<Dictionary<string, Dictionary<string, ConfigFieldInfo>>>>
         {
             FeatureName = "listConfigs",
             FeatureGroup = "admin",
@@ -21,10 +21,34 @@ public static class Features
             Method = HttpMethod.Get,
             Handler = async (_, _) =>
             {
-                return new ApiResponse<Dictionary<string, object>>
+                var result = new Dictionary<string, Dictionary<string, ConfigFieldInfo>>();
+
+                foreach (var (typeName, config) in ConfigurationCatalog.GetAllConfigurations())
+                {
+                    var fields = new Dictionary<string, ConfigFieldInfo>();
+
+                    foreach (var property in config.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
+                    {
+                        if (!property.CanRead) continue;
+
+                        var componentAttr = property.GetCustomAttribute<ConfigComponentAttribute>();
+                        var value = property.GetValue(config);
+
+                        fields[property.Name] = new ConfigFieldInfo
+                        {
+                            Value = value,
+                            Type = MapPropertyType(property.PropertyType),
+                            Component = componentAttr?.Component
+                        };
+                    }
+
+                    result[typeName] = fields;
+                }
+
+                return new ApiResponse<Dictionary<string, Dictionary<string, ConfigFieldInfo>>>
                 {
                     Success = true,
-                    Data = ConfigurationCatalog.GetAllConfigurations()
+                    Data = result
                 };
             }
         });
@@ -97,6 +121,16 @@ public static class Features
                 };
             }
         });
+    }
+
+    private static string MapPropertyType(Type type)
+    {
+        if (type == typeof(string)) return "string";
+        if (type == typeof(bool)) return "boolean";
+        if (type == typeof(int) || type == typeof(long) || type == typeof(short) ||
+            type == typeof(float) || type == typeof(double) || type == typeof(decimal))
+            return "number";
+        return "string";
     }
 
     private static Type? FindConfigurationType(string typeName)

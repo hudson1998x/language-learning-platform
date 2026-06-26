@@ -15,7 +15,6 @@ public class AppAdminModule : IModuleLoader
         Features.LoadFeatures();
         Eventing.Eventing.Of<ComponentRegistryGeneratorEvents>().BeforeWrite.Concurrent(tsConfig =>
         {
-            Console.WriteLine("Added import");
             tsConfig.AddAutoImport("./App/Code/Core/AppAdmin/Source/web/config-editor/index.tsx");
         });
         

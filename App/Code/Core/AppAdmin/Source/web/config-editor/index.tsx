@@ -1,14 +1,22 @@
 import { useEffect, useState } from "react";
 import { listConfigs, changeSettings } from '@api/admin';
-import { register } from "@registry";
+import { register, mod } from "@registry";
 import './style.scss';
 
+interface FieldInfo {
+    type: string;
+    value: unknown;
+    component: string | null;
+}
+
+type ConfigsData = Record<string, Record<string, FieldInfo>>;
+
 const ConfigEditor = () => {
-    const [configs, setConfigs] = useState<Record<string, unknown>>({});
+    const [configs, setConfigs] = useState<ConfigsData>({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [selectedConfig, setSelectedConfig] = useState<string | null>(null);
-    const [formValues, setFormValues] = useState<Record<string, string | number | boolean>>({});
+    const [formValues, setFormValues] = useState<Record<string, unknown>>({});
     const [saving, setSaving] = useState(false);
     const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
     const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
@@ -18,14 +26,14 @@ const ConfigEditor = () => {
             .then((res) => {
                 if (res.success && res.data) {
                     setConfigs(res.data);
-                    const keys = Object.keys(res.data);
-                    if (keys.length > 0) {
-                        const firstKey = keys[0];
-                        setSelectedConfig(firstKey);
-                        setFormValues(res.data[firstKey] as Record<string, string | number | boolean>);
-                        const moduleName = firstKey.endsWith('Configuration')
-                            ? firstKey.slice(0, -13)
-                            : firstKey;
+                    const entries = Object.entries(res.data);
+                    if (entries.length > 0) {
+                        const [firstName, firstFields] = entries[0];
+                        setSelectedConfig(firstName);
+                        setFormValues(extractValues(firstFields));
+                        const moduleName = firstName.endsWith('Configuration')
+                            ? firstName.slice(0, -13)
+                            : firstName;
                         setExpandedModules(new Set([moduleName]));
                     }
                 } else {
@@ -36,13 +44,24 @@ const ConfigEditor = () => {
             .finally(() => setLoading(false));
     }, []);
 
+    const extractValues = (fields: Record<string, FieldInfo>): Record<string, unknown> => {
+        const values: Record<string, unknown> = {};
+        for (const [key, info] of Object.entries(fields)) {
+            values[key] = info.value;
+        }
+        return values;
+    };
+
     const handleSelectConfig = (name: string) => {
         setSelectedConfig(name);
-        setFormValues(configs[name] as Record<string, string | number | boolean>);
+        const fields = configs[name];
+        if (fields) {
+            setFormValues(extractValues(fields));
+        }
         setSaveMessage(null);
     };
 
-    const handleFieldChange = (field: string, value: string | number | boolean) => {
+    const handleFieldChange = (field: string, value: unknown) => {
         setFormValues((prev) => ({ ...prev, [field]: value }));
     };
 
@@ -58,7 +77,6 @@ const ConfigEditor = () => {
             const res = await changeSettings(payload as Parameters<typeof changeSettings>[0]);
             if (res.success) {
                 setSaveMessage({ type: 'success', text: 'Saved successfully' });
-                setConfigs((prev) => ({ ...prev, [selectedConfig]: { ...formValues } }));
             } else {
                 setSaveMessage({ type: 'error', text: res.message ?? 'Failed to save' });
             }
@@ -126,19 +144,24 @@ const ConfigEditor = () => {
                         </button>
                         {expandedModules.has(module) && (
                             <div className="config-editor__group-items">
-                                {configNames.map((name) => (
-                                    <button
-                                        key={name}
-                                        className={`config-editor__config-btn ${
-                                            selectedConfig === name
-                                                ? 'config-editor__config-btn--active'
-                                                : ''
-                                        }`}
-                                        onClick={() => handleSelectConfig(name)}
-                                    >
-                                        {name}
-                                    </button>
-                                ))}
+                                {configNames.map((originalName) => {
+                                    const displayName = originalName === module + 'Configuration'
+                                        ? 'Main settings'
+                                        : originalName.replaceAll("Configuration", "");
+                                    return (
+                                        <button
+                                            key={originalName}
+                                            className={`config-editor__config-btn ${
+                                                selectedConfig === originalName
+                                                    ? 'config-editor__config-btn--active'
+                                                    : ''
+                                            }`}
+                                            onClick={() => handleSelectConfig(originalName)}
+                                        >
+                                            {displayName}
+                                        </button>
+                                    );
+                                })}
                             </div>
                         )}
                     </div>
@@ -149,35 +172,55 @@ const ConfigEditor = () => {
                     <>
                         <h2 className="config-editor__config-title">{selectedConfig}</h2>
                         <div className="config-editor__fields">
-                            {Object.entries(formValues).map(([key, value]) => (
-                                <div key={key} className="config-editor__field">
-                                    <label className="config-editor__field-label">{key}</label>
-                                    {typeof value === 'boolean' ? (
-                                        <input
-                                            type="checkbox"
-                                            className="config-editor__checkbox"
-                                            checked={value}
-                                            onChange={(e) => handleFieldChange(key, e.target.checked)}
-                                        />
-                                    ) : typeof value === 'number' ? (
-                                        <input
-                                            type="number"
-                                            className="config-editor__input"
-                                            value={value}
-                                            onChange={(e) =>
-                                                handleFieldChange(key, Number(e.target.value))
-                                            }
-                                        />
-                                    ) : (
-                                        <input
-                                            type="text"
-                                            className="config-editor__input"
-                                            value={String(value ?? '')}
-                                            onChange={(e) => handleFieldChange(key, e.target.value)}
-                                        />
-                                    )}
-                                </div>
-                            ))}
+                            {Object.entries(formValues).map(([key, value]) => {
+                                const fieldInfo = configs[selectedConfig]?.[key];
+                                const componentName = fieldInfo?.component;
+
+                                if (componentName) {
+                                    const FieldComponent = mod(componentName);
+                                    return (
+                                        <div key={key} className="config-editor__field">
+                                            <label className="config-editor__field-label">{key}</label>
+                                            <div className="config-editor__field-component">
+                                                <FieldComponent
+                                                    value={value}
+                                                    onChange={(newVal: unknown) => handleFieldChange(key, newVal)}
+                                                />
+                                            </div>
+                                        </div>
+                                    );
+                                }
+
+                                return (
+                                    <div key={key} className="config-editor__field">
+                                        <label className="config-editor__field-label">{key}</label>
+                                        {fieldInfo?.type === 'boolean' || typeof value === 'boolean' ? (
+                                            <input
+                                                type="checkbox"
+                                                className="config-editor__checkbox"
+                                                checked={!!value}
+                                                onChange={(e) => handleFieldChange(key, e.target.checked)}
+                                            />
+                                        ) : fieldInfo?.type === 'number' || typeof value === 'number' ? (
+                                            <input
+                                                type="number"
+                                                className="config-editor__input"
+                                                value={Number(value ?? 0)}
+                                                onChange={(e) =>
+                                                    handleFieldChange(key, Number(e.target.value))
+                                                }
+                                            />
+                                        ) : (
+                                            <input
+                                                type="text"
+                                                className="config-editor__input"
+                                                value={String(value ?? '')}
+                                                onChange={(e) => handleFieldChange(key, e.target.value)}
+                                            />
+                                        )}
+                                    </div>
+                                );
+                            })}
                         </div>
                         <div className="config-editor__actions">
                             <button

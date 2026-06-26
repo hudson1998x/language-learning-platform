@@ -3909,7 +3909,6 @@ body {
   padding: 16px;
   overflow-y: auto;
   flex-shrink: 0;
-  background: #161616;
 }
 .config-editor__sidebar-title {
   font-size: 14px;
@@ -3999,6 +3998,9 @@ body {
   font-size: 13px;
   color: #999;
   flex-shrink: 0;
+}
+.config-editor__field-component {
+  flex: 1;
 }
 .config-editor__input {
   flex: 1;

@@ -22,7 +22,6 @@ $success: #34d399;
     padding: 16px;
     overflow-y: auto;
     flex-shrink: 0;
-    background: $surface;
   }
 
   &__sidebar-title {
@@ -126,6 +125,10 @@ $success: #34d399;
     font-size: 13px;
     color: $text-dim;
     flex-shrink: 0;
+  }
+
+  &__field-component {
+    flex: 1;
   }
 
   &__input {

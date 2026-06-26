@@ -25239,12 +25239,12 @@
       listConfigs().then((res) => {
         if (res.success && res.data) {
           setConfigs(res.data);
-          const keys = Object.keys(res.data);
-          if (keys.length > 0) {
-            const firstKey = keys[0];
-            setSelectedConfig(firstKey);
-            setFormValues(res.data[firstKey]);
-            const moduleName = firstKey.endsWith("Configuration") ? firstKey.slice(0, -13) : firstKey;
+          const entries = Object.entries(res.data);
+          if (entries.length > 0) {
+            const [firstName, firstFields] = entries[0];
+            setSelectedConfig(firstName);
+            setFormValues(extractValues(firstFields));
+            const moduleName = firstName.endsWith("Configuration") ? firstName.slice(0, -13) : firstName;
             setExpandedModules(/* @__PURE__ */ new Set([moduleName]));
           }
         } else {
@@ -25252,9 +25252,19 @@
         }
       }).catch((err) => setError(err.message)).finally(() => setLoading(false));
     }, []);
+    const extractValues = (fields) => {
+      const values = {};
+      for (const [key, info] of Object.entries(fields)) {
+        values[key] = info.value;
+      }
+      return values;
+    };
     const handleSelectConfig = (name) => {
       setSelectedConfig(name);
-      setFormValues(configs[name]);
+      const fields = configs[name];
+      if (fields) {
+        setFormValues(extractValues(fields));
+      }
       setSaveMessage(null);
     };
     const handleFieldChange = (field, value) => {
@@ -25272,7 +25282,6 @@
         const res = await changeSettings(payload2);
         if (res.success) {
           setSaveMessage({ type: "success", text: "Saved successfully" });
-          setConfigs((prev) => ({ ...prev, [selectedConfig]: { ...formValues } }));
         } else {
           setSaveMessage({ type: "error", text: res.message ?? "Failed to save" });
         }
@@ -25323,47 +25332,67 @@
               ]
             }
           ),
-          expandedModules.has(module) && /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("div", { className: "config-editor__group-items", children: configNames.map((name) => /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(
-            "button",
-            {
-              className: `config-editor__config-btn ${selectedConfig === name ? "config-editor__config-btn--active" : ""}`,
-              onClick: () => handleSelectConfig(name),
-              children: name
-            },
-            name
-          )) })
+          expandedModules.has(module) && /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("div", { className: "config-editor__group-items", children: configNames.map((originalName) => {
+            const displayName = originalName === module + "Configuration" ? "Main settings" : originalName.replaceAll("Configuration", "");
+            return /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(
+              "button",
+              {
+                className: `config-editor__config-btn ${selectedConfig === originalName ? "config-editor__config-btn--active" : ""}`,
+                onClick: () => handleSelectConfig(originalName),
+                children: displayName
+              },
+              originalName
+            );
+          }) })
         ] }, module))
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("main", { className: "config-editor__content", children: selectedConfig ? /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)(import_jsx_runtime29.Fragment, { children: [
         /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("h2", { className: "config-editor__config-title", children: selectedConfig }),
-        /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("div", { className: "config-editor__fields", children: Object.entries(formValues).map(([key, value]) => /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "config-editor__field", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("label", { className: "config-editor__field-label", children: key }),
-          typeof value === "boolean" ? /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(
-            "input",
-            {
-              type: "checkbox",
-              className: "config-editor__checkbox",
-              checked: value,
-              onChange: (e) => handleFieldChange(key, e.target.checked)
-            }
-          ) : typeof value === "number" ? /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(
-            "input",
-            {
-              type: "number",
-              className: "config-editor__input",
-              value,
-              onChange: (e) => handleFieldChange(key, Number(e.target.value))
-            }
-          ) : /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(
-            "input",
-            {
-              type: "text",
-              className: "config-editor__input",
-              value: String(value ?? ""),
-              onChange: (e) => handleFieldChange(key, e.target.value)
-            }
-          )
-        ] }, key)) }),
+        /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("div", { className: "config-editor__fields", children: Object.entries(formValues).map(([key, value]) => {
+          const fieldInfo = configs[selectedConfig]?.[key];
+          const componentName = fieldInfo?.component;
+          if (componentName) {
+            const FieldComponent = mod(componentName);
+            return /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "config-editor__field", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("label", { className: "config-editor__field-label", children: key }),
+              /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("div", { className: "config-editor__field-component", children: /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(
+                FieldComponent,
+                {
+                  value,
+                  onChange: (newVal) => handleFieldChange(key, newVal)
+                }
+              ) })
+            ] }, key);
+          }
+          return /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "config-editor__field", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("label", { className: "config-editor__field-label", children: key }),
+            fieldInfo?.type === "boolean" || typeof value === "boolean" ? /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(
+              "input",
+              {
+                type: "checkbox",
+                className: "config-editor__checkbox",
+                checked: !!value,
+                onChange: (e) => handleFieldChange(key, e.target.checked)
+              }
+            ) : fieldInfo?.type === "number" || typeof value === "number" ? /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(
+              "input",
+              {
+                type: "number",
+                className: "config-editor__input",
+                value: Number(value ?? 0),
+                onChange: (e) => handleFieldChange(key, Number(e.target.value))
+              }
+            ) : /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(
+              "input",
+              {
+                type: "text",
+                className: "config-editor__input",
+                value: String(value ?? ""),
+                onChange: (e) => handleFieldChange(key, e.target.value)
+              }
+            )
+          ] }, key);
+        }) }),
         /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "config-editor__actions", children: [
           /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(
             "button",
