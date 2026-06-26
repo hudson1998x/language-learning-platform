@@ -1,5 +1,6 @@
 using LLE.Frontend.Events;
 using LLE.Kernel.Contracts;
+using LLE.Kernel.Events;
 using LLE.ReactFrontend.Generators;
 using LLE.Sockets.Events;
 using LLE.TypeScript.Builders;
@@ -112,10 +113,13 @@ public class ReactFrontendModule : IModuleLoader
             }
         );
         
-        // load all components into a registry. 
-        var generator = new ComponentRegistryGenerator();
-        generator.GenerateComponentRegistry();
-        
+        // defer registry generation until all modules have registered their auto-imports.
+        Eventing.Eventing.Of<ApplicationEvents>().AllStarted.Concurrent(_ =>
+        {
+            var generator = new ComponentRegistryGenerator();
+            generator.GenerateComponentRegistry();
+        });
+
         return Task.CompletedTask;
     }
 

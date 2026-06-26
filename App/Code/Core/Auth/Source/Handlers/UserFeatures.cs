@@ -1,8 +1,10 @@
 using LLE.Auth.Dto;
 using LLE.Auth.Exceptions;
+using LLE.Auth.Features.Roles;
 using LLE.Auth.Features.Users;
 using LLE.Auth.Utilities;
 using LLE.Kernel.Registry;
+using LLE.Kernel.Security;
 using Microsoft.AspNetCore.Http;
 
 namespace LLE.Auth.Handlers;
@@ -35,14 +37,25 @@ public static class UserFeatures
     public static async ValueTask<UserAuthStateResponse> UserAuthState(object body, HttpContext context)
     {
         var userService = ServiceCatalog.GetService<UserService>();
+        var roleRepository = RepositoryCatalog.GetRepository<IRoleRepository>();
         
         var currentUser = await userService.GetCurrentUser(context);
+
+        Role? role = null;
+
+        if (currentUser?.RoleId is not null)
+        {
+            role = await roleRepository.FindByIdAsync(currentUser.RoleId.Value, UserContext.FromHttpContext(context), DataOptions.Bypass);
+        }
+
+        role ??= await roleRepository.FindByKeyAsync("guest", UserContext.Guest, DataOptions.Bypass);
         
         return new()
         {
             Success = true,
             Message = "Endpoint okay",
-            User = currentUser
+            User = currentUser,
+            Role = role
         };
     }
 

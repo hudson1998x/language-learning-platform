@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSession } from '@hook/session-provider'
 import "./style.scss";
 
 export interface NavLink {
@@ -20,8 +21,15 @@ const LINKS: NavLink[] = [
     { label: "LeMessage", href: "/messages"}
 ];
 
-export const NavBar = ({ links = LINKS, initialActive = links[0]?.href }: NavBarProps) => {
+export const NavBar = ({ links = [...LINKS], initialActive = links[0]?.href }: NavBarProps) => {
+    
     const active = links.filter((l) => l.href == location.pathname)?.[0]?.href;
+    const { isAdmin } = useSession();
+    
+    if (isAdmin)
+    {
+        links.push({ label: 'App settings', href: "/settings" });
+    }
 
     return (
         <nav className="navbar">

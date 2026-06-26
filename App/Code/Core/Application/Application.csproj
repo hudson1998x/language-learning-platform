@@ -12,6 +12,7 @@
     <ItemGroup>
       <ProjectReference Include="..\..\Community\CommunityModuleRegistry\Source\CommunityModuleRegistry.csproj" />
       <ProjectReference Include="..\..\Local\AppRegistry\Source\LocalAppRegistry.csproj" />
+      <ProjectReference Include="..\AppAdmin\Source\AppAdmin.csproj" />
       <ProjectReference Include="..\Auth\Source\Auth.csproj" />
       <ProjectReference Include="..\Frontend\Source\Frontend.csproj" />
       <ProjectReference Include="..\Kernel\Source\Kernel.csproj" />

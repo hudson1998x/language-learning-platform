@@ -80,4 +80,22 @@ public static class ConfigurationCatalog
     }
 
     public static T GetConfiguration<T>() where T : class => (T)GetConfiguration(typeof(T));
+
+    public static Dictionary<string, object> GetAllConfigurations()
+    {
+        return ConfigMap.ToDictionary(kvp => kvp.Key.Name, kvp => kvp.Value);
+    }
+
+    public static void SaveConfiguration(Type type)
+    {
+        if (!ConfigMap.TryGetValue(type, out var instance))
+            throw new InvalidOperationException($"Configuration '{type.Name}' has not been loaded yet.");
+
+        Directory.CreateDirectory(ConfigDirectory);
+        var filePath = Path.Combine(ConfigDirectory, $"{type.Name}.json");
+        var json = JsonSerializer.Serialize(instance, type, new JsonSerializerOptions { WriteIndented = true });
+        File.WriteAllText(filePath, json);
+    }
+
+    public static void SaveConfiguration<T>() where T : class => SaveConfiguration(typeof(T));
 }

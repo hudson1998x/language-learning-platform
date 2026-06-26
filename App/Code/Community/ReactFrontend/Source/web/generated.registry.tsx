@@ -25,3 +25,4 @@ import '../../../../../.././App/Code/Local/Scenarios/Source/web/Pages/Scenarios/
 import '../../../../../.././App/Code/Local/Scenarios/Source/web/Pages/ScenarioSession/index.tsx';
 import '../../../../../.././App/Code/Community/LeMessage/Source/web/ChatPage/index.tsx';
 import '../../../../../.././App/Code/Community/MusicTranslation/Source/web/TranslationPage/index.tsx';
+import '../../../../../.././App/Code/Core/AppAdmin/Source/web/config-editor/index.tsx';

@@ -3896,4 +3896,172 @@ body {
   color: #34d399;
   font-weight: 500;
 }
+
+/* App/Code/Core/AppAdmin/Source/web/config-editor/style.scss */
+.config-editor {
+  display: flex;
+  height: calc(100vh - 120px);
+  color: #e5e5e5;
+}
+.config-editor__sidebar {
+  width: 260px;
+  border-right: 1px solid #2a2a2a;
+  padding: 16px;
+  overflow-y: auto;
+  flex-shrink: 0;
+  background: #161616;
+}
+.config-editor__sidebar-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #999;
+  margin: 0 0 12px;
+  padding: 0 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.config-editor__group {
+  margin-bottom: 4px;
+}
+.config-editor__group-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 8px 12px;
+  background: none;
+  border: none;
+  color: #e5e5e5;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 6px;
+  text-align: left;
+}
+.config-editor__group-toggle:hover {
+  background: #1a1a1a;
+}
+.config-editor__group-arrow {
+  font-size: 10px;
+  color: #777;
+  width: 12px;
+  flex-shrink: 0;
+}
+.config-editor__group-items {
+  margin-left: 18px;
+  margin-top: 2px;
+}
+.config-editor__config-btn {
+  display: block;
+  width: 100%;
+  padding: 6px 12px;
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 13px;
+  cursor: pointer;
+  border-radius: 4px;
+  text-align: left;
+}
+.config-editor__config-btn:hover {
+  background: #1a1a1a;
+  color: #e5e5e5;
+}
+.config-editor__config-btn--active {
+  background: rgba(91, 141, 239, 0.12);
+  color: #5b8def;
+}
+.config-editor__content {
+  flex: 1;
+  padding: 24px 32px;
+  overflow-y: auto;
+}
+.config-editor__config-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #2a2a2a;
+}
+.config-editor__fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 600px;
+}
+.config-editor__field {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.config-editor__field-label {
+  min-width: 160px;
+  font-size: 13px;
+  color: #999;
+  flex-shrink: 0;
+}
+.config-editor__input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #333;
+  border-radius: 6px;
+  background: #161616;
+  color: #e5e5e5;
+  font-size: 14px;
+  font-family: inherit;
+}
+.config-editor__input:focus {
+  outline: none;
+  border-color: #5b8def;
+}
+.config-editor__checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #5b8def;
+}
+.config-editor__actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #2a2a2a;
+}
+.config-editor__save-btn {
+  padding: 8px 24px;
+  border: none;
+  border-radius: 6px;
+  background: #5b8def;
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+}
+.config-editor__save-btn:hover:not(:disabled) {
+  background: #4878d9;
+}
+.config-editor__save-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.config-editor__message {
+  font-size: 13px;
+}
+.config-editor__message--success {
+  color: #34d399;
+}
+.config-editor__message--error {
+  color: #f87171;
+}
+.config-editor__centered {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #999;
+  font-size: 14px;
+}
+.config-editor__error {
+  color: #f87171;
+}
 /*# sourceMappingURL=index.css.map */

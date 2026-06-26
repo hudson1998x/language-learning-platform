@@ -30,6 +30,9 @@ public static partial class ApplicationLoader
                     case ServiceAttribute:
                         ServiceCatalog.GetService(type);
                         break;
+                    case ConfigurationAttribute:
+                        ConfigurationCatalog.GetConfiguration(type);
+                        break;
                 }
             }
         }

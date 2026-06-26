@@ -21840,7 +21840,9 @@
   );
   var SessionProvider = ({ children }) => {
     const [session, isLoading, error] = usePromise(userState, []);
-    return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(SessionContext.Provider, { value: { session, isLoading, error }, children });
+    const isAdmin = session?.role?.key === "admin";
+    console.log({ isAdmin });
+    return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(SessionContext.Provider, { value: { session, isLoading, error, isAdmin }, children });
   };
   var useSession = () => {
     const ctx = (0, import_react4.useContext)(SessionContext);
@@ -22211,8 +22213,12 @@
     // { label: "Leddit", href: "/leddit" }, // disabled for now, future feature.
     { label: "LeMessage", href: "/messages" }
   ];
-  var NavBar = ({ links = LINKS, initialActive = links[0]?.href }) => {
+  var NavBar = ({ links = [...LINKS], initialActive = links[0]?.href }) => {
     const active = links.filter((l) => l.href == location.pathname)?.[0]?.href;
+    const { isAdmin } = useSession();
+    if (isAdmin) {
+      links.push({ label: "App settings", href: "/settings" });
+    }
     return /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("nav", { className: "navbar", children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("ul", { className: "navbar__list", children: links.map((link) => /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("li", { className: "navbar__item", children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
       "a",
       {
@@ -25189,6 +25195,198 @@
   };
   register("@page/music-translation-index", MusicTranslationIndexPage);
 
+  // App/Code/Core/AppAdmin/Source/web/config-editor/index.tsx
+  var import_react24 = __toESM(require_react(), 1);
+
+  // App/Api/admin.ts
+  var listConfigs = () => {
+    return fetch("/api/configuration/list", {
+      method: "GET"
+    }).then((response) => {
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+      return response.json();
+    });
+  };
+  var changeSettings = (payload2) => {
+    return fetch("/api/configuration/update", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload2)
+    }).then((response) => {
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+      return response.json();
+    });
+  };
+
+  // App/Code/Core/AppAdmin/Source/web/config-editor/index.tsx
+  var import_jsx_runtime29 = __toESM(require_jsx_runtime(), 1);
+  var ConfigEditor = () => {
+    const [configs, setConfigs] = (0, import_react24.useState)({});
+    const [loading, setLoading] = (0, import_react24.useState)(true);
+    const [error, setError] = (0, import_react24.useState)(null);
+    const [selectedConfig, setSelectedConfig] = (0, import_react24.useState)(null);
+    const [formValues, setFormValues] = (0, import_react24.useState)({});
+    const [saving, setSaving] = (0, import_react24.useState)(false);
+    const [saveMessage, setSaveMessage] = (0, import_react24.useState)(null);
+    const [expandedModules, setExpandedModules] = (0, import_react24.useState)(/* @__PURE__ */ new Set());
+    (0, import_react24.useEffect)(() => {
+      listConfigs().then((res) => {
+        if (res.success && res.data) {
+          setConfigs(res.data);
+          const keys = Object.keys(res.data);
+          if (keys.length > 0) {
+            const firstKey = keys[0];
+            setSelectedConfig(firstKey);
+            setFormValues(res.data[firstKey]);
+            const moduleName = firstKey.endsWith("Configuration") ? firstKey.slice(0, -13) : firstKey;
+            setExpandedModules(/* @__PURE__ */ new Set([moduleName]));
+          }
+        } else {
+          setError(res.message ?? "Failed to load configurations");
+        }
+      }).catch((err) => setError(err.message)).finally(() => setLoading(false));
+    }, []);
+    const handleSelectConfig = (name) => {
+      setSelectedConfig(name);
+      setFormValues(configs[name]);
+      setSaveMessage(null);
+    };
+    const handleFieldChange = (field, value) => {
+      setFormValues((prev) => ({ ...prev, [field]: value }));
+    };
+    const handleSave = async () => {
+      if (!selectedConfig) return;
+      setSaving(true);
+      setSaveMessage(null);
+      try {
+        const payload2 = {
+          configurationType: selectedConfig,
+          configuration: formValues
+        };
+        const res = await changeSettings(payload2);
+        if (res.success) {
+          setSaveMessage({ type: "success", text: "Saved successfully" });
+          setConfigs((prev) => ({ ...prev, [selectedConfig]: { ...formValues } }));
+        } else {
+          setSaveMessage({ type: "error", text: res.message ?? "Failed to save" });
+        }
+      } catch (err) {
+        setSaveMessage({
+          type: "error",
+          text: err instanceof Error ? err.message : "Failed to save"
+        });
+      } finally {
+        setSaving(false);
+      }
+    };
+    const groupedConfigs = () => {
+      const groups2 = {};
+      Object.keys(configs).forEach((name) => {
+        const moduleName = name.endsWith("Configuration") ? name.slice(0, -13) : name;
+        if (!groups2[moduleName]) groups2[moduleName] = [];
+        groups2[moduleName].push(name);
+      });
+      return groups2;
+    };
+    if (loading) {
+      return /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("div", { className: "config-editor", children: /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("div", { className: "config-editor__centered", children: "Loading configurations..." }) });
+    }
+    if (error) {
+      return /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("div", { className: "config-editor", children: /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("div", { className: "config-editor__centered config-editor__error", children: error }) });
+    }
+    const groups = groupedConfigs();
+    return /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "config-editor", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("aside", { className: "config-editor__sidebar", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("h2", { className: "config-editor__sidebar-title", children: "Modules" }),
+        Object.entries(groups).map(([module, configNames]) => /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "config-editor__group", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)(
+            "button",
+            {
+              className: "config-editor__group-toggle",
+              onClick: () => {
+                setExpandedModules((prev) => {
+                  const next = new Set(prev);
+                  if (next.has(module)) next.delete(module);
+                  else next.add(module);
+                  return next;
+                });
+              },
+              children: [
+                /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("span", { className: "config-editor__group-arrow", children: expandedModules.has(module) ? "\u25BC" : "\u25B6" }),
+                module
+              ]
+            }
+          ),
+          expandedModules.has(module) && /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("div", { className: "config-editor__group-items", children: configNames.map((name) => /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(
+            "button",
+            {
+              className: `config-editor__config-btn ${selectedConfig === name ? "config-editor__config-btn--active" : ""}`,
+              onClick: () => handleSelectConfig(name),
+              children: name
+            },
+            name
+          )) })
+        ] }, module))
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("main", { className: "config-editor__content", children: selectedConfig ? /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)(import_jsx_runtime29.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("h2", { className: "config-editor__config-title", children: selectedConfig }),
+        /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("div", { className: "config-editor__fields", children: Object.entries(formValues).map(([key, value]) => /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "config-editor__field", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("label", { className: "config-editor__field-label", children: key }),
+          typeof value === "boolean" ? /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(
+            "input",
+            {
+              type: "checkbox",
+              className: "config-editor__checkbox",
+              checked: value,
+              onChange: (e) => handleFieldChange(key, e.target.checked)
+            }
+          ) : typeof value === "number" ? /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(
+            "input",
+            {
+              type: "number",
+              className: "config-editor__input",
+              value,
+              onChange: (e) => handleFieldChange(key, Number(e.target.value))
+            }
+          ) : /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(
+            "input",
+            {
+              type: "text",
+              className: "config-editor__input",
+              value: String(value ?? ""),
+              onChange: (e) => handleFieldChange(key, e.target.value)
+            }
+          )
+        ] }, key)) }),
+        /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "config-editor__actions", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(
+            "button",
+            {
+              className: "config-editor__save-btn",
+              onClick: handleSave,
+              disabled: saving,
+              children: saving ? "Saving..." : "Save"
+            }
+          ),
+          saveMessage && /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(
+            "span",
+            {
+              className: `config-editor__message config-editor__message--${saveMessage.type}`,
+              children: saveMessage.text
+            }
+          )
+        ] })
+      ] }) : /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("div", { className: "config-editor__centered", children: "Select a configuration to edit" }) })
+    ] });
+  };
+  register("@admin/configuration", ConfigEditor);
+
   // App/Code/Community/ReactFrontend/Source/web/generated.registry.tsx
   register("@component/Pages/Homepage", Homepage);
   register("@component/Pages/FlashCards", FlashCards);
@@ -25198,10 +25396,10 @@
   register("@component/Spinner", Spinner);
 
   // App/Code/Community/ReactFrontend/Source/web/index.tsx
-  var import_jsx_runtime29 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime30 = __toESM(require_jsx_runtime(), 1);
   var root = (0, import_client.createRoot)(document.getElementById("app"));
   root.render(
-    /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Default_default, { children: /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Canvas, { children: window.canvasState }) })
+    /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(Default_default, { children: /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(Canvas, { children: window.canvasState }) })
   );
 })();
 /*! Bundled license information:

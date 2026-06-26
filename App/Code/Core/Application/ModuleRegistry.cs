@@ -1,3 +1,4 @@
+using LLE.AppAdmin;
 using LLE.Auth;
 using LLE.Frontend;
 using LLE.Kernel;
@@ -14,6 +15,7 @@ public static class ModuleRegistry
         // Add all modules from core
         // here
         // ============================
+        ApplicationLoader.AddModule(new AppAdminModule());
         ApplicationLoader.AddModule(new FrontendModule());
         ApplicationLoader.AddModule(new TypeScriptModule());
         ApplicationLoader.AddModule(new AuthModule());

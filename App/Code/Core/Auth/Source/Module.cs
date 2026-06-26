@@ -42,6 +42,12 @@ public class AuthModule : IModuleLoader
                 Name = "User",
                 Description = "Standard user"
             }, UserContext.Guest, DataOptions.Bypass);
+            await repo.CreateAsync(new Role
+            {
+                Key = "guest",
+                Name = "Guest",
+                Description = "Not logged in yet."
+            }, UserContext.Guest, DataOptions.Bypass);
             
             await Eventing.Eventing.Of<RolesEventTable>().Setup.DispatchAsync(repo);
             await Eventing.Eventing.Of<RolesEventTable>().Ready.DispatchAsync(repo);

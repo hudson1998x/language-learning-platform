@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Text.Json;
+using LLE.Eventing;
 using LLE.Kernel.Contracts;
 using LLE.Kernel.Events;
 using LLE.Kernel.Registry;
@@ -56,7 +57,9 @@ public static partial class ApplicationLoader
         
         await Task.WhenAll(
             enabledModules.Select(m => m.AppStart()));
-        
+
+        await Eventing.Eventing.Of<ApplicationEvents>().AllStarted.DispatchAsync(new object());
+
         // at this point, all modules are loaded.
     }
 
