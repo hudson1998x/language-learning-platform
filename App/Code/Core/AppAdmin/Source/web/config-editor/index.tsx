@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { listConfigs, changeSettings } from '@api/admin';
 import { register, mod } from "@registry";
+import { useSession } from "@hook/session-provider"; 
 import './style.scss';
 
 interface FieldInfo {
@@ -12,6 +13,8 @@ interface FieldInfo {
 type ConfigsData = Record<string, Record<string, FieldInfo>>;
 
 const ConfigEditor = () => {
+    
+    const { isAdmin } = useSession();
     const [configs, setConfigs] = useState<ConfigsData>({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -110,6 +113,14 @@ const ConfigEditor = () => {
         );
     }
 
+    if (!isAdmin) {
+        return (
+            <div className="config-editor">
+                <div className="config-editor__centered config-editor__error">You do not have permission to access this page.</div>
+            </div>
+        );
+    }
+    
     if (error) {
         return (
             <div className="config-editor">

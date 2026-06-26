@@ -25368,6 +25368,7 @@
   // App/Code/Core/AppAdmin/Source/web/config-editor/index.tsx
   var import_jsx_runtime32 = __toESM(require_jsx_runtime(), 1);
   var ConfigEditor = () => {
+    const { isAdmin } = useSession();
     const [configs, setConfigs] = (0, import_react27.useState)({});
     const [loading, setLoading] = (0, import_react27.useState)(true);
     const [error, setError] = (0, import_react27.useState)(null);
@@ -25446,6 +25447,9 @@
     };
     if (loading) {
       return /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("div", { className: "config-editor", children: /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("div", { className: "config-editor__centered", children: "Loading configurations..." }) });
+    }
+    if (!isAdmin) {
+      return /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("div", { className: "config-editor", children: /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("div", { className: "config-editor__centered config-editor__error", children: "You do not have permission to access this page." }) });
     }
     if (error) {
       return /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("div", { className: "config-editor", children: /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("div", { className: "config-editor__centered config-editor__error", children: error }) });
