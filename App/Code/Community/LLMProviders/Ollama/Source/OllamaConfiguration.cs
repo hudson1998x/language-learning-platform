@@ -5,6 +5,7 @@ namespace LLE.LLMProviders.Ollama;
 [Configuration]
 public class OllamaConfiguration
 {
+    [FromEnvironment<string>("OLLAMA_URL", "http://localhost:11434/")]
     public string BaseUrl { get; set; } = "http://localhost:11434/";
     public string ModelName { get; set; } = "llama3";
 }
