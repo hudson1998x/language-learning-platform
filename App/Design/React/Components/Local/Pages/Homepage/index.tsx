@@ -161,7 +161,7 @@ export const Homepage = () => {
     {
         return (
             <div className={'homepage'}>
-                <p className={'warn'}>This page requires an LLM, please head to your <a href={'/settings'}>Settings</a> to connect one.</p>
+                <p className={'warn'}>This page requires an LLM, please head to your <a href={'/settings'}>Settings</a> to connect one, if using Ollama, please ensure the server is running</p>
             </div>
         )
     }

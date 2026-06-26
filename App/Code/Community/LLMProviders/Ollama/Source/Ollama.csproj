@@ -9,6 +9,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\..\..\Core\Kernel\Source\Kernel.csproj" />
+      <ProjectReference Include="..\..\..\..\Core\AppAdmin\Source\AppAdmin.csproj" />
       <ProjectReference Include="..\..\..\LLMFramework\Source\LLMFramework.csproj" />
       <ProjectReference Include="..\..\..\ReactFrontend\Source\ReactFrontend.csproj" />
     </ItemGroup>

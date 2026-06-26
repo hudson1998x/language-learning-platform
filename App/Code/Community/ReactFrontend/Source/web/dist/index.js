@@ -22898,7 +22898,7 @@
       return /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("div", { className: "homepage", children: /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("p", { className: "warn", children: [
         "This page requires an LLM, please head to your ",
         /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("a", { href: "/settings", children: "Settings" }),
-        " to connect one."
+        " to connect one, if using Ollama, please ensure the server is running"
       ] }) });
     }
     return /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("div", { className: "homepage", children: [

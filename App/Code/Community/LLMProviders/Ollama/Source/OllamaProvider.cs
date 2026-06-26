@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using LLE.AppAdmin.Events;
 using LLE.Kernel.Registry;
 using LLE.LLMFramework.Contracts;
 using LLE.LLMFramework.Models;
@@ -8,16 +9,43 @@ namespace LLE.LLMProviders.Ollama;
 
 public class OllamaProvider : ILLMProvider
 {
-    private readonly HttpClient _httpClient;
+    private HttpClient _httpClient;
     private readonly OllamaConfiguration _config;
+    private bool _isAvailable;
 
     public OllamaProvider()
     {
         _config = ConfigurationCatalog.GetConfiguration<OllamaConfiguration>();
         _httpClient = new HttpClient { BaseAddress = new Uri(_config.BaseUrl) };
+
+        _ = CheckAvailabilityAsync();
+
+        Eventing.Eventing.Of<ConfigurationEvents>().Changed.Concurrent(payload =>
+        {
+            if (payload is OllamaConfiguration)
+            {
+                _httpClient.Dispose();
+                _httpClient = new HttpClient { BaseAddress = new Uri(_config.BaseUrl) };
+                _ = CheckAvailabilityAsync();
+            }
+        });
     }
 
-    public bool IsEnabled => _config.Enabled;
+    public bool IsEnabled => _config.Enabled && _isAvailable;
+
+    private async Task CheckAvailabilityAsync()
+    {
+        try
+        {
+            using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(2));
+            var response = await _httpClient.GetAsync("/api/tags", timeout.Token);
+            _isAvailable = response.IsSuccessStatusCode;
+        }
+        catch
+        {
+            _isAvailable = false;
+        }
+    }
 
     public async Task<LLMResponse> GenerateAsync(LLMRequest request)
     {
