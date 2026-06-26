@@ -3602,6 +3602,7 @@ body {
 }
 .music-translation .song-table .song-title {
   font-weight: 500;
+  color: #999;
 }
 .music-translation .song-table .song-artist {
   color: #999;
