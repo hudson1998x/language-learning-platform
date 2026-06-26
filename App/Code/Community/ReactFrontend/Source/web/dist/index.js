@@ -25247,12 +25247,12 @@
   };
   register("@page/music-translation-index", MusicTranslationIndexPage);
 
-  // App/Code/Community/LLMProviders/Ollama/Source/web/configuration/model-selector/index.tsx
+  // App/Code/Community/MistralChat/Source/web/configuration/model-selector/index.tsx
   var import_react25 = __toESM(require_react(), 1);
 
-  // App/Api/ollama.ts
-  var listOllamaModels = () => {
-    return fetch("/api/ollama/models", {
+  // App/Api/mistral.ts
+  var listMistralModels = () => {
+    return fetch("/api/mistral/models", {
       method: "GET"
     }).then((response) => {
       if (!response.ok) {
@@ -25262,13 +25262,13 @@
     });
   };
 
-  // App/Code/Community/LLMProviders/Ollama/Source/web/configuration/model-selector/index.tsx
+  // App/Code/Community/MistralChat/Source/web/configuration/model-selector/index.tsx
   var import_jsx_runtime30 = __toESM(require_jsx_runtime(), 1);
-  var OllamaModelSelector = ({ value, onChange }) => {
+  var MistralModelSelector = ({ value, onChange }) => {
     const [models, setModels] = (0, import_react25.useState)([]);
     const [loading, setLoading] = (0, import_react25.useState)(true);
     (0, import_react25.useEffect)(() => {
-      listOllamaModels().then((res) => {
+      listMistralModels().then((res) => {
         if (res.success && res.data) {
           setModels(res.data);
         }
@@ -25287,15 +25287,57 @@
       }
     );
   };
+  register("@config/mistral/model-selector", MistralModelSelector);
+
+  // App/Code/Community/LLMProviders/Ollama/Source/web/configuration/model-selector/index.tsx
+  var import_react26 = __toESM(require_react(), 1);
+
+  // App/Api/ollama.ts
+  var listOllamaModels = () => {
+    return fetch("/api/ollama/models", {
+      method: "GET"
+    }).then((response) => {
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+      return response.json();
+    });
+  };
+
+  // App/Code/Community/LLMProviders/Ollama/Source/web/configuration/model-selector/index.tsx
+  var import_jsx_runtime31 = __toESM(require_jsx_runtime(), 1);
+  var OllamaModelSelector = ({ value, onChange }) => {
+    const [models, setModels] = (0, import_react26.useState)([]);
+    const [loading, setLoading] = (0, import_react26.useState)(true);
+    (0, import_react26.useEffect)(() => {
+      listOllamaModels().then((res) => {
+        if (res.success && res.data) {
+          setModels(res.data);
+        }
+      }).finally(() => setLoading(false));
+    }, []);
+    return /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)(
+      "select",
+      {
+        value: String(value ?? ""),
+        onChange: (e) => onChange(e.target.value),
+        disabled: loading,
+        children: [
+          loading && /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("option", { children: "Loading models..." }),
+          models.map((model) => /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("option", { value: model, children: model }, model))
+        ]
+      }
+    );
+  };
   register("@config/ollama/model-selector", OllamaModelSelector);
 
   // App/Code/Community/LLMFramework/Source/web/configuration/provider-selector/index.tsx
-  var import_react26 = __toESM(require_react(), 1);
-  var import_jsx_runtime31 = __toESM(require_jsx_runtime(), 1);
+  var import_react27 = __toESM(require_react(), 1);
+  var import_jsx_runtime32 = __toESM(require_jsx_runtime(), 1);
   var ProviderSelector = ({ value, onChange }) => {
-    const [providers, setProviders] = (0, import_react26.useState)({});
-    const [loading, setLoading] = (0, import_react26.useState)(true);
-    (0, import_react26.useEffect)(() => {
+    const [providers, setProviders] = (0, import_react27.useState)({});
+    const [loading, setLoading] = (0, import_react27.useState)(true);
+    (0, import_react27.useEffect)(() => {
       llmStatus().then((res) => {
         if (res.success && res.data?.providers) {
           setProviders(res.data.providers);
@@ -25304,18 +25346,18 @@
     }, []);
     const providerNames = Object.keys(providers);
     const noProviders = providerNames.length === 0 && !loading;
-    return /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)(
+    return /* @__PURE__ */ (0, import_jsx_runtime32.jsxs)(
       "select",
       {
         value: String(value ?? ""),
         onChange: (e) => onChange(e.target.value),
         disabled: loading,
         children: [
-          loading && /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("option", { children: "Loading providers..." }),
-          noProviders && /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("option", { value: "", children: "No providers available" }),
+          loading && /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("option", { children: "Loading providers..." }),
+          noProviders && /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("option", { value: "", children: "No providers available" }),
           providerNames.map((name) => {
             const enabled = providers[name];
-            return /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)(
+            return /* @__PURE__ */ (0, import_jsx_runtime32.jsxs)(
               "option",
               {
                 value: name,
@@ -25337,7 +25379,7 @@
   register("@config/llm/provider-selector", ProviderSelector);
 
   // App/Code/Core/AppAdmin/Source/web/config-editor/index.tsx
-  var import_react27 = __toESM(require_react(), 1);
+  var import_react28 = __toESM(require_react(), 1);
 
   // App/Api/admin.ts
   var listConfigs = () => {
@@ -25366,18 +25408,18 @@
   };
 
   // App/Code/Core/AppAdmin/Source/web/config-editor/index.tsx
-  var import_jsx_runtime32 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime33 = __toESM(require_jsx_runtime(), 1);
   var ConfigEditor = () => {
     const { isAdmin } = useSession();
-    const [configs, setConfigs] = (0, import_react27.useState)({});
-    const [loading, setLoading] = (0, import_react27.useState)(true);
-    const [error, setError] = (0, import_react27.useState)(null);
-    const [selectedConfig, setSelectedConfig] = (0, import_react27.useState)(null);
-    const [formValues, setFormValues] = (0, import_react27.useState)({});
-    const [saving, setSaving] = (0, import_react27.useState)(false);
-    const [saveMessage, setSaveMessage] = (0, import_react27.useState)(null);
-    const [expandedModules, setExpandedModules] = (0, import_react27.useState)(/* @__PURE__ */ new Set());
-    (0, import_react27.useEffect)(() => {
+    const [configs, setConfigs] = (0, import_react28.useState)({});
+    const [loading, setLoading] = (0, import_react28.useState)(true);
+    const [error, setError] = (0, import_react28.useState)(null);
+    const [selectedConfig, setSelectedConfig] = (0, import_react28.useState)(null);
+    const [formValues, setFormValues] = (0, import_react28.useState)({});
+    const [saving, setSaving] = (0, import_react28.useState)(false);
+    const [saveMessage, setSaveMessage] = (0, import_react28.useState)(null);
+    const [expandedModules, setExpandedModules] = (0, import_react28.useState)(/* @__PURE__ */ new Set());
+    (0, import_react28.useEffect)(() => {
       listConfigs().then((res) => {
         if (res.success && res.data) {
           setConfigs(res.data);
@@ -25446,20 +25488,20 @@
       return groups2;
     };
     if (loading) {
-      return /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("div", { className: "config-editor", children: /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("div", { className: "config-editor__centered", children: "Loading configurations..." }) });
+      return /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("div", { className: "config-editor", children: /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("div", { className: "config-editor__centered", children: "Loading configurations..." }) });
     }
     if (!isAdmin) {
-      return /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("div", { className: "config-editor", children: /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("div", { className: "config-editor__centered config-editor__error", children: "You do not have permission to access this page." }) });
+      return /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("div", { className: "config-editor", children: /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("div", { className: "config-editor__centered config-editor__error", children: "You do not have permission to access this page." }) });
     }
     if (error) {
-      return /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("div", { className: "config-editor", children: /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("div", { className: "config-editor__centered config-editor__error", children: error }) });
+      return /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("div", { className: "config-editor", children: /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("div", { className: "config-editor__centered config-editor__error", children: error }) });
     }
     const groups = groupedConfigs();
-    return /* @__PURE__ */ (0, import_jsx_runtime32.jsxs)("div", { className: "config-editor", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime32.jsxs)("aside", { className: "config-editor__sidebar", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("h2", { className: "config-editor__sidebar-title", children: "Modules" }),
-        Object.entries(groups).map(([module, configNames]) => /* @__PURE__ */ (0, import_jsx_runtime32.jsxs)("div", { className: "config-editor__group", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime32.jsxs)(
+    return /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)("div", { className: "config-editor", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)("aside", { className: "config-editor__sidebar", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("h2", { className: "config-editor__sidebar-title", children: "Modules" }),
+        Object.entries(groups).map(([module, configNames]) => /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)("div", { className: "config-editor__group", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)(
             "button",
             {
               className: "config-editor__group-toggle",
@@ -25472,14 +25514,14 @@
                 });
               },
               children: [
-                /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("span", { className: "config-editor__group-arrow", children: expandedModules.has(module) ? "\u25BC" : "\u25B6" }),
+                /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("span", { className: "config-editor__group-arrow", children: expandedModules.has(module) ? "\u25BC" : "\u25B6" }),
                 module
               ]
             }
           ),
-          expandedModules.has(module) && /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("div", { className: "config-editor__group-items", children: configNames.map((originalName) => {
+          expandedModules.has(module) && /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("div", { className: "config-editor__group-items", children: configNames.map((originalName) => {
             const displayName = originalName === module + "Configuration" ? "Main settings" : originalName.replaceAll("Configuration", "");
-            return /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(
+            return /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
               "button",
               {
                 className: `config-editor__config-btn ${selectedConfig === originalName ? "config-editor__config-btn--active" : ""}`,
@@ -25491,16 +25533,16 @@
           }) })
         ] }, module))
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("main", { className: "config-editor__content", children: selectedConfig ? /* @__PURE__ */ (0, import_jsx_runtime32.jsxs)(import_jsx_runtime32.Fragment, { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("h2", { className: "config-editor__config-title", children: selectedConfig }),
-        /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("div", { className: "config-editor__fields", children: Object.entries(formValues).map(([key, value]) => {
+      /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("main", { className: "config-editor__content", children: selectedConfig ? /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)(import_jsx_runtime33.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("h2", { className: "config-editor__config-title", children: selectedConfig }),
+        /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("div", { className: "config-editor__fields", children: Object.entries(formValues).map(([key, value]) => {
           const fieldInfo = configs[selectedConfig]?.[key];
           const componentName = fieldInfo?.component;
           if (componentName) {
             const FieldComponent = mod(componentName);
-            return /* @__PURE__ */ (0, import_jsx_runtime32.jsxs)("div", { className: "config-editor__field", children: [
-              /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("label", { className: "config-editor__field-label", children: key }),
-              /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("div", { className: "config-editor__field-component", children: /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(
+            return /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)("div", { className: "config-editor__field", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("label", { className: "config-editor__field-label", children: key }),
+              /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("div", { className: "config-editor__field-component", children: /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
                 FieldComponent,
                 {
                   value,
@@ -25509,9 +25551,9 @@
               ) })
             ] }, key);
           }
-          return /* @__PURE__ */ (0, import_jsx_runtime32.jsxs)("div", { className: "config-editor__field", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("label", { className: "config-editor__field-label", children: key }),
-            fieldInfo?.type === "boolean" || typeof value === "boolean" ? /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(
+          return /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)("div", { className: "config-editor__field", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("label", { className: "config-editor__field-label", children: key }),
+            fieldInfo?.type === "boolean" || typeof value === "boolean" ? /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
               "input",
               {
                 type: "checkbox",
@@ -25519,7 +25561,7 @@
                 checked: !!value,
                 onChange: (e) => handleFieldChange(key, e.target.checked)
               }
-            ) : fieldInfo?.type === "number" || typeof value === "number" ? /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(
+            ) : fieldInfo?.type === "number" || typeof value === "number" ? /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
               "input",
               {
                 type: "number",
@@ -25527,7 +25569,7 @@
                 value: Number(value ?? 0),
                 onChange: (e) => handleFieldChange(key, Number(e.target.value))
               }
-            ) : /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(
+            ) : /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
               "input",
               {
                 type: "text",
@@ -25538,8 +25580,8 @@
             )
           ] }, key);
         }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime32.jsxs)("div", { className: "config-editor__actions", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)("div", { className: "config-editor__actions", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
             "button",
             {
               className: "config-editor__save-btn",
@@ -25548,7 +25590,7 @@
               children: saving ? "Saving..." : "Save"
             }
           ),
-          saveMessage && /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(
+          saveMessage && /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
             "span",
             {
               className: `config-editor__message config-editor__message--${saveMessage.type}`,
@@ -25556,7 +25598,7 @@
             }
           )
         ] })
-      ] }) : /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("div", { className: "config-editor__centered", children: "Select a configuration to edit" }) })
+      ] }) : /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("div", { className: "config-editor__centered", children: "Select a configuration to edit" }) })
     ] });
   };
   register("@admin/configuration", ConfigEditor);
@@ -25570,10 +25612,10 @@
   register("@component/Spinner", Spinner);
 
   // App/Code/Community/ReactFrontend/Source/web/index.tsx
-  var import_jsx_runtime33 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime34 = __toESM(require_jsx_runtime(), 1);
   var root = (0, import_client.createRoot)(document.getElementById("app"));
   root.render(
-    /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(Default_default, { children: /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(Canvas, { children: window.canvasState }) })
+    /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(Default_default, { children: /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(Canvas, { children: window.canvasState }) })
   );
 })();
 /*! Bundled license information:

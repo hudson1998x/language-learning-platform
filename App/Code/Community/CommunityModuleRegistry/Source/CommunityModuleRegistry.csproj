@@ -12,6 +12,7 @@
       <ProjectReference Include="..\..\HomeChat\Source\HomeChat.csproj" />
       <ProjectReference Include="..\..\Languages\Source\Languages.csproj" />
       <ProjectReference Include="..\..\LeMessage\Source\LeMessage.csproj" />
+      <ProjectReference Include="..\..\MistralChat\Source\MistralChat.csproj" />
       <ProjectReference Include="..\..\LLMProviders\Ollama\Source\Ollama.csproj" />
       <ProjectReference Include="..\..\MusicTranslation\Source\MusicTranslation.csproj" />
       <ProjectReference Include="..\..\Pages\Source\Pages.csproj" />

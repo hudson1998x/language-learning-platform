@@ -368,7 +368,7 @@ public class MusicTranslationService(
     {
         try
         {
-            var response = await llmService.SendMessageAsync("Ollama", userPrompt, req =>
+            var response = await llmService.SendMessageAsync(userPrompt, req =>
             {
                 req.MaxTokens = maxTokens;
                 req.Instructions.Add(new Instruction { Content = systemPrompt });
