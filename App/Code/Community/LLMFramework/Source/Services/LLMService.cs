@@ -20,12 +20,25 @@ public class LLMService
     {
         var config = ConfigurationCatalog.GetConfiguration<LLMConfiguration>();
 
-        return _providers[config.PreferredProvider];
+        if (!_providers.TryGetValue(config.PreferredProvider, out var provider))
+            return null;
+
+        return provider.IsEnabled ? provider : null;
     }
 
     public IReadOnlyDictionary<string, ILLMProvider> GetRegisteredProviders()
     {
         return _providers;
+    }
+
+    public bool IsLlmAvailable()
+    {
+        return _providers.Values.Any(p => p.IsEnabled);
+    }
+
+    public Dictionary<string, bool> GetProviderStatus()
+    {
+        return _providers.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.IsEnabled);
     }
 
     public async Task<LLMResponse> SendMessageAsync(

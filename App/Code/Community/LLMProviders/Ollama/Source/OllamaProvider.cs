@@ -17,6 +17,8 @@ public class OllamaProvider : ILLMProvider
         _httpClient = new HttpClient { BaseAddress = new Uri(_config.BaseUrl) };
     }
 
+    public bool IsEnabled => _config.Enabled;
+
     public async Task<LLMResponse> GenerateAsync(LLMRequest request)
     {
         var model = request.Model ?? _config.ModelName;

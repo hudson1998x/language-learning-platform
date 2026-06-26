@@ -1,6 +1,7 @@
 using LLE.Kernel.Contracts;
 using LLE.Kernel.Registry;
 using LLE.LLMFramework.Services;
+using LLE.ReactFrontend.Events;
 
 namespace LLE.LLMProviders.Ollama;
 
@@ -8,8 +9,16 @@ public class OllamaModule : IModuleLoader
 {
     public Task AppStart()
     {
+        Features.LoadFeatures();
+
         var llmService = ServiceCatalog.GetService<LLMService>();
         llmService.Register<OllamaProvider>("Ollama");
+
+        Eventing.Eventing.Of<ComponentRegistryGeneratorEvents>().BeforeWrite.Concurrent(registry =>
+        {
+            registry.AddAutoImport("./App/Code/Community/LLMProviders/Ollama/Source/web/configuration/model-selector/index.tsx");
+        });
+        
         return Task.CompletedTask;
     }
 

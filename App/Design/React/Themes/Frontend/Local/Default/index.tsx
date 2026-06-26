@@ -7,13 +7,16 @@ import './style.scss'
 import { Topbar } from './Blocks/Topbar'
 import { LanguageSelector } from '@component/LanguageSelector'
 import { LanguageWelcome } from './DefaultPages/LanguageSelectionInterstitial'
+import { LlmCapabilityProvider } from '@hook/llm-capability-provider'
 
 const LLEThemeWrapper: FC<PropsWithChildren> = (props) => {
 
     return (
         <SessionProvider>
             <LanguageProvider>
-                <LLETheme {...props}/>
+                <LlmCapabilityProvider>
+                    <LLETheme {...props}/>
+                </LlmCapabilityProvider>
             </LanguageProvider>
         </SessionProvider>
     )

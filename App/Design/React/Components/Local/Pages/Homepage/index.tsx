@@ -4,6 +4,7 @@ import { Spinner } from '@component/Spinner';
 import { CreateFlashCardModal } from '@component/Pages/FlashCards/CreateFlashCardModal';
 import { useSession } from '@hook/session-provider';
 import { useLanguage } from '@hook/language-provider';
+import {useLlmCapability} from '@hook/llm-capability-provider'
 import './style.scss';
 
 interface ChatMessage {
@@ -85,6 +86,7 @@ const TileIcon = ({ icon }: { icon: string }) => {
 export const Homepage = () => {
     const { session } = useSession();
     const { language } = useLanguage();
+    const { available: llmIsAvailable } = useLlmCapability();
 
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [userInput, setUserInput] = useState('');
@@ -154,6 +156,15 @@ export const Homepage = () => {
     };
 
     const hasMessages = messages.length > 0;
+    
+    if (!llmIsAvailable)
+    {
+        return (
+            <div className={'homepage'}>
+                <p className={'warn'}>This page requires an LLM, please head to your <a href={'/settings'}>Settings</a> to connect one.</p>
+            </div>
+        )
+    }
 
     return (
         <div className={'homepage'}>

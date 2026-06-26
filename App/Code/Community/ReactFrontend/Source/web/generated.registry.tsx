@@ -25,4 +25,6 @@ import '../../../../../.././App/Code/Local/Scenarios/Source/web/Pages/Scenarios/
 import '../../../../../.././App/Code/Local/Scenarios/Source/web/Pages/ScenarioSession/index.tsx';
 import '../../../../../.././App/Code/Community/LeMessage/Source/web/ChatPage/index.tsx';
 import '../../../../../.././App/Code/Community/MusicTranslation/Source/web/TranslationPage/index.tsx';
+import '../../../../../.././App/Code/Community/LLMProviders/Ollama/Source/web/configuration/model-selector/index.tsx';
+import '../../../../../.././App/Code/Community/LLMFramework/Source/web/configuration/provider-selector/index.tsx';
 import '../../../../../.././App/Code/Core/AppAdmin/Source/web/config-editor/index.tsx';

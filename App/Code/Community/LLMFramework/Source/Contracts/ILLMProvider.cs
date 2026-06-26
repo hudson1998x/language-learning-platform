@@ -4,5 +4,6 @@ namespace LLE.LLMFramework.Contracts;
 
 public interface ILLMProvider
 {
+    bool IsEnabled { get; }
     Task<LLMResponse> GenerateAsync(LLMRequest request);
 }

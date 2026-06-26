@@ -15,11 +15,11 @@
     "IsEnabled": true,
     "IsInstalled": true
   },
-  "LLE.AppAdmin.AppAdminModule": {
+  "LLE.Pages.PagesModule": {
     "IsEnabled": true,
     "IsInstalled": true
   },
-  "LLE.Pages.PagesModule": {
+  "LLE.AppAdmin.AppAdminModule": {
     "IsEnabled": true,
     "IsInstalled": true
   },
@@ -52,6 +52,10 @@
     "IsInstalled": true
   },
   "LLE.FlashCards.FlashCardsModule": {
+    "IsEnabled": true,
+    "IsInstalled": true
+  },
+  "LLE.LLMFramework.LLMModule": {
     "IsEnabled": true,
     "IsInstalled": true
   }

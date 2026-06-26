@@ -24,6 +24,19 @@ $accent-soft: rgba(91, 141, 239, 0.12);
   width: 100%;
   height: calc(100vh - 120px);
   min-height: 0;
+  
+  .warn {
+    background: #0a84ff;
+    color:#fff;
+    padding: 10px 15px;
+    border-radius:4px;
+    font-size:13px;
+    
+    a {
+      color:#fff;
+      font-weight: bold;
+    }
+  }
 }
 
 .homepage__empty {

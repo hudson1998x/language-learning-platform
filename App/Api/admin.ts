@@ -1,10 +1,16 @@
+export interface ConfigFieldInfo {
+    type: string;
+    value?: unknown | null;
+    component?: string | null;
+}
+
 export interface ApiResponse<T> {
     success: boolean;
     message?: string | null;
     data?: T | null;
 }
 
-export const listConfigs = (): Promise<ApiResponse<Record<string, unknown>>> => {
+export const listConfigs = (): Promise<ApiResponse<Record<string, Record<string, ConfigFieldInfo>>>> => {
     return fetch('/api/configuration/list', {
         method: "GET",
     })
