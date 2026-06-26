@@ -15,7 +15,7 @@ const MistralModelSelector = ({ value, onChange }: ModelSelectorProps) => {
         listMistralModels()
             .then((res) => {
                 if (res.success && res.data) {
-                    setModels(res.data);
+                    setModels([...new Set(res.data)]);
                 }
             })
             .finally(() => setLoading(false));

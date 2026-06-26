@@ -52,7 +52,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeChat", "App\Code\Commun
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppAdmin", "App\Code\Core\AppAdmin\Source\AppAdmin.csproj", "{76122138-1439-448A-AFB8-95AE00D42221}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MistralChat", "App\Code\Community\MistralChat\Source\MistralChat.csproj", "{69AC8398-D5D2-4EC4-8B04-64D1FB67AFA5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MistralChat", "App\Code\Community\LLMProviders\MistralChat\Source\MistralChat.csproj", "{69AC8398-D5D2-4EC4-8B04-64D1FB67AFA5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

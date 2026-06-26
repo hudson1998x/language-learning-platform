@@ -25247,7 +25247,7 @@
   };
   register("@page/music-translation-index", MusicTranslationIndexPage);
 
-  // App/Code/Community/MistralChat/Source/web/configuration/model-selector/index.tsx
+  // App/Code/Community/LLMProviders/MistralChat/Source/web/configuration/model-selector/index.tsx
   var import_react25 = __toESM(require_react(), 1);
 
   // App/Api/mistral.ts
@@ -25262,7 +25262,7 @@
     });
   };
 
-  // App/Code/Community/MistralChat/Source/web/configuration/model-selector/index.tsx
+  // App/Code/Community/LLMProviders/MistralChat/Source/web/configuration/model-selector/index.tsx
   var import_jsx_runtime30 = __toESM(require_jsx_runtime(), 1);
   var MistralModelSelector = ({ value, onChange }) => {
     const [models, setModels] = (0, import_react25.useState)([]);
@@ -25270,7 +25270,7 @@
     (0, import_react25.useEffect)(() => {
       listMistralModels().then((res) => {
         if (res.success && res.data) {
-          setModels(res.data);
+          setModels([...new Set(res.data)]);
         }
       }).finally(() => setLoading(false));
     }, []);
@@ -25289,8 +25289,107 @@
   };
   register("@config/mistral/model-selector", MistralModelSelector);
 
-  // App/Code/Community/LLMProviders/Ollama/Source/web/configuration/model-selector/index.tsx
+  // App/Code/Community/LLMProviders/MistralChat/Source/web/help/connecting-mistral/index.tsx
   var import_react26 = __toESM(require_react(), 1);
+  var import_jsx_runtime31 = __toESM(require_jsx_runtime(), 1);
+  var steps = [
+    {
+      number: "01",
+      heading: "Create or sign in to your Mistral account",
+      body: "Head over to the Mistral console. You'll need an account \u2014 if you don't have one yet, registration is quick and free.",
+      link: { href: "https://console.mistral.ai/home", label: "console.mistral.ai/home" },
+      image: "/media/mistral/help/console.png",
+      imageAlt: "Mistral AI console home screen"
+    },
+    {
+      number: "02",
+      heading: "Open the API Keys section",
+      body: `Once logged in, click "Create an API key" near the centre of the page. A dialog will appear \u2014 this is where you'll configure your new key.`,
+      image: "/media/mistral/help/my-api-keys.png",
+      imageAlt: "Mistral API keys management page"
+    },
+    {
+      number: "03",
+      heading: "Name and configure your key",
+      body: "Enter a memorable name for your key. Under connector access approval, select both Private and Shared Connectors to ensure the key has the right permissions.",
+      image: "/media/mistral/help/creating_api_key.png",
+      imageAlt: "Creating a new Mistral API key dialog"
+    },
+    {
+      number: "04",
+      heading: "Copy your key \u2014 you'll only see it once",
+      body: `After clicking "Create new", Mistral will display your key. Copy it immediately and store it somewhere safe \u2014 it won't be shown again.`,
+      image: "/media/mistral/help/copy_key.png",
+      imageAlt: "Generated Mistral API key displayed on screen"
+    },
+    {
+      number: "05",
+      heading: "Paste the key into your settings",
+      body: `Back in the connector settings, find the "ApiKey" field and paste in the key you just copied. Save, and you're connected.`,
+      image: "/media/mistral/help/input-in-apikey.png",
+      imageAlt: "Pasting the API key into the connector settings"
+    }
+  ];
+  var StepImage = ({ src, alt, onOpen }) => /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)("div", { className: "step-image-wrap", onClick: () => onOpen({ src, alt }), title: "Click to enlarge", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("img", { src, alt, className: "step-image" }),
+    /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)("span", { className: "zoom-hint", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)("svg", { width: "16", height: "16", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("circle", { cx: "11", cy: "11", r: "8" }),
+        /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("line", { x1: "21", y1: "21", x2: "16.65", y2: "16.65" }),
+        /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("line", { x1: "11", y1: "8", x2: "11", y2: "14" }),
+        /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("line", { x1: "8", y1: "11", x2: "14", y2: "11" })
+      ] }),
+      "Enlarge"
+    ] })
+  ] });
+  var ZoomOverlay = ({ image, onClose }) => {
+    if (!image) return null;
+    return /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("div", { className: "zoom-overlay", onClick: onClose, children: /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)("div", { className: "zoom-overlay__inner", onClick: (e) => e.stopPropagation(), children: [
+      /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("button", { className: "zoom-close", onClick: onClose, "aria-label": "Close", children: /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)("svg", { width: "20", height: "20", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2.5", strokeLinecap: "round", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("line", { x1: "18", y1: "6", x2: "6", y2: "18" }),
+        /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("line", { x1: "6", y1: "6", x2: "18", y2: "18" })
+      ] }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("img", { src: image.src, alt: image.alt, className: "zoom-image" })
+    ] }) });
+  };
+  var ConnectingMistralHelp = () => {
+    const [zoomedImage, setZoomedImage] = (0, import_react26.useState)(null);
+    return /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)("div", { className: "mistral-help-connection-guide", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)("div", { className: "guide-header", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("span", { className: "guide-eyebrow", children: "Integration Guide" }),
+        /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("h2", { className: "guide-title", children: "Connecting to Mistral AI" }),
+        /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("p", { className: "guide-subtitle", children: "Follow these five steps to generate an API key and link your Mistral account. The whole process takes under two minutes." })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("ol", { className: "steps-list", children: steps.map((step) => /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)("li", { className: "step-card", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("span", { className: "step-number", "aria-hidden": "true", children: step.number }),
+        /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)("div", { className: "step-content", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("h3", { className: "step-heading", children: step.heading }),
+          /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)("p", { className: "step-body", children: [
+            step.body,
+            step.link && /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)(import_jsx_runtime31.Fragment, { children: [
+              " Visit ",
+              /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("a", { href: step.link.href, target: "_blank", rel: "noopener noreferrer", children: step.link.label }),
+              "."
+            ] })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(StepImage, { src: step.image, alt: step.imageAlt, onOpen: setZoomedImage })
+        ] })
+      ] }, step.number)) }),
+      /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)("div", { className: "guide-footer", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)("svg", { width: "16", height: "16", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("circle", { cx: "12", cy: "12", r: "10" }),
+          /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("line", { x1: "12", y1: "8", x2: "12", y2: "12" }),
+          /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("line", { x1: "12", y1: "16", x2: "12.01", y2: "16" })
+        ] }),
+        "Keep your API key private \u2014 never commit it to source control or share it publicly."
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(ZoomOverlay, { image: zoomedImage, onClose: () => setZoomedImage(null) })
+    ] });
+  };
+  register("@help/mistral/connection-guide", ConnectingMistralHelp);
+
+  // App/Code/Community/LLMProviders/Ollama/Source/web/configuration/model-selector/index.tsx
+  var import_react27 = __toESM(require_react(), 1);
 
   // App/Api/ollama.ts
   var listOllamaModels = () => {
@@ -25305,26 +25404,26 @@
   };
 
   // App/Code/Community/LLMProviders/Ollama/Source/web/configuration/model-selector/index.tsx
-  var import_jsx_runtime31 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime32 = __toESM(require_jsx_runtime(), 1);
   var OllamaModelSelector = ({ value, onChange }) => {
-    const [models, setModels] = (0, import_react26.useState)([]);
-    const [loading, setLoading] = (0, import_react26.useState)(true);
-    (0, import_react26.useEffect)(() => {
+    const [models, setModels] = (0, import_react27.useState)([]);
+    const [loading, setLoading] = (0, import_react27.useState)(true);
+    (0, import_react27.useEffect)(() => {
       listOllamaModels().then((res) => {
         if (res.success && res.data) {
           setModels(res.data);
         }
       }).finally(() => setLoading(false));
     }, []);
-    return /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)(
+    return /* @__PURE__ */ (0, import_jsx_runtime32.jsxs)(
       "select",
       {
         value: String(value ?? ""),
         onChange: (e) => onChange(e.target.value),
         disabled: loading,
         children: [
-          loading && /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("option", { children: "Loading models..." }),
-          models.map((model) => /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("option", { value: model, children: model }, model))
+          loading && /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("option", { children: "Loading models..." }),
+          models.map((model) => /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("option", { value: model, children: model }, model))
         ]
       }
     );
@@ -25332,12 +25431,12 @@
   register("@config/ollama/model-selector", OllamaModelSelector);
 
   // App/Code/Community/LLMFramework/Source/web/configuration/provider-selector/index.tsx
-  var import_react27 = __toESM(require_react(), 1);
-  var import_jsx_runtime32 = __toESM(require_jsx_runtime(), 1);
+  var import_react28 = __toESM(require_react(), 1);
+  var import_jsx_runtime33 = __toESM(require_jsx_runtime(), 1);
   var ProviderSelector = ({ value, onChange }) => {
-    const [providers, setProviders] = (0, import_react27.useState)({});
-    const [loading, setLoading] = (0, import_react27.useState)(true);
-    (0, import_react27.useEffect)(() => {
+    const [providers, setProviders] = (0, import_react28.useState)({});
+    const [loading, setLoading] = (0, import_react28.useState)(true);
+    (0, import_react28.useEffect)(() => {
       llmStatus().then((res) => {
         if (res.success && res.data?.providers) {
           setProviders(res.data.providers);
@@ -25346,18 +25445,18 @@
     }, []);
     const providerNames = Object.keys(providers);
     const noProviders = providerNames.length === 0 && !loading;
-    return /* @__PURE__ */ (0, import_jsx_runtime32.jsxs)(
+    return /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)(
       "select",
       {
         value: String(value ?? ""),
         onChange: (e) => onChange(e.target.value),
         disabled: loading,
         children: [
-          loading && /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("option", { children: "Loading providers..." }),
-          noProviders && /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("option", { value: "", children: "No providers available" }),
+          loading && /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("option", { children: "Loading providers..." }),
+          noProviders && /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("option", { value: "", children: "No providers available" }),
           providerNames.map((name) => {
             const enabled = providers[name];
-            return /* @__PURE__ */ (0, import_jsx_runtime32.jsxs)(
+            return /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)(
               "option",
               {
                 value: name,
@@ -25379,7 +25478,7 @@
   register("@config/llm/provider-selector", ProviderSelector);
 
   // App/Code/Core/AppAdmin/Source/web/config-editor/index.tsx
-  var import_react28 = __toESM(require_react(), 1);
+  var import_react29 = __toESM(require_react(), 1);
 
   // App/Api/admin.ts
   var listConfigs = () => {
@@ -25408,19 +25507,19 @@
   };
 
   // App/Code/Core/AppAdmin/Source/web/config-editor/index.tsx
-  var import_jsx_runtime33 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime34 = __toESM(require_jsx_runtime(), 1);
   var ConfigEditor = () => {
     const { isAdmin } = useSession();
-    const [configs, setConfigs] = (0, import_react28.useState)({});
-    const [loading, setLoading] = (0, import_react28.useState)(true);
-    const [error, setError] = (0, import_react28.useState)(null);
-    const [selectedConfig, setSelectedConfig] = (0, import_react28.useState)(null);
-    const [formValues, setFormValues] = (0, import_react28.useState)({});
-    const [saving, setSaving] = (0, import_react28.useState)(false);
-    const [saveMessage, setSaveMessage] = (0, import_react28.useState)(null);
-    const [expandedModules, setExpandedModules] = (0, import_react28.useState)(/* @__PURE__ */ new Set());
-    const [activeTab, setActiveTab] = (0, import_react28.useState)("fields");
-    (0, import_react28.useEffect)(() => {
+    const [configs, setConfigs] = (0, import_react29.useState)({});
+    const [loading, setLoading] = (0, import_react29.useState)(true);
+    const [error, setError] = (0, import_react29.useState)(null);
+    const [selectedConfig, setSelectedConfig] = (0, import_react29.useState)(null);
+    const [formValues, setFormValues] = (0, import_react29.useState)({});
+    const [saving, setSaving] = (0, import_react29.useState)(false);
+    const [saveMessage, setSaveMessage] = (0, import_react29.useState)(null);
+    const [expandedModules, setExpandedModules] = (0, import_react29.useState)(/* @__PURE__ */ new Set());
+    const [activeTab, setActiveTab] = (0, import_react29.useState)("fields");
+    (0, import_react29.useEffect)(() => {
       listConfigs().then((res) => {
         if (res.success && res.data) {
           setConfigs(res.data);
@@ -25493,20 +25592,20 @@
       return groups2;
     };
     if (loading) {
-      return /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("div", { className: "config-editor", children: /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("div", { className: "config-editor__centered", children: "Loading configurations..." }) });
+      return /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("div", { className: "config-editor", children: /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("div", { className: "config-editor__centered", children: "Loading configurations..." }) });
     }
     if (!isAdmin) {
-      return /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("div", { className: "config-editor", children: /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("div", { className: "config-editor__centered config-editor__error", children: "You do not have permission to access this page." }) });
+      return /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("div", { className: "config-editor", children: /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("div", { className: "config-editor__centered config-editor__error", children: "You do not have permission to access this page." }) });
     }
     if (error) {
-      return /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("div", { className: "config-editor", children: /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("div", { className: "config-editor__centered config-editor__error", children: error }) });
+      return /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("div", { className: "config-editor", children: /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("div", { className: "config-editor__centered config-editor__error", children: error }) });
     }
     const groups = groupedConfigs();
-    return /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)("div", { className: "config-editor", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)("aside", { className: "config-editor__sidebar", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("h2", { className: "config-editor__sidebar-title", children: "Modules" }),
-        Object.entries(groups).map(([module, configNames]) => /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)("div", { className: "config-editor__group", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)(
+    return /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)("div", { className: "config-editor", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)("aside", { className: "config-editor__sidebar", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("h2", { className: "config-editor__sidebar-title", children: "Modules" }),
+        Object.entries(groups).map(([module, configNames]) => /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)("div", { className: "config-editor__group", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)(
             "button",
             {
               className: "config-editor__group-toggle",
@@ -25519,14 +25618,14 @@
                 });
               },
               children: [
-                /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("span", { className: "config-editor__group-arrow", children: expandedModules.has(module) ? "\u25BC" : "\u25B6" }),
+                /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("span", { className: "config-editor__group-arrow", children: expandedModules.has(module) ? "\u25BC" : "\u25B6" }),
                 module
               ]
             }
           ),
-          expandedModules.has(module) && /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("div", { className: "config-editor__group-items", children: configNames.map((originalName) => {
+          expandedModules.has(module) && /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("div", { className: "config-editor__group-items", children: configNames.map((originalName) => {
             const displayName = originalName === module + "Configuration" ? "Main settings" : originalName.replaceAll("Configuration", "");
-            return /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
+            return /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(
               "button",
               {
                 className: `config-editor__config-btn ${selectedConfig === originalName ? "config-editor__config-btn--active" : ""}`,
@@ -25538,8 +25637,8 @@
           }) })
         ] }, module))
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("main", { className: "config-editor__content", children: selectedConfig ? /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)(import_jsx_runtime33.Fragment, { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("h2", { className: "config-editor__config-title", children: selectedConfig }),
+      /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("main", { className: "config-editor__content", children: selectedConfig ? /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)(import_jsx_runtime34.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("h2", { className: "config-editor__config-title", children: selectedConfig }),
         (() => {
           const configType = configs[selectedConfig];
           const classHelp = configType?.help ?? [];
@@ -25550,29 +25649,29 @@
             tabMap.get(key).push(h);
           }
           const tabs = ["fields", ...tabMap.keys()];
-          return /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)(import_jsx_runtime33.Fragment, { children: [
-            tabs.length > 1 && /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("div", { className: "config-editor__tabs", children: tabs.map((tab) => /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
+          return /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)(import_jsx_runtime34.Fragment, { children: [
+            tabs.length > 1 && /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("div", { className: "config-editor__tabs", children: tabs.map((tab) => /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(
               "button",
               {
                 className: `config-editor__tab ${activeTab === tab ? "config-editor__tab--active" : ""}`,
                 onClick: () => setActiveTab(tab),
-                children: tab === "fields" ? "Fields" : tab
+                children: tab === "fields" ? "Settings" : tab
               },
               tab
             )) }),
-            activeTab === "fields" ? /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("div", { className: "config-editor__fields", children: Object.entries(formValues).map(([key, value]) => {
+            activeTab === "fields" ? /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("div", { className: "config-editor__fields", children: Object.entries(formValues).map(([key, value]) => {
               const fieldInfo = configType?.fields[key];
               const componentName = fieldInfo?.component;
               const fieldInput = componentName ? (() => {
                 const FieldComponent = mod(componentName);
-                return /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("div", { className: "config-editor__field-component", children: /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
+                return /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("div", { className: "config-editor__field-component", children: /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(
                   FieldComponent,
                   {
                     value,
                     onChange: (newVal) => handleFieldChange(key, newVal)
                   }
                 ) });
-              })() : fieldInfo?.type === "boolean" || typeof value === "boolean" ? /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
+              })() : fieldInfo?.type === "boolean" || typeof value === "boolean" ? /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(
                 "input",
                 {
                   type: "checkbox",
@@ -25580,7 +25679,7 @@
                   checked: !!value,
                   onChange: (e) => handleFieldChange(key, e.target.checked)
                 }
-              ) : fieldInfo?.type === "number" || typeof value === "number" ? /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
+              ) : fieldInfo?.type === "number" || typeof value === "number" ? /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(
                 "input",
                 {
                   type: "number",
@@ -25588,7 +25687,7 @@
                   value: Number(value ?? 0),
                   onChange: (e) => handleFieldChange(key, Number(e.target.value))
                 }
-              ) : /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
+              ) : /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(
                 "input",
                 {
                   type: "text",
@@ -25598,22 +25697,22 @@
                 }
               );
               const fieldHelp = fieldInfo?.help;
-              return /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)("div", { className: "config-editor__field", children: [
-                /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("label", { className: "config-editor__field-label", children: key }),
-                /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)("div", { className: "config-editor__field-control", children: [
+              return /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)("div", { className: "config-editor__field", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("label", { className: "config-editor__field-label", children: key }),
+                /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)("div", { className: "config-editor__field-control", children: [
                   fieldInput,
-                  fieldHelp && fieldHelp.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("div", { className: "config-editor__field-help", children: fieldHelp.map((helpItem, i) => {
+                  fieldHelp && fieldHelp.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("div", { className: "config-editor__field-help", children: fieldHelp.map((helpItem, i) => {
                     const HelpComponent = mod(helpItem.component);
-                    return /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(HelpComponent, {}, i);
+                    return /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(HelpComponent, {}, i);
                   }) })
                 ] })
               ] }, key);
-            }) }) : /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("div", { className: "config-editor__tab-panel", children: (tabMap.get(activeTab) ?? []).map((helpItem, i) => {
+            }) }) : /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("div", { className: "config-editor__tab-panel", children: (tabMap.get(activeTab) ?? []).map((helpItem, i) => {
               const HelpComponent = mod(helpItem.component);
-              return /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(HelpComponent, {}, i);
+              return /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(HelpComponent, {}, i);
             }) }),
-            activeTab === "fields" && /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)("div", { className: "config-editor__actions", children: [
-              /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
+            activeTab === "fields" && /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)("div", { className: "config-editor__actions", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(
                 "button",
                 {
                   className: "config-editor__save-btn",
@@ -25622,7 +25721,7 @@
                   children: saving ? "Saving..." : "Save"
                 }
               ),
-              saveMessage && /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
+              saveMessage && /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(
                 "span",
                 {
                   className: `config-editor__message config-editor__message--${saveMessage.type}`,
@@ -25632,7 +25731,7 @@
             ] })
           ] });
         })()
-      ] }) : /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("div", { className: "config-editor__centered", children: "Select a configuration to edit" }) })
+      ] }) : /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("div", { className: "config-editor__centered", children: "Select a configuration to edit" }) })
     ] });
   };
   register("@admin/configuration", ConfigEditor);
@@ -25646,10 +25745,10 @@
   register("@component/Spinner", Spinner);
 
   // App/Code/Community/ReactFrontend/Source/web/index.tsx
-  var import_jsx_runtime34 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime35 = __toESM(require_jsx_runtime(), 1);
   var root = (0, import_client.createRoot)(document.getElementById("app"));
   root.render(
-    /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(Default_default, { children: /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(Canvas, { children: window.canvasState }) })
+    /* @__PURE__ */ (0, import_jsx_runtime35.jsx)(Default_default, { children: /* @__PURE__ */ (0, import_jsx_runtime35.jsx)(Canvas, { children: window.canvasState }) })
   );
 })();
 /*! Bundled license information:

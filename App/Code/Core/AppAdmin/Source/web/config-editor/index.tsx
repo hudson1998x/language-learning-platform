@@ -222,7 +222,7 @@ const ConfigEditor = () => {
                                                     }`}
                                                     onClick={() => setActiveTab(tab)}
                                                 >
-                                                    {tab === 'fields' ? 'Fields' : tab}
+                                                    {tab === 'fields' ? 'Settings' : tab}
                                                 </button>
                                             ))}
                                         </div>

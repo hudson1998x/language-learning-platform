@@ -3,6 +3,7 @@ using LLE.Kernel.Attributes;
 namespace LLE.LLMProviders.MistralChat;
 
 [Configuration]
+[ConfigHelp("@help/mistral/connection-guide", "Connection Guide")]
 public class MistralConfiguration
 {
     public bool Enabled { get; set; } = true;
