@@ -25419,6 +25419,7 @@
     const [saving, setSaving] = (0, import_react28.useState)(false);
     const [saveMessage, setSaveMessage] = (0, import_react28.useState)(null);
     const [expandedModules, setExpandedModules] = (0, import_react28.useState)(/* @__PURE__ */ new Set());
+    const [activeTab, setActiveTab] = (0, import_react28.useState)("fields");
     (0, import_react28.useEffect)(() => {
       listConfigs().then((res) => {
         if (res.success && res.data) {
@@ -25427,14 +25428,17 @@
           if (entries.length > 0) {
             const [firstName, firstFields] = entries[0];
             setSelectedConfig(firstName);
-            setFormValues(extractValues(firstFields));
+            setFormValues(extractValues(firstFields.fields));
             const moduleName = firstName.endsWith("Configuration") ? firstName.slice(0, -13) : firstName;
             setExpandedModules(/* @__PURE__ */ new Set([moduleName]));
           }
         } else {
           setError(res.message ?? "Failed to load configurations");
         }
-      }).catch((err) => setError(err.message)).finally(() => setLoading(false));
+      }).catch((err) => {
+        setError(err.message);
+        console.log(err);
+      }).finally(() => setLoading(false));
     }, []);
     const extractValues = (fields) => {
       const values = {};
@@ -25445,10 +25449,11 @@
     };
     const handleSelectConfig = (name) => {
       setSelectedConfig(name);
-      const fields = configs[name];
-      if (fields) {
-        setFormValues(extractValues(fields));
+      const configType = configs[name];
+      if (configType) {
+        setFormValues(extractValues(configType.fields));
       }
+      setActiveTab("fields");
       setSaveMessage(null);
     };
     const handleFieldChange = (field, value) => {
@@ -25535,69 +25540,98 @@
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("main", { className: "config-editor__content", children: selectedConfig ? /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)(import_jsx_runtime33.Fragment, { children: [
         /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("h2", { className: "config-editor__config-title", children: selectedConfig }),
-        /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("div", { className: "config-editor__fields", children: Object.entries(formValues).map(([key, value]) => {
-          const fieldInfo = configs[selectedConfig]?.[key];
-          const componentName = fieldInfo?.component;
-          if (componentName) {
-            const FieldComponent = mod(componentName);
-            return /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)("div", { className: "config-editor__field", children: [
-              /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("label", { className: "config-editor__field-label", children: key }),
-              /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("div", { className: "config-editor__field-component", children: /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
-                FieldComponent,
-                {
-                  value,
-                  onChange: (newVal) => handleFieldChange(key, newVal)
-                }
-              ) })
-            ] }, key);
+        (() => {
+          const configType = configs[selectedConfig];
+          const classHelp = configType?.help ?? [];
+          const tabMap = /* @__PURE__ */ new Map();
+          for (const h of classHelp) {
+            const key = h.tabName ?? "Help";
+            if (!tabMap.has(key)) tabMap.set(key, []);
+            tabMap.get(key).push(h);
           }
-          return /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)("div", { className: "config-editor__field", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("label", { className: "config-editor__field-label", children: key }),
-            fieldInfo?.type === "boolean" || typeof value === "boolean" ? /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
-              "input",
+          const tabs = ["fields", ...tabMap.keys()];
+          return /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)(import_jsx_runtime33.Fragment, { children: [
+            tabs.length > 1 && /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("div", { className: "config-editor__tabs", children: tabs.map((tab) => /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
+              "button",
               {
-                type: "checkbox",
-                className: "config-editor__checkbox",
-                checked: !!value,
-                onChange: (e) => handleFieldChange(key, e.target.checked)
-              }
-            ) : fieldInfo?.type === "number" || typeof value === "number" ? /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
-              "input",
-              {
-                type: "number",
-                className: "config-editor__input",
-                value: Number(value ?? 0),
-                onChange: (e) => handleFieldChange(key, Number(e.target.value))
-              }
-            ) : /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
-              "input",
-              {
-                type: "text",
-                className: "config-editor__input",
-                value: String(value ?? ""),
-                onChange: (e) => handleFieldChange(key, e.target.value)
-              }
-            )
-          ] }, key);
-        }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)("div", { className: "config-editor__actions", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
-            "button",
-            {
-              className: "config-editor__save-btn",
-              onClick: handleSave,
-              disabled: saving,
-              children: saving ? "Saving..." : "Save"
-            }
-          ),
-          saveMessage && /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
-            "span",
-            {
-              className: `config-editor__message config-editor__message--${saveMessage.type}`,
-              children: saveMessage.text
-            }
-          )
-        ] })
+                className: `config-editor__tab ${activeTab === tab ? "config-editor__tab--active" : ""}`,
+                onClick: () => setActiveTab(tab),
+                children: tab === "fields" ? "Fields" : tab
+              },
+              tab
+            )) }),
+            activeTab === "fields" ? /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("div", { className: "config-editor__fields", children: Object.entries(formValues).map(([key, value]) => {
+              const fieldInfo = configType?.fields[key];
+              const componentName = fieldInfo?.component;
+              const fieldInput = componentName ? (() => {
+                const FieldComponent = mod(componentName);
+                return /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("div", { className: "config-editor__field-component", children: /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
+                  FieldComponent,
+                  {
+                    value,
+                    onChange: (newVal) => handleFieldChange(key, newVal)
+                  }
+                ) });
+              })() : fieldInfo?.type === "boolean" || typeof value === "boolean" ? /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
+                "input",
+                {
+                  type: "checkbox",
+                  className: "config-editor__checkbox",
+                  checked: !!value,
+                  onChange: (e) => handleFieldChange(key, e.target.checked)
+                }
+              ) : fieldInfo?.type === "number" || typeof value === "number" ? /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
+                "input",
+                {
+                  type: "number",
+                  className: "config-editor__input",
+                  value: Number(value ?? 0),
+                  onChange: (e) => handleFieldChange(key, Number(e.target.value))
+                }
+              ) : /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
+                "input",
+                {
+                  type: "text",
+                  className: "config-editor__input",
+                  value: String(value ?? ""),
+                  onChange: (e) => handleFieldChange(key, e.target.value)
+                }
+              );
+              const fieldHelp = fieldInfo?.help;
+              return /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)("div", { className: "config-editor__field", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("label", { className: "config-editor__field-label", children: key }),
+                /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)("div", { className: "config-editor__field-control", children: [
+                  fieldInput,
+                  fieldHelp && fieldHelp.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("div", { className: "config-editor__field-help", children: fieldHelp.map((helpItem, i) => {
+                    const HelpComponent = mod(helpItem.component);
+                    return /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(HelpComponent, {}, i);
+                  }) })
+                ] })
+              ] }, key);
+            }) }) : /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("div", { className: "config-editor__tab-panel", children: (tabMap.get(activeTab) ?? []).map((helpItem, i) => {
+              const HelpComponent = mod(helpItem.component);
+              return /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(HelpComponent, {}, i);
+            }) }),
+            activeTab === "fields" && /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)("div", { className: "config-editor__actions", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
+                "button",
+                {
+                  className: "config-editor__save-btn",
+                  onClick: handleSave,
+                  disabled: saving,
+                  children: saving ? "Saving..." : "Save"
+                }
+              ),
+              saveMessage && /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
+                "span",
+                {
+                  className: `config-editor__message config-editor__message--${saveMessage.type}`,
+                  children: saveMessage.text
+                }
+              )
+            ] })
+          ] });
+        })()
       ] }) : /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("div", { className: "config-editor__centered", children: "Select a configuration to edit" }) })
     ] });
   };

@@ -13,7 +13,7 @@ public static class Features
 {
     public static void LoadFeatures()
     {
-        FeatureRegistry.Add(new Feature<object, ApiResponse<Dictionary<string, Dictionary<string, ConfigFieldInfo>>>>
+        FeatureRegistry.Add(new Feature<object, ApiResponse<Dictionary<string, ConfigTypeInfo>>>
         {
             FeatureName = "listConfigs",
             FeatureGroup = "admin",
@@ -21,31 +21,53 @@ public static class Features
             Method = HttpMethod.Get,
             Handler = async (_, _) =>
             {
-                var result = new Dictionary<string, Dictionary<string, ConfigFieldInfo>>();
+                var result = new Dictionary<string, ConfigTypeInfo>();
 
                 foreach (var (typeName, config) in ConfigurationCatalog.GetAllConfigurations())
                 {
+                    var configType = config.GetType();
                     var fields = new Dictionary<string, ConfigFieldInfo>();
 
-                    foreach (var property in config.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
+                    foreach (var property in configType.GetProperties(BindingFlags.Public | BindingFlags.Instance))
                     {
                         if (!property.CanRead) continue;
 
                         var componentAttr = property.GetCustomAttribute<ConfigComponentAttribute>();
                         var value = property.GetValue(config);
 
+                        var propertyHelp = property.GetCustomAttributes<ConfigHelpAttribute>()
+                            .Select(a => new ConfigHelpInfo
+                            {
+                                Component = a.Component,
+                                TabName = a.TabName
+                            })
+                            .ToList();
+
                         fields[property.Name] = new ConfigFieldInfo
                         {
                             Value = value,
                             Type = MapPropertyType(property.PropertyType),
-                            Component = componentAttr?.Component
+                            Component = componentAttr?.Component,
+                            Help = propertyHelp.Count > 0 ? propertyHelp : null
                         };
                     }
 
-                    result[typeName] = fields;
+                    var classHelp = configType.GetCustomAttributes<ConfigHelpAttribute>()
+                        .Select(a => new ConfigHelpInfo
+                        {
+                            Component = a.Component,
+                            TabName = a.TabName
+                        })
+                        .ToList();
+
+                    result[typeName] = new ConfigTypeInfo
+                    {
+                        Fields = fields,
+                        Help = classHelp.Count > 0 ? classHelp : null
+                    };
                 }
 
-                return new ApiResponse<Dictionary<string, Dictionary<string, ConfigFieldInfo>>>
+                return new ApiResponse<Dictionary<string, ConfigTypeInfo>>
                 {
                     Success = true,
                     Data = result

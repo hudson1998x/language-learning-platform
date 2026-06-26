@@ -1,7 +1,18 @@
+export interface ConfigHelpInfo {
+    component: string;
+    tabName?: string | null;
+}
+
 export interface ConfigFieldInfo {
     type: string;
     value?: unknown | null;
     component?: string | null;
+    help?: ConfigHelpInfo[] | null;
+}
+
+export interface ConfigTypeInfo {
+    fields: Record<string, ConfigFieldInfo>;
+    help?: ConfigHelpInfo[] | null;
 }
 
 export interface ApiResponse<T> {
@@ -10,7 +21,7 @@ export interface ApiResponse<T> {
     data?: T | null;
 }
 
-export const listConfigs = (): Promise<ApiResponse<Record<string, Record<string, ConfigFieldInfo>>>> => {
+export const listConfigs = (): Promise<ApiResponse<Record<string, ConfigTypeInfo>>> => {
     return fetch('/api/configuration/list', {
         method: "GET",
     })

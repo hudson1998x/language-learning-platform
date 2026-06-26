@@ -107,6 +107,40 @@ $success: #34d399;
     border-bottom: 1px solid $border;
   }
 
+  &__tabs {
+    display: flex;
+    gap: 2px;
+    margin-bottom: 20px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid $border;
+  }
+
+  &__tab {
+    padding: 6px 16px;
+    background: none;
+    border: none;
+    color: $text-dim;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: color 0.15s ease, background-color 0.15s ease;
+
+    &:hover {
+      color: $text;
+      background: $surface-raised;
+    }
+
+    &--active {
+      color: $accent;
+      background: rgba($accent, 0.12);
+    }
+  }
+
+  &__tab-panel {
+    max-width: 600px;
+  }
+
   &__fields {
     display: flex;
     flex-direction: column;
@@ -116,7 +150,7 @@ $success: #34d399;
 
   &__field {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 12px;
   }
 
@@ -125,10 +159,28 @@ $success: #34d399;
     font-size: 13px;
     color: $text-dim;
     flex-shrink: 0;
+    padding-top: 8px;
+  }
+
+  &__field-control {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
   }
 
   &__field-component {
     flex: 1;
+  }
+
+  &__field-help {
+    padding: 8px 12px;
+    background: $surface;
+    border: 1px solid $border;
+    border-radius: 6px;
+    font-size: 13px;
+    color: $text;
+    line-height: 1.5;
   }
 
   &__input {

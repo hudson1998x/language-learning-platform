@@ -8,9 +8,20 @@ interface FieldInfo {
     type: string;
     value: unknown;
     component: string | null;
+    help?: { component: string; tabName?: string | null }[] | null;
 }
 
-type ConfigsData = Record<string, Record<string, FieldInfo>>;
+interface ConfigHelpInfo {
+    component: string;
+    tabName?: string | null;
+}
+
+interface ConfigTypeInfo {
+    fields: Record<string, FieldInfo>;
+    help?: ConfigHelpInfo[] | null;
+}
+
+type ConfigsData = Record<string, ConfigTypeInfo>;
 
 const ConfigEditor = () => {
     
@@ -23,6 +34,7 @@ const ConfigEditor = () => {
     const [saving, setSaving] = useState(false);
     const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
     const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
+    const [activeTab, setActiveTab] = useState<string>('fields');
 
     useEffect(() => {
         listConfigs()
@@ -33,7 +45,7 @@ const ConfigEditor = () => {
                     if (entries.length > 0) {
                         const [firstName, firstFields] = entries[0];
                         setSelectedConfig(firstName);
-                        setFormValues(extractValues(firstFields));
+                        setFormValues(extractValues(firstFields.fields));
                         const moduleName = firstName.endsWith('Configuration')
                             ? firstName.slice(0, -13)
                             : firstName;
@@ -43,7 +55,10 @@ const ConfigEditor = () => {
                     setError(res.message ?? 'Failed to load configurations');
                 }
             })
-            .catch((err) => setError(err.message))
+            .catch((err) => {
+                setError(err.message);
+                console.log(err);
+            })
             .finally(() => setLoading(false));
     }, []);
 
@@ -57,10 +72,11 @@ const ConfigEditor = () => {
 
     const handleSelectConfig = (name: string) => {
         setSelectedConfig(name);
-        const fields = configs[name];
-        if (fields) {
-            setFormValues(extractValues(fields));
+        const configType = configs[name];
+        if (configType) {
+            setFormValues(extractValues(configType.fields));
         }
+        setActiveTab('fields');
         setSaveMessage(null);
     };
 
@@ -182,73 +198,126 @@ const ConfigEditor = () => {
                 {selectedConfig ? (
                     <>
                         <h2 className="config-editor__config-title">{selectedConfig}</h2>
-                        <div className="config-editor__fields">
-                            {Object.entries(formValues).map(([key, value]) => {
-                                const fieldInfo = configs[selectedConfig]?.[key];
-                                const componentName = fieldInfo?.component;
-
-                                if (componentName) {
-                                    const FieldComponent = mod(componentName);
-                                    return (
-                                        <div key={key} className="config-editor__field">
-                                            <label className="config-editor__field-label">{key}</label>
-                                            <div className="config-editor__field-component">
-                                                <FieldComponent
-                                                    value={value}
-                                                    onChange={(newVal: unknown) => handleFieldChange(key, newVal)}
-                                                />
-                                            </div>
+                        {(() => {
+                            const configType = configs[selectedConfig];
+                            const classHelp = configType?.help ?? [];
+                            const tabMap = new Map<string, ConfigHelpInfo[]>();
+                            for (const h of classHelp) {
+                                const key = h.tabName ?? 'Help';
+                                if (!tabMap.has(key)) tabMap.set(key, []);
+                                tabMap.get(key)!.push(h);
+                            }
+                            const tabs = ['fields', ...tabMap.keys()];
+                            return (
+                                <>
+                                    {tabs.length > 1 && (
+                                        <div className="config-editor__tabs">
+                                            {tabs.map((tab) => (
+                                                <button
+                                                    key={tab}
+                                                    className={`config-editor__tab ${
+                                                        activeTab === tab
+                                                            ? 'config-editor__tab--active'
+                                                            : ''
+                                                    }`}
+                                                    onClick={() => setActiveTab(tab)}
+                                                >
+                                                    {tab === 'fields' ? 'Fields' : tab}
+                                                </button>
+                                            ))}
                                         </div>
-                                    );
-                                }
+                                    )}
+                                    {activeTab === 'fields' ? (
+                                        <div className="config-editor__fields">
+                                            {Object.entries(formValues).map(([key, value]) => {
+                                                const fieldInfo = configType?.fields[key];
+                                                const componentName = fieldInfo?.component;
 
-                                return (
-                                    <div key={key} className="config-editor__field">
-                                        <label className="config-editor__field-label">{key}</label>
-                                        {fieldInfo?.type === 'boolean' || typeof value === 'boolean' ? (
-                                            <input
-                                                type="checkbox"
-                                                className="config-editor__checkbox"
-                                                checked={!!value}
-                                                onChange={(e) => handleFieldChange(key, e.target.checked)}
-                                            />
-                                        ) : fieldInfo?.type === 'number' || typeof value === 'number' ? (
-                                            <input
-                                                type="number"
-                                                className="config-editor__input"
-                                                value={Number(value ?? 0)}
-                                                onChange={(e) =>
-                                                    handleFieldChange(key, Number(e.target.value))
-                                                }
-                                            />
-                                        ) : (
-                                            <input
-                                                type="text"
-                                                className="config-editor__input"
-                                                value={String(value ?? '')}
-                                                onChange={(e) => handleFieldChange(key, e.target.value)}
-                                            />
-                                        )}
-                                    </div>
-                                );
-                            })}
-                        </div>
-                        <div className="config-editor__actions">
-                            <button
-                                className="config-editor__save-btn"
-                                onClick={handleSave}
-                                disabled={saving}
-                            >
-                                {saving ? 'Saving...' : 'Save'}
-                            </button>
-                            {saveMessage && (
-                                <span
-                                    className={`config-editor__message config-editor__message--${saveMessage.type}`}
-                                >
-                                    {saveMessage.text}
-                                </span>
-                            )}
-                        </div>
+                                                const fieldInput = componentName ? (
+                                                    (() => {
+                                                        const FieldComponent = mod(componentName);
+                                                        return (
+                                                            <div className="config-editor__field-component">
+                                                                <FieldComponent
+                                                                    value={value}
+                                                                    onChange={(newVal: unknown) => handleFieldChange(key, newVal)}
+                                                                />
+                                                            </div>
+                                                        );
+                                                    })()
+                                                ) : fieldInfo?.type === 'boolean' || typeof value === 'boolean' ? (
+                                                    <input
+                                                        type="checkbox"
+                                                        className="config-editor__checkbox"
+                                                        checked={!!value}
+                                                        onChange={(e) => handleFieldChange(key, e.target.checked)}
+                                                    />
+                                                ) : fieldInfo?.type === 'number' || typeof value === 'number' ? (
+                                                    <input
+                                                        type="number"
+                                                        className="config-editor__input"
+                                                        value={Number(value ?? 0)}
+                                                        onChange={(e) =>
+                                                            handleFieldChange(key, Number(e.target.value))
+                                                        }
+                                                    />
+                                                ) : (
+                                                    <input
+                                                        type="text"
+                                                        className="config-editor__input"
+                                                        value={String(value ?? '')}
+                                                        onChange={(e) => handleFieldChange(key, e.target.value)}
+                                                    />
+                                                );
+
+                                                const fieldHelp = fieldInfo?.help;
+                                                return (
+                                                    <div key={key} className="config-editor__field">
+                                                        <label className="config-editor__field-label">{key}</label>
+                                                        <div className="config-editor__field-control">
+                                                            {fieldInput}
+                                                            {fieldHelp && fieldHelp.length > 0 && (
+                                                                <div className="config-editor__field-help">
+                                                                    {fieldHelp.map((helpItem, i) => {
+                                                                        const HelpComponent = mod(helpItem.component);
+                                                                        return <HelpComponent key={i} />;
+                                                                    })}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    ) : (
+                                        <div className="config-editor__tab-panel">
+                                            {(tabMap.get(activeTab) ?? []).map((helpItem, i) => {
+                                                const HelpComponent = mod(helpItem.component);
+                                                return <HelpComponent key={i} />;
+                                            })}
+                                        </div>
+                                    )}
+                                    {activeTab === 'fields' && (
+                                        <div className="config-editor__actions">
+                                            <button
+                                                className="config-editor__save-btn"
+                                                onClick={handleSave}
+                                                disabled={saving}
+                                            >
+                                                {saving ? 'Saving...' : 'Save'}
+                                            </button>
+                                            {saveMessage && (
+                                                <span
+                                                    className={`config-editor__message config-editor__message--${saveMessage.type}`}
+                                                >
+                                                    {saveMessage.text}
+                                                </span>
+                                            )}
+                                        </div>
+                                    )}
+                                </>
+                            );
+                        })()}
                     </>
                 ) : (
                     <div className="config-editor__centered">Select a configuration to edit</div>
