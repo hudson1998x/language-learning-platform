@@ -47,11 +47,15 @@
     "IsEnabled": true,
     "IsInstalled": true
   },
+  "LLE.MusicTranslation.MusicTranslationModule": {
+    "IsEnabled": true,
+    "IsInstalled": true
+  },
   "LLE.LLMProviders.MistralChat.MistralModule": {
     "IsEnabled": true,
     "IsInstalled": true
   },
-  "LLE.MusicTranslation.MusicTranslationModule": {
+  "LLE.LLMProviders.ChatGPT.ChatGPTModule": {
     "IsEnabled": true,
     "IsInstalled": true
   },

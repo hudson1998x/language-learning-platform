@@ -54,6 +54,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppAdmin", "App\Code\Core\A
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MistralChat", "App\Code\Community\LLMProviders\MistralChat\Source\MistralChat.csproj", "{69AC8398-D5D2-4EC4-8B04-64D1FB67AFA5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatGPT", "App\Code\Community\LLMProviders\ChatGPT\Source\ChatGPT.csproj", "{C60668D3-85B5-448F-AFAF-31E671AD14F4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -200,5 +202,9 @@ Global
 		{69AC8398-D5D2-4EC4-8B04-64D1FB67AFA5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{69AC8398-D5D2-4EC4-8B04-64D1FB67AFA5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{69AC8398-D5D2-4EC4-8B04-64D1FB67AFA5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C60668D3-85B5-448F-AFAF-31E671AD14F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C60668D3-85B5-448F-AFAF-31E671AD14F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C60668D3-85B5-448F-AFAF-31E671AD14F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C60668D3-85B5-448F-AFAF-31E671AD14F4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

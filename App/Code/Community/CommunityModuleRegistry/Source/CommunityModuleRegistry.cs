@@ -3,6 +3,7 @@ using LLE.Kernel;
 using LLE.Languages;
 using LLE.LeMessage;
 using LLE.LLMFramework;
+using LLE.LLMProviders.ChatGPT;
 using LLE.LLMProviders.MistralChat;
 using LLE.LLMProviders.Ollama;
 using LLE.MusicTranslation;
@@ -23,6 +24,7 @@ public static class CommunityModuleRegistry
         ApplicationLoader.AddModule(new LLMModule());
         ApplicationLoader.AddModule(new OllamaModule());
         ApplicationLoader.AddModule(new MistralModule());
+        ApplicationLoader.AddModule(new ChatGPTModule());
         ApplicationLoader.AddModule(new MusicTranslationModule());
         ApplicationLoader.AddModule(new LeMessageModule());
         ApplicationLoader.AddModule(new HomeChatModule());

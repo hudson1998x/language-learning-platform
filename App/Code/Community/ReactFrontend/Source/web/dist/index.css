@@ -3908,6 +3908,274 @@ body {
   font-weight: 500;
 }
 
+/* App/Code/Community/LLMProviders/ChatGPT/Source/web/help/connecting-chatgpt/style.scss */
+.chatgpt-help-connection-guide {
+  font-family:
+    "Inter",
+    system-ui,
+    sans-serif;
+  background: #0D1117;
+  color: #E8EDF3;
+  padding: 40px 32px 56px;
+  margin: 0 auto;
+  -webkit-font-smoothing: antialiased;
+}
+.guide-header {
+  margin-bottom: 48px;
+}
+.guide-eyebrow {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #19C37D;
+  margin-bottom: 12px;
+  font-family:
+    "JetBrains Mono",
+    "Fira Code",
+    monospace;
+}
+.guide-title {
+  font-size: clamp(24px, 4vw, 34px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  margin: 0 0 14px;
+  color: #E8EDF3;
+}
+.guide-subtitle {
+  font-size: 15px;
+  line-height: 1.65;
+  color: #7A8BA0;
+  margin: 0;
+  max-width: 520px;
+}
+.steps-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.step-card {
+  position: relative;
+  background: #161C26;
+  border: 1px solid #2A3650;
+  border-radius: 12px;
+  padding: 28px 28px 28px 36px;
+  overflow: hidden;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.step-card:hover {
+  border-color: rgba(25, 195, 125, 0.35);
+  box-shadow: 0 0 0 1px rgba(25, 195, 125, 0.1), 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+.step-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: #19C37D;
+  border-radius: 12px 0 0 12px;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+.step-card:hover::before {
+  opacity: 1;
+}
+.step-number {
+  position: absolute;
+  top: -14px;
+  right: 16px;
+  font-family:
+    "JetBrains Mono",
+    "Fira Code",
+    monospace;
+  font-size: 80px;
+  font-weight: 800;
+  line-height: 1;
+  color: #19C37D;
+  opacity: 0.07;
+  pointer-events: none;
+  user-select: none;
+  letter-spacing: -0.04em;
+}
+.step-content {
+  position: relative;
+}
+.step-heading {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.3;
+  margin: 0 0 8px;
+  color: #E8EDF3;
+}
+.step-body {
+  font-size: 14px;
+  line-height: 1.7;
+  color: #7A8BA0;
+  margin: 0 0 20px;
+}
+.step-body a {
+  color: #5BA4F5;
+  text-decoration: none;
+  font-family:
+    "JetBrains Mono",
+    "Fira Code",
+    monospace;
+  font-size: 13px;
+  border-bottom: 1px solid rgba(91, 164, 245, 0.3);
+  transition: border-color 0.15s, color 0.15s;
+}
+.step-body a:hover {
+  color: rgb(148.6827586207, 196.0068965517, 248.5172413793);
+  border-color: #5BA4F5;
+}
+.step-image-wrap {
+  position: relative;
+  cursor: zoom-in;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #2A3650;
+  background: #1F2837;
+  display: block;
+}
+.step-image-wrap:hover {
+  border-color: rgba(25, 195, 125, 0.4);
+}
+.step-image-wrap:hover .zoom-hint {
+  opacity: 1;
+  transform: translateY(0);
+}
+.step-image-wrap:hover .step-image {
+  filter: brightness(0.88);
+}
+.step-image {
+  width: 100%;
+  display: block;
+  transition: filter 0.2s ease;
+}
+.zoom-hint {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(13, 17, 23, 0.85);
+  backdrop-filter: blur(6px);
+  color: #E8EDF3;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: 1px solid #2A3650;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
+}
+.zoom-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(7, 10, 15, 0.88);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  cursor: zoom-out;
+  animation: overlay-in 0.2s ease;
+}
+.zoom-overlay__inner {
+  position: relative;
+  max-width: min(1100px, 96vw);
+  max-height: 90vh;
+  cursor: default;
+  animation: zoom-in 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.zoom-image {
+  display: block;
+  width: 100%;
+  max-height: 88vh;
+  object-fit: contain;
+  border-radius: 10px;
+  border: 1px solid #2A3650;
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.7);
+}
+.zoom-close {
+  position: absolute;
+  top: -14px;
+  right: -14px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #1F2837;
+  border: 1px solid #2A3650;
+  color: #7A8BA0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s;
+  z-index: 1;
+}
+.zoom-close:hover {
+  background: #19C37D;
+  border-color: #19C37D;
+  color: #fff;
+}
+.guide-footer {
+  margin-top: 40px;
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  font-size: 13px;
+  color: #7A8BA0;
+  background: rgba(25, 195, 125, 0.06);
+  border: 1px solid rgba(25, 195, 125, 0.18);
+  border-radius: 8px;
+  padding: 14px 16px;
+  line-height: 1.5;
+}
+.guide-footer svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: #19C37D;
+}
+@keyframes overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes zoom-in {
+  from {
+    opacity: 0;
+    transform: scale(0.93);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .zoom-overlay,
+  .zoom-overlay__inner {
+    animation: none;
+  }
+}
+
 /* App/Code/Community/LLMProviders/MistralChat/Source/web/help/connecting-mistral/style.scss */
 .mistral-help-connection-guide {
   font-family:

@@ -12,6 +12,8 @@
       <ProjectReference Include="..\..\HomeChat\Source\HomeChat.csproj" />
       <ProjectReference Include="..\..\Languages\Source\Languages.csproj" />
       <ProjectReference Include="..\..\LeMessage\Source\LeMessage.csproj" />
+      <ProjectReference Include="..\..\ChatGPT\Source\ChatGPT.csproj" />
+      <ProjectReference Include="..\..\LLMProviders\ChatGPT\Source\ChatGPT.csproj" />
       <ProjectReference Include="..\..\LLMProviders\MistralChat\Source\MistralChat.csproj" />
       <ProjectReference Include="..\..\MistralChat\Source\MistralChat.csproj" />
       <ProjectReference Include="..\..\LLMProviders\Ollama\Source\Ollama.csproj" />
