@@ -23077,7 +23077,12 @@
   var MAX_CUSTOM = 200;
   var normalize = (s) => s.trim().toLowerCase().replace(/\s+/g, " ");
   var Study = ({ onClose }) => {
-    const [phase, setPhase] = (0, import_react15.useState)("pick");
+    const { language } = useLanguage();
+    const [phase, setPhase] = (0, import_react15.useState)("categories");
+    const [categories, setCategories] = (0, import_react15.useState)([]);
+    const [selectedCategories, setSelectedCategories] = (0, import_react15.useState)(/* @__PURE__ */ new Set());
+    const [categoriesLoading, setCategoriesLoading] = (0, import_react15.useState)(true);
+    const [categoriesError, setCategoriesError] = (0, import_react15.useState)(null);
     const [cardCount, setCardCount] = (0, import_react15.useState)(10);
     const [customCount, setCustomCount] = (0, import_react15.useState)("");
     const [cards, setCards] = (0, import_react15.useState)([]);
@@ -23092,12 +23097,53 @@
     const card = cards[currentIndex];
     const expectedAnswer = card ? showFront ? card.backStatement : card.frontStatement : "";
     const isAnswerCorrect = checked && normalize(userAnswer) === normalize(expectedAnswer);
+    (0, import_react15.useEffect)(() => {
+      if (phase !== "categories") return;
+      const fetchCategories = async () => {
+        setCategoriesLoading(true);
+        setCategoriesError(null);
+        try {
+          const res = await fetch("/api/flashcard/categories");
+          if (!res.ok) throw new Error(`Failed to load categories`);
+          const json = await res.json();
+          if (!json.success) throw new Error(json.message ?? "Failed to load categories");
+          setCategories(json.data ?? []);
+        } catch (err) {
+          setCategoriesError(err instanceof Error ? err.message : "Failed to load categories");
+        } finally {
+          setCategoriesLoading(false);
+        }
+      };
+      fetchCategories();
+    }, [phase]);
+    const toggleCategory = (name) => {
+      setSelectedCategories((prev) => {
+        const next = new Set(prev);
+        if (next.has(name)) next.delete(name);
+        else next.add(name);
+        return next;
+      });
+    };
+    const selectAllCategories = () => {
+      setSelectedCategories(new Set(categories.map((c) => c.name)));
+    };
+    const deselectAllCategories = () => {
+      setSelectedCategories(/* @__PURE__ */ new Set());
+    };
+    const totalCardsForSelected = (0, import_react15.useMemo)(() => {
+      if (selectedCategories.size === 0) return categories.reduce((sum, c) => sum + c.count, 0);
+      return categories.filter((c) => selectedCategories.has(c.name)).reduce((sum, c) => sum + c.count, 0);
+    }, [selectedCategories, categories]);
     const startSession = async (count) => {
       const clamped = Math.min(Math.max(count, 1), MAX_CUSTOM);
       setIsLoading(true);
       setError(null);
       try {
-        const response = await getStudySession({ cardCount: clamped });
+        const payload2 = { cardCount: clamped };
+        if (selectedCategories.size > 0) {
+          payload2.categories = Array.from(selectedCategories);
+        }
+        const response = await getStudySession(payload2);
         if (!response.success) {
           setError(response.message ?? "Failed to start study session");
           return;
@@ -23175,13 +23221,72 @@
       if (phase === "session" && !checked) inputRef.current?.focus();
     }, [phase, checked, currentIndex]);
     const missedCount = (0, import_react15.useMemo)(() => results.filter((r) => !r.wasCorrect).length, [results]);
+    if (phase === "categories") {
+      return /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("div", { className: "modal-overlay", onClick: onClose, children: /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "modal study-categories", onClick: (e) => e.stopPropagation(), children: [
+        /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "modal-header", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("h2", { children: "Pick categories" }),
+          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("button", { className: "modal-close", onClick: onClose, children: "\u2715" })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "modal-body", children: [
+          categoriesLoading && /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("div", { className: "categories-loading", children: /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(Spinner, {}) }),
+          categoriesError && /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("div", { className: "modal-error", children: categoriesError }),
+          !categoriesLoading && !categoriesError && categories.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("div", { className: "categories-empty", children: "No categories found. Add categories to your cards first." }),
+          !categoriesLoading && !categoriesError && categories.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)(import_jsx_runtime19.Fragment, { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "categories-actions-row", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("button", { className: "link-btn", onClick: selectAllCategories, children: "Select all" }),
+              /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("span", { className: "categories-divider", children: "|" }),
+              /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("button", { className: "link-btn", onClick: deselectAllCategories, children: "Deselect all" })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "category-grid", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)(
+                "button",
+                {
+                  className: `category-chip ${selectedCategories.size === 0 ? "active" : ""}`,
+                  onClick: deselectAllCategories,
+                  children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("span", { className: "chip-check", children: selectedCategories.size === 0 ? "\u2713" : "" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("span", { className: "chip-label", children: "All categories" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("span", { className: "chip-count", children: totalCardsForSelected })
+                  ]
+                }
+              ),
+              categories.map((cat) => /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)(
+                "button",
+                {
+                  className: `category-chip ${selectedCategories.has(cat.name) ? "active" : ""}`,
+                  onClick: () => toggleCategory(cat.name),
+                  children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("span", { className: "chip-check", children: selectedCategories.has(cat.name) ? "\u2713" : "" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("span", { className: "chip-label", children: cat.name }),
+                    /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("span", { className: "chip-count", children: cat.count })
+                  ]
+                },
+                cat.name
+              ))
+            ] })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("div", { className: "categories-footer", children: /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(
+            "button",
+            {
+              className: "next-btn",
+              onClick: () => setPhase("pick"),
+              disabled: categories.length === 0,
+              children: "Next"
+            }
+          ) })
+        ] })
+      ] }) });
+    }
     if (phase === "pick") {
+      const selectedCount = selectedCategories.size;
+      const summary = selectedCount === 0 ? `All categories \xB7 ${totalCardsForSelected} cards available` : `${selectedCount} ${selectedCount === 1 ? "category" : "categories"} \xB7 ${totalCardsForSelected} cards available`;
       return /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("div", { className: "modal-overlay", onClick: onClose, children: /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "modal study-pick", onClick: (e) => e.stopPropagation(), children: [
         /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "modal-header", children: [
           /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("h2", { children: "How many cards?" }),
           /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("button", { className: "modal-close", onClick: onClose, children: "\u2715" })
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: "modal-body", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("div", { className: "pick-summary", children: summary }),
           /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("div", { className: "preset-grid", children: PRESETS.map((n) => /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(
             "button",
             {

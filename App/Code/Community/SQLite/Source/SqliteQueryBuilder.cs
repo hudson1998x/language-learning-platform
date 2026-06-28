@@ -160,8 +160,19 @@ internal sealed class SqliteQueryBuilder : IAstVisitor<SqlQueryResult>
         var sb = new StringBuilder();
         foreach (var v in values)
         {
-            if (sb.Length > 0) sb.Append(", ");
-            sb.Append(AddParameter(v));
+            if (v is System.Collections.IEnumerable collection and not string)
+            {
+                foreach (var item in collection)
+                {
+                    if (sb.Length > 0) sb.Append(", ");
+                    sb.Append(AddParameter(item));
+                }
+            }
+            else
+            {
+                if (sb.Length > 0) sb.Append(", ");
+                sb.Append(AddParameter(v));
+            }
         }
         return $"{QuoteName(node.ColumnName)} {op} ({sb})";
     }

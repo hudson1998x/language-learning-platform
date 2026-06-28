@@ -1307,6 +1307,12 @@ body {
 .study-pick {
   max-width: 380px;
 }
+.study-pick .pick-summary {
+  font-size: 13px;
+  color: #aaa;
+  text-align: center;
+  padding-bottom: 4px;
+}
 .study-pick .preset-grid {
   display: flex;
   gap: 8px;
@@ -1381,6 +1387,115 @@ body {
   margin-top: 4px;
   font-size: 12px;
   color: #777;
+}
+.study-categories {
+  max-width: 440px;
+}
+.study-categories .categories-loading {
+  display: flex;
+  justify-content: center;
+  padding: 32px 0;
+}
+.study-categories .categories-empty {
+  text-align: center;
+  font-size: 14px;
+  color: #777;
+  padding: 24px 0;
+}
+.study-categories .categories-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.study-categories .categories-actions-row .link-btn {
+  background: none;
+  border: none;
+  color: #4f46e5;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+}
+.study-categories .categories-actions-row .link-btn:hover {
+  text-decoration: underline;
+}
+.study-categories .categories-actions-row .categories-divider {
+  color: #333;
+  font-size: 13px;
+}
+.study-categories .category-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-height: 280px;
+  overflow-y: auto;
+  padding: 4px 0;
+}
+.study-categories .category-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid #333;
+  border-radius: 999px;
+  background: #1a1a1a;
+  color: #e5e5e5;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.study-categories .category-chip:focus-visible {
+  outline: 2px solid #4f46e5;
+  outline-offset: 2px;
+}
+.study-categories .category-chip:hover {
+  background: #262626;
+}
+.study-categories .category-chip.active {
+  background: rgba(79, 70, 229, 0.15);
+  border-color: #4f46e5;
+  color: #c7d2fe;
+}
+.study-categories .category-chip .chip-check {
+  width: 14px;
+  font-size: 12px;
+  color: #4f46e5;
+  font-weight: 600;
+}
+.study-categories .category-chip .chip-count {
+  font-size: 11px;
+  color: #777;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 1px 6px;
+  border-radius: 999px;
+}
+.study-categories .category-chip.active .chip-count {
+  background: rgba(79, 70, 229, 0.2);
+  color: #a5b4fc;
+}
+.study-categories .categories-footer {
+  padding-top: 8px;
+}
+.study-categories .categories-footer .next-btn {
+  width: 100%;
+  background: #4f46e5;
+  border: 1px solid #4f46e5;
+  color: #e5e5e5;
+  padding: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+.study-categories .categories-footer .next-btn:focus-visible {
+  outline: 2px solid #4f46e5;
+  outline-offset: 2px;
+}
+.study-categories .categories-footer .next-btn:hover:not(:disabled) {
+  background: #4338ca;
+}
+.study-categories .categories-footer .next-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 .study-fullscreen {
   position: fixed;

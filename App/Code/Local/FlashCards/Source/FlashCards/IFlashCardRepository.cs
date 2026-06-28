@@ -14,4 +14,10 @@ public interface IFlashCardRepository : IEntityRepository<FlashCard>
     
     [Query("LanguageId = :language")]
     public Task<List<FlashCard>> GetPaginatedForLanguage(Guid language, UserContext context, DataOptions dataOptions, SortOption sortOption, Pagination pagination);
+
+    [Query("LanguageId = :language")]
+    public Task<List<FlashCard>> GetAllForLanguage(Guid language, UserContext context, DataOptions dataOptions, SortOption sort);
+
+    [Query("LanguageId = :language and Category in (:categories)")]
+    public Task<List<FlashCard>> GetByCategories(Guid language, List<string> categories, UserContext context, DataOptions dataOptions, SortOption sort);
 }

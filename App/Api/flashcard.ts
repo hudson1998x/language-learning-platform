@@ -138,6 +138,7 @@ export const loadFlashCard = (id: string): Promise<ApiResponse<FlashCard>> => {
 
 export interface StudySessionInitRequest {
     cardCount: number;
+    categories?: string[] | null;
 }
 
 export const getStudySession = (payload: StudySessionInitRequest): Promise<ApiResponse<FlashCard[]>> => {
@@ -179,6 +180,23 @@ export const updateFlashCardScore = (payload: StudySessionCardAnswerRequest): Pr
 
 export const listFlashCardsForLanguage = (pageNum: string, size: string, sortField: string, sortDir: string): Promise<ApiResponse<FlashCard[]>> => {
     return fetch(`/api/flashcard/for-language/${pageNum}/${size}/${sortField}/${sortDir}`, {
+        method: "GET",
+    })
+    .then((response: Response) => {
+        if (!response.ok) {
+            throw new Error(`Request failed with status ${response.status}`);
+        }
+        return response.json();
+    });
+};
+
+export interface CategoryInfo {
+    name: string;
+    count: number;
+}
+
+export const getCategories = (): Promise<ApiResponse<CategoryInfo[]>> => {
+    return fetch('/api/flashcard/categories', {
         method: "GET",
     })
     .then((response: Response) => {

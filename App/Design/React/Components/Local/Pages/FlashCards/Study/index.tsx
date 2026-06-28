@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getStudySession, updateFlashCardScore, FlashCard } from '@api/flashcard'
 import { Spinner } from '@component/Spinner'
+import { useLanguage } from '@hook/language-provider'
 import './study.scss'
 
 const PRESETS = [5, 10, 20, 50, 100] as const
@@ -12,13 +13,23 @@ interface StudyResult {
     showedFront: boolean
 }
 
-// Loose match: ignores case, surrounding whitespace, and repeated
-// internal spaces, so "Paris" vs " paris  " both count.
+interface CategoryInfo {
+    name: string
+    count: number
+}
+
 const normalize = (s: string) => s.trim().toLowerCase().replace(/\s+/g, ' ')
 
 export const Study = ({ onClose }: { onClose: () => void }) => {
 
-    const [phase, setPhase] = useState<'pick' | 'session' | 'results'>('pick')
+    const { language } = useLanguage()
+
+    const [phase, setPhase] = useState<'categories' | 'pick' | 'session' | 'results'>('categories')
+    const [categories, setCategories] = useState<CategoryInfo[]>([])
+    const [selectedCategories, setSelectedCategories] = useState<Set<string>>(new Set())
+    const [categoriesLoading, setCategoriesLoading] = useState(true)
+    const [categoriesError, setCategoriesError] = useState<string | null>(null)
+
     const [cardCount, setCardCount] = useState(10)
     const [customCount, setCustomCount] = useState('')
     const [cards, setCards] = useState<FlashCard[]>([])
@@ -35,12 +46,58 @@ export const Study = ({ onClose }: { onClose: () => void }) => {
     const expectedAnswer = card ? (showFront ? card.backStatement : card.frontStatement) : ''
     const isAnswerCorrect = checked && normalize(userAnswer) === normalize(expectedAnswer)
 
+    useEffect(() => {
+        if (phase !== 'categories') return
+        const fetchCategories = async () => {
+            setCategoriesLoading(true)
+            setCategoriesError(null)
+            try {
+                const res = await fetch('/api/flashcard/categories')
+                if (!res.ok) throw new Error(`Failed to load categories`)
+                const json = await res.json()
+                if (!json.success) throw new Error(json.message ?? 'Failed to load categories')
+                setCategories(json.data ?? [])
+            } catch (err) {
+                setCategoriesError(err instanceof Error ? err.message : 'Failed to load categories')
+            } finally {
+                setCategoriesLoading(false)
+            }
+        }
+        fetchCategories()
+    }, [phase])
+
+    const toggleCategory = (name: string) => {
+        setSelectedCategories((prev) => {
+            const next = new Set(prev)
+            if (next.has(name)) next.delete(name)
+            else next.add(name)
+            return next
+        })
+    }
+
+    const selectAllCategories = () => {
+        setSelectedCategories(new Set(categories.map((c) => c.name)))
+    }
+
+    const deselectAllCategories = () => {
+        setSelectedCategories(new Set())
+    }
+
+    const totalCardsForSelected = useMemo(() => {
+        if (selectedCategories.size === 0) return categories.reduce((sum, c) => sum + c.count, 0)
+        return categories.filter((c) => selectedCategories.has(c.name)).reduce((sum, c) => sum + c.count, 0)
+    }, [selectedCategories, categories])
+
     const startSession = async (count: number) => {
         const clamped = Math.min(Math.max(count, 1), MAX_CUSTOM)
         setIsLoading(true)
         setError(null)
         try {
-            const response = await getStudySession({ cardCount: clamped })
+            const payload: { cardCount: number; categories?: string[] } = { cardCount: clamped }
+            if (selectedCategories.size > 0) {
+                payload.categories = Array.from(selectedCategories)
+            }
+            const response = await getStudySession(payload)
             if (!response.success) {
                 setError(response.message ?? 'Failed to start study session')
                 return
@@ -100,9 +157,6 @@ export const Study = ({ onClose }: { onClose: () => void }) => {
         setPhase('session')
     }
 
-    // Keyboard shortcuts during an active session: Enter checks the
-    // answer (or advances once checked), 1/← marks incorrect, 2/→
-    // marks correct once the answer's been checked.
     useEffect(() => {
         if (phase !== 'session' || isLoading || error) return
         const onKeyDown = (e: KeyboardEvent) => {
@@ -131,7 +185,75 @@ export const Study = ({ onClose }: { onClose: () => void }) => {
 
     const missedCount = useMemo(() => results.filter((r) => !r.wasCorrect).length, [results])
 
+    if (phase === 'categories') {
+        return (
+            <div className={'modal-overlay'} onClick={onClose}>
+                <div className={'modal study-categories'} onClick={(e) => e.stopPropagation()}>
+                    <div className={'modal-header'}>
+                        <h2>Pick categories</h2>
+                        <button className={'modal-close'} onClick={onClose}>✕</button>
+                    </div>
+                    <div className={'modal-body'}>
+                        {categoriesLoading && (
+                            <div className={'categories-loading'}><Spinner /></div>
+                        )}
+                        {categoriesError && (
+                            <div className={'modal-error'}>{categoriesError}</div>
+                        )}
+                        {!categoriesLoading && !categoriesError && categories.length === 0 && (
+                            <div className={'categories-empty'}>No categories found. Add categories to your cards first.</div>
+                        )}
+                        {!categoriesLoading && !categoriesError && categories.length > 0 && (
+                            <>
+                                <div className={'categories-actions-row'}>
+                                    <button className={'link-btn'} onClick={selectAllCategories}>Select all</button>
+                                    <span className={'categories-divider'}>|</span>
+                                    <button className={'link-btn'} onClick={deselectAllCategories}>Deselect all</button>
+                                </div>
+                                <div className={'category-grid'}>
+                                    <button
+                                        className={`category-chip ${selectedCategories.size === 0 ? 'active' : ''}`}
+                                        onClick={deselectAllCategories}
+                                    >
+                                        <span className={'chip-check'}>{selectedCategories.size === 0 ? '✓' : ''}</span>
+                                        <span className={'chip-label'}>All categories</span>
+                                        <span className={'chip-count'}>{totalCardsForSelected}</span>
+                                    </button>
+                                    {categories.map((cat) => (
+                                        <button
+                                            key={cat.name}
+                                            className={`category-chip ${selectedCategories.has(cat.name) ? 'active' : ''}`}
+                                            onClick={() => toggleCategory(cat.name)}
+                                        >
+                                            <span className={'chip-check'}>{selectedCategories.has(cat.name) ? '✓' : ''}</span>
+                                            <span className={'chip-label'}>{cat.name}</span>
+                                            <span className={'chip-count'}>{cat.count}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </>
+                        )}
+                        <div className={'categories-footer'}>
+                            <button
+                                className={'next-btn'}
+                                onClick={() => setPhase('pick')}
+                                disabled={categories.length === 0}
+                            >
+                                Next
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )
+    }
+
     if (phase === 'pick') {
+        const selectedCount = selectedCategories.size
+        const summary = selectedCount === 0
+            ? `All categories · ${totalCardsForSelected} cards available`
+            : `${selectedCount} ${selectedCount === 1 ? 'category' : 'categories'} · ${totalCardsForSelected} cards available`
+
         return (
             <div className={'modal-overlay'} onClick={onClose}>
                 <div className={'modal study-pick'} onClick={(e) => e.stopPropagation()}>
@@ -140,6 +262,7 @@ export const Study = ({ onClose }: { onClose: () => void }) => {
                         <button className={'modal-close'} onClick={onClose}>✕</button>
                     </div>
                     <div className={'modal-body'}>
+                        <div className={'pick-summary'}>{summary}</div>
                         <div className={'preset-grid'}>
                             {PRESETS.map((n) => (
                                 <button

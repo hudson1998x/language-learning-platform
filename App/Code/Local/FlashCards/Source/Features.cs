@@ -34,42 +34,66 @@ public static class Features
                         Data = null
                     };
                 }
-                
-                var items = await flashCards.GetStudySessionFlashCards(
-                    language.Value,
-                    context,
-                    DataOptions.Default,
-                    new Pagination()
-                    {
-                        PageNo = 1,
-                        Limit = payload.CardCount
-                    },
-                    new SortOption()
-                    {
-                        Field = "IncorrectCount",
-                        Ascending = false
-                    }
-                );
 
-                if (items.Count < payload.CardCount)
+                var hasCategories = payload.Categories is { Count: > 0 };
+
+                List<FlashCard> items;
+
+                if (hasCategories)
                 {
-                    var remaining = payload.CardCount - items.Count;
-                    var supplementalItems = await flashCards.GetPaginatedForLanguage(
+                    items = await flashCards.GetByCategories(
                         language.Value,
+                        payload.Categories!,
                         context,
                         DataOptions.Default,
                         new SortOption()
                         {
                             Field = "IncorrectCount",
                             Ascending = false
-                        },
+                        }
+                    );
+
+                    if (items.Count > payload.CardCount)
+                        items = items.Take(payload.CardCount).ToList();
+                }
+                else
+                {
+                    items = await flashCards.GetStudySessionFlashCards(
+                        language.Value,
+                        context,
+                        DataOptions.Default,
                         new Pagination()
                         {
                             PageNo = 1,
-                            Limit = remaining
-                        });
+                            Limit = payload.CardCount
+                        },
+                        new SortOption()
+                        {
+                            Field = "IncorrectCount",
+                            Ascending = false
+                        }
+                    );
 
-                    items.AddRange(supplementalItems.Where(s => !items.Any(i => i.Id == s.Id)));
+                    if (items.Count < payload.CardCount)
+                    {
+                        var remaining = payload.CardCount - items.Count;
+                        var supplementalItems = await flashCards.GetPaginatedForLanguage(
+                            language.Value,
+                            context,
+                            DataOptions.Default,
+                            new SortOption()
+                            {
+                                Field = "IncorrectCount",
+                                Ascending = false
+                            },
+                            new Pagination()
+                            {
+                                PageNo = 1,
+                                Limit = remaining
+                            });
+
+                        items.AddRange(supplementalItems.Where(s => !items.Any(i => i.Id == s.Id)));
+                    }
                 }
                 
                 return new ApiResponse<List<FlashCard>>()
@@ -132,7 +156,7 @@ public static class Features
                 }
                 else
                 {
-                    card.CorrectCount--;
+                    card.CorrectCount = Math.Max(0, card.CorrectCount - 1);
                 }
                 card.LastReviewedUtc = DateTime.UtcNow;
                 card.ReviewCount++;
@@ -188,6 +212,50 @@ public static class Features
                 {
                     Success = true,
                     Data = await repository.GetPaginatedForLanguage(language.Value, uc, DataOptions.Default, sortBy, pagination)
+                };
+            }
+        });
+
+        FeatureRegistry.Add(new Feature<object, ApiResponse<List<CategoryInfo>>>()
+        {
+            FeatureName = "getCategories",
+            FeatureGroup = "flashcard",
+            Route = "/api/flashcard/categories",
+            Method = HttpMethod.Get,
+            Handler = async (_, httpContext) =>
+            {
+                var repo = RepositoryCatalog.GetRepository<IFlashCardRepository>();
+                var context = UserContext.FromHttpContext(httpContext);
+                var language = GetLanguageId(httpContext);
+
+                if (language is null)
+                {
+                    return new ApiResponse<List<CategoryInfo>>()
+                    {
+                        Success = false,
+                        Message = "Language is empty",
+                        Data = null
+                    };
+                }
+
+                var cards = await repo.GetAllForLanguage(
+                    language.Value,
+                    context,
+                    DataOptions.Default,
+                    new SortOption { Field = "Category", Ascending = true }
+                );
+
+                var categories = cards
+                    .Where(c => !string.IsNullOrWhiteSpace(c.Category))
+                    .GroupBy(c => c.Category!.Trim())
+                    .Select(g => new CategoryInfo { Name = g.Key, Count = g.Count() })
+                    .OrderBy(c => c.Name)
+                    .ToList();
+
+                return new ApiResponse<List<CategoryInfo>>()
+                {
+                    Success = true,
+                    Data = categories
                 };
             }
         });
