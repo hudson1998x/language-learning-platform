@@ -36,6 +36,14 @@ public class MistralModule : IModuleLoader
                     Path.Combine(env.ContentRootPath, "./App/Code/Community/LLMProviders/MistralChat/Source/web/help/connecting-mistral/media")
                 )
             });
+
+            webApp.UseStaticFiles(new StaticFileOptions()
+            {
+                RequestPath = "/media/mistral",
+                FileProvider = new PhysicalFileProvider(
+                    Path.Combine(env.ContentRootPath, "./App/Code/Community/LLMProviders/MistralChat/Source/web")
+                )
+            });
         });
 
         return Task.CompletedTask;

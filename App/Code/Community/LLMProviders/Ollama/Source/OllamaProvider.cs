@@ -32,6 +32,7 @@ public class OllamaProvider : ILLMProvider
     }
 
     public bool IsEnabled => _config.Enabled && _isAvailable;
+    public string? LogoUrl => "/media/ollama/logo.png";
 
     private async Task CheckAvailabilityAsync()
     {

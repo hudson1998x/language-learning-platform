@@ -42,15 +42,28 @@ const ConfigEditor = () => {
                 if (res.success && res.data) {
                     setConfigs(res.data);
                     const entries = Object.entries(res.data);
-                    if (entries.length > 0) {
-                        const [firstName, firstFields] = entries[0];
-                        setSelectedConfig(firstName);
-                        setFormValues(extractValues(firstFields.fields));
-                        const moduleName = firstName.endsWith('Configuration')
-                            ? firstName.slice(0, -13)
-                            : firstName;
-                        setExpandedModules(new Set([moduleName]));
+
+                    const params = new URLSearchParams(window.location.search);
+                    const tabParam = params.get('tab')?.toLowerCase();
+
+                    let targetEntry: [string, ConfigTypeInfo] | undefined;
+
+                    if (tabParam && entries.length > 0) {
+                        targetEntry = entries.find(([name]) => {
+                            const moduleName = name.endsWith('Configuration')
+                                ? name.slice(0, -13)
+                                : name;
+                            return moduleName.toLowerCase() === tabParam;
+                        });
                     }
+
+                    const [firstName, firstFields] = targetEntry ?? entries[0];
+                    setSelectedConfig(firstName);
+                    setFormValues(extractValues(firstFields.fields));
+                    const moduleName = firstName.endsWith('Configuration')
+                        ? firstName.slice(0, -13)
+                        : firstName;
+                    setExpandedModules(new Set([moduleName]));
                 } else {
                     setError(res.message ?? 'Failed to load configurations');
                 }

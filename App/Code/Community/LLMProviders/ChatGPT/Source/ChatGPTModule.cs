@@ -36,6 +36,14 @@ public class ChatGPTModule : IModuleLoader
                     Path.Combine(env.ContentRootPath, "./App/Code/Community/LLMProviders/ChatGPT/Source/web/help/connecting-chatgpt/media")
                 )
             });
+
+            webApp.UseStaticFiles(new StaticFileOptions()
+            {
+                RequestPath = "/media/chatgpt",
+                FileProvider = new PhysicalFileProvider(
+                    Path.Combine(env.ContentRootPath, "./App/Code/Community/LLMProviders/ChatGPT/Source/web")
+                )
+            });
         });
 
         return Task.CompletedTask;

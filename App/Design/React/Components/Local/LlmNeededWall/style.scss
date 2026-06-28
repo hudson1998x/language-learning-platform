@@ -1,0 +1,70 @@
+$bg: #0e0e0e;
+$surface: #161616;
+$surface-raised: #1a1a1a;
+$border: #2a2a2a;
+$text: #e5e5e5;
+$text-dim: #999;
+$accent: #5b8def;
+
+.llm-needed {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 24px;
+
+    &__content {
+        max-width: 640px;
+        width: 100%;
+        text-align: center;
+    }
+
+    &__title {
+        font-size: 28px;
+        font-weight: 700;
+        color: $text;
+        margin: 0 0 12px;
+    }
+
+    &__subtitle {
+        font-size: 15px;
+        color: $text-dim;
+        line-height: 1.6;
+        margin: 0 0 36px;
+    }
+
+    &__grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 16px;
+    }
+
+    &__card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        padding: 24px 16px;
+        background: $surface;
+        border: 1px solid $border;
+        border-radius: 10px;
+        text-decoration: none;
+        transition: border-color 0.15s ease, background-color 0.15s ease;
+
+        &:hover {
+            border-color: $accent;
+            background: $surface-raised;
+        }
+    }
+
+    &__card-logo {
+        width: 56px;
+        height: 56px;
+        object-fit: contain;
+    }
+
+    &__card-name {
+        font-size: 14px;
+        font-weight: 500;
+        color: $text;
+    }
+}

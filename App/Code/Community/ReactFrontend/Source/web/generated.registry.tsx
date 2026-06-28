@@ -10,6 +10,7 @@ import { Homepage } from '@component/Pages/Homepage'
 import { FlashCards } from '@component/Pages/FlashCards'
 import { Study } from '@component/Pages/FlashCards/Study'
 import { LanguageSelector } from '@component/LanguageSelector'
+import { LlmNeededWall } from '@component/LlmNeededWall'
 import { Text } from '@component/Text'
 import { Spinner } from '@component/Spinner'
 
@@ -17,6 +18,7 @@ register('@component/Pages/Homepage', Homepage)
 register('@component/Pages/FlashCards', FlashCards)
 register('@component/Pages/FlashCards/Study', Study)
 register('@component/LanguageSelector', LanguageSelector)
+register('@component/LlmNeededWall', LlmNeededWall)
 register('@component/Text', Text)
 register('@component/Spinner', Spinner)
 

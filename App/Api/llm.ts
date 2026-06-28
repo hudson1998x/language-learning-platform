@@ -2,6 +2,7 @@ export interface LlmStatusResponse {
     available: boolean;
     defaultProvider?: string | null;
     providers: Record<string, boolean>;
+    providerLogos: Record<string, string>;
 }
 
 export interface ApiResponse<T> {

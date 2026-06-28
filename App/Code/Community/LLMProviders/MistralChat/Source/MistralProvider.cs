@@ -33,6 +33,7 @@ public class MistralProvider : ILLMProvider
     }
 
     public bool IsEnabled => _config.Enabled && _isAvailable;
+    public string? LogoUrl => "/media/mistral/logo.png";
 
     private HttpClient CreateClient()
     {

@@ -33,6 +33,7 @@ public class ChatGPTProvider : ILLMProvider
     }
 
     public bool IsEnabled => _config.Enabled && _isAvailable;
+    public string? LogoUrl => "/media/chatgpt/logo.png";
 
     private HttpClient CreateClient()
     {

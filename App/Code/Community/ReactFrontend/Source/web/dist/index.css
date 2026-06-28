@@ -1003,6 +1003,62 @@ body {
   background: #4338ca;
 }
 
+/* App/Design/React/Components/Local/LlmNeededWall/style.scss */
+.llm-needed {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+}
+.llm-needed__content {
+  max-width: 640px;
+  width: 100%;
+  text-align: center;
+}
+.llm-needed__title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #e5e5e5;
+  margin: 0 0 12px;
+}
+.llm-needed__subtitle {
+  font-size: 15px;
+  color: #999;
+  line-height: 1.6;
+  margin: 0 0 36px;
+}
+.llm-needed__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+}
+.llm-needed__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 24px 16px;
+  background: #161616;
+  border: 1px solid #2a2a2a;
+  border-radius: 10px;
+  text-decoration: none;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+.llm-needed__card:hover {
+  border-color: #5b8def;
+  background: #1a1a1a;
+}
+.llm-needed__card-logo {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+}
+.llm-needed__card-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #e5e5e5;
+}
+
 /* App/Design/React/Components/Local/Pages/Homepage/style.scss */
 .homepage {
   display: flex;
