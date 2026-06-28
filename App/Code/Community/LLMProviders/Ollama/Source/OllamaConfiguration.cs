@@ -2,7 +2,7 @@ using LLE.Kernel.Attributes;
 
 namespace LLE.LLMProviders.Ollama;
 
-[Configuration]
+[Configuration("AI integration", 4)]
 public class OllamaConfiguration
 {
     public bool Enabled { get; set; } = true;

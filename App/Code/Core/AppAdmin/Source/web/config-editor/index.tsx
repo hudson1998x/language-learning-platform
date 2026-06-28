@@ -19,6 +19,9 @@ interface ConfigHelpInfo {
 interface ConfigTypeInfo {
     fields: Record<string, FieldInfo>;
     help?: ConfigHelpInfo[] | null;
+    groupName?: string | null;
+    sortOrder?: number;
+    alias?: string | null;
 }
 
 type ConfigsData = Record<string, ConfigTypeInfo>;
@@ -60,10 +63,8 @@ const ConfigEditor = () => {
                     const [firstName, firstFields] = targetEntry ?? entries[0];
                     setSelectedConfig(firstName);
                     setFormValues(extractValues(firstFields.fields));
-                    const moduleName = firstName.endsWith('Configuration')
-                        ? firstName.slice(0, -13)
-                        : firstName;
-                    setExpandedModules(new Set([moduleName]));
+                    const selectedGroup = res.data[firstName]?.groupName ?? 'Other';
+                    setExpandedModules(new Set([selectedGroup]));
                 } else {
                     setError(res.message ?? 'Failed to load configurations');
                 }
@@ -124,14 +125,28 @@ const ConfigEditor = () => {
 
     const groupedConfigs = (): Record<string, string[]> => {
         const groups: Record<string, string[]> = {};
-        Object.keys(configs).forEach((name) => {
-            const moduleName = name.endsWith('Configuration')
-                ? name.slice(0, -13)
-                : name;
-            if (!groups[moduleName]) groups[moduleName] = [];
-            groups[moduleName].push(name);
+        const sortKeys: Record<string, number> = {};
+        Object.entries(configs).forEach(([name, info]) => {
+            const group = info.groupName ?? 'Other';
+            if (!groups[group]) groups[group] = [];
+            groups[group].push(name);
+            const order = info.sortOrder ?? Number.MAX_SAFE_INTEGER;
+            if (!(group in sortKeys) || order < sortKeys[group]) {
+                sortKeys[group] = order;
+            }
         });
-        return groups;
+        const sorted = Object.keys(groups).sort(
+            (a, b) => (sortKeys[a] ?? Number.MAX_SAFE_INTEGER) - (sortKeys[b] ?? Number.MAX_SAFE_INTEGER)
+        );
+        const result: Record<string, string[]> = {};
+        for (const group of sorted) {
+            result[group] = groups[group].sort((a, b) => {
+                const aOrder = configs[a]?.sortOrder ?? Number.MAX_SAFE_INTEGER;
+                const bOrder = configs[b]?.sortOrder ?? Number.MAX_SAFE_INTEGER;
+                return aOrder - bOrder;
+            });
+        }
+        return result;
     };
 
     if (loading) {
@@ -163,7 +178,7 @@ const ConfigEditor = () => {
     return (
         <div className="config-editor">
             <aside className="config-editor__sidebar">
-                <h2 className="config-editor__sidebar-title">Modules</h2>
+                <h2 className="config-editor__sidebar-title">Groups</h2>
                 {Object.entries(groups).map(([module, configNames]) => (
                     <div key={module} className="config-editor__group">
                         <button
@@ -185,9 +200,8 @@ const ConfigEditor = () => {
                         {expandedModules.has(module) && (
                             <div className="config-editor__group-items">
                                 {configNames.map((originalName) => {
-                                    const displayName = originalName === module + 'Configuration'
-                                        ? 'Main settings'
-                                        : originalName.replaceAll("Configuration", "");
+                                    const displayName = configs[originalName]?.alias
+                                        ?? originalName.replaceAll("Configuration", "");
                                     return (
                                         <button
                                             key={originalName}

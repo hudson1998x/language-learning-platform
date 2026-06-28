@@ -25718,15 +25718,15 @@
           let targetEntry;
           if (tabParam && entries.length > 0) {
             targetEntry = entries.find(([name]) => {
-              const moduleName2 = name.endsWith("Configuration") ? name.slice(0, -13) : name;
-              return moduleName2.toLowerCase() === tabParam;
+              const moduleName = name.endsWith("Configuration") ? name.slice(0, -13) : name;
+              return moduleName.toLowerCase() === tabParam;
             });
           }
           const [firstName, firstFields] = targetEntry ?? entries[0];
           setSelectedConfig(firstName);
           setFormValues(extractValues(firstFields.fields));
-          const moduleName = firstName.endsWith("Configuration") ? firstName.slice(0, -13) : firstName;
-          setExpandedModules(/* @__PURE__ */ new Set([moduleName]));
+          const selectedGroup = res.data[firstName]?.groupName ?? "Other";
+          setExpandedModules(/* @__PURE__ */ new Set([selectedGroup]));
         } else {
           setError(res.message ?? "Failed to load configurations");
         }
@@ -25780,12 +25780,28 @@
     };
     const groupedConfigs = () => {
       const groups2 = {};
-      Object.keys(configs).forEach((name) => {
-        const moduleName = name.endsWith("Configuration") ? name.slice(0, -13) : name;
-        if (!groups2[moduleName]) groups2[moduleName] = [];
-        groups2[moduleName].push(name);
+      const sortKeys = {};
+      Object.entries(configs).forEach(([name, info]) => {
+        const group = info.groupName ?? "Other";
+        if (!groups2[group]) groups2[group] = [];
+        groups2[group].push(name);
+        const order = info.sortOrder ?? Number.MAX_SAFE_INTEGER;
+        if (!(group in sortKeys) || order < sortKeys[group]) {
+          sortKeys[group] = order;
+        }
       });
-      return groups2;
+      const sorted = Object.keys(groups2).sort(
+        (a, b) => (sortKeys[a] ?? Number.MAX_SAFE_INTEGER) - (sortKeys[b] ?? Number.MAX_SAFE_INTEGER)
+      );
+      const result = {};
+      for (const group of sorted) {
+        result[group] = groups2[group].sort((a, b) => {
+          const aOrder = configs[a]?.sortOrder ?? Number.MAX_SAFE_INTEGER;
+          const bOrder = configs[b]?.sortOrder ?? Number.MAX_SAFE_INTEGER;
+          return aOrder - bOrder;
+        });
+      }
+      return result;
     };
     if (loading) {
       return /* @__PURE__ */ (0, import_jsx_runtime37.jsx)("div", { className: "config-editor", children: /* @__PURE__ */ (0, import_jsx_runtime37.jsx)("div", { className: "config-editor__centered", children: "Loading configurations..." }) });
@@ -25799,7 +25815,7 @@
     const groups = groupedConfigs();
     return /* @__PURE__ */ (0, import_jsx_runtime37.jsxs)("div", { className: "config-editor", children: [
       /* @__PURE__ */ (0, import_jsx_runtime37.jsxs)("aside", { className: "config-editor__sidebar", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime37.jsx)("h2", { className: "config-editor__sidebar-title", children: "Modules" }),
+        /* @__PURE__ */ (0, import_jsx_runtime37.jsx)("h2", { className: "config-editor__sidebar-title", children: "Groups" }),
         Object.entries(groups).map(([module, configNames]) => /* @__PURE__ */ (0, import_jsx_runtime37.jsxs)("div", { className: "config-editor__group", children: [
           /* @__PURE__ */ (0, import_jsx_runtime37.jsxs)(
             "button",
@@ -25820,7 +25836,7 @@
             }
           ),
           expandedModules.has(module) && /* @__PURE__ */ (0, import_jsx_runtime37.jsx)("div", { className: "config-editor__group-items", children: configNames.map((originalName) => {
-            const displayName = originalName === module + "Configuration" ? "Main settings" : originalName.replaceAll("Configuration", "");
+            const displayName = configs[originalName]?.alias ?? originalName.replaceAll("Configuration", "");
             return /* @__PURE__ */ (0, import_jsx_runtime37.jsx)(
               "button",
               {

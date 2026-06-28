@@ -2,7 +2,7 @@ using LLE.Kernel.Attributes;
 
 namespace LLE.LLMProviders.MistralChat;
 
-[Configuration]
+[Configuration("AI integration", 3)]
 [ConfigHelp("@help/mistral/connection-guide", "Connection Guide")]
 public class MistralConfiguration
 {

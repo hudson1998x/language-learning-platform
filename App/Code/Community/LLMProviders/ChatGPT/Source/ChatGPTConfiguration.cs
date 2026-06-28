@@ -2,7 +2,7 @@ using LLE.Kernel.Attributes;
 
 namespace LLE.LLMProviders.ChatGPT;
 
-[Configuration]
+[Configuration("AI integration", 2)]
 [ConfigHelp("@help/chatgpt/connection-guide", "Connection Guide")]
 public class ChatGPTConfiguration
 {

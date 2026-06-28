@@ -13,6 +13,9 @@ export interface ConfigFieldInfo {
 export interface ConfigTypeInfo {
     fields: Record<string, ConfigFieldInfo>;
     help?: ConfigHelpInfo[] | null;
+    groupName?: string | null;
+    sortOrder: number;
+    alias?: string | null;
 }
 
 export interface ApiResponse<T> {

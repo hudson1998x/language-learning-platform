@@ -60,10 +60,15 @@ public static class Features
                         })
                         .ToList();
 
+                    var configAttr = configType.GetCustomAttribute<ConfigurationAttribute>();
+
                     result[typeName] = new ConfigTypeInfo
                     {
                         Fields = fields,
-                        Help = classHelp.Count > 0 ? classHelp : null
+                        Help = classHelp.Count > 0 ? classHelp : null,
+                        GroupName = configAttr?.GroupName,
+                        SortOrder = configAttr?.SortOrder ?? int.MaxValue,
+                        Alias = configAttr?.Alias
                     };
                 }
 
