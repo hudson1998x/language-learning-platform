@@ -10,7 +10,6 @@
     <ItemGroup>
       <ProjectReference Include="..\..\..\Core\Kernel\Source\Kernel.csproj" />
       <ProjectReference Include="..\..\FlashCards\Source\FlashCards.csproj" />
-      <ProjectReference Include="..\..\Scenarios\Source\Scenarios.csproj" />
     </ItemGroup>
 
 </Project>

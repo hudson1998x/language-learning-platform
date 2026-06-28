@@ -18,7 +18,6 @@ const LINKS: NavLink[] = [
     {label: "Dashboard", href: "/"},
     {label: "Flash cards", href: "/flashcards"},
     {label: "Music translation", href: "/musiclyrics", requiresLlm: true},
-    {label: "Scenarios", href: "/scenarios", requiresLlm: true},
     // { label: "Leddit", href: "/leddit" }, // disabled for now, future feature.
     {label: "LeMessage", href: "/messages", requiresLlm: true}
 ];

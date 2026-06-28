@@ -22243,7 +22243,6 @@
     { label: "Dashboard", href: "/" },
     { label: "Flash cards", href: "/flashcards" },
     { label: "Music translation", href: "/musiclyrics", requiresLlm: true },
-    { label: "Scenarios", href: "/scenarios", requiresLlm: true },
     // { label: "Leddit", href: "/leddit" }, // disabled for now, future feature.
     { label: "LeMessage", href: "/messages", requiresLlm: true }
   ];
@@ -23635,611 +23634,11 @@
     return /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("p", { children: props.text });
   };
 
-  // App/Code/Local/Scenarios/Source/web/Pages/Scenarios/index.tsx
+  // App/Code/Community/LeMessage/Source/web/ChatPage/index.tsx
   var import_react19 = __toESM(require_react(), 1);
 
-  // App/Api/scenario.ts
-  var createScenario = (payload2) => {
-    return fetch("/api/scenario/create", {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(payload2)
-    }).then((response) => {
-      if (!response.ok) {
-        throw new Error(`Request failed with status ${response.status}`);
-      }
-      return response.json();
-    });
-  };
-  var deleteScenario = (payload2) => {
-    return fetch("/api/scenario/delete", {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(payload2)
-    }).then((response) => {
-      if (!response.ok) {
-        throw new Error(`Request failed with status ${response.status}`);
-      }
-      return response.json();
-    });
-  };
-  var listScenarioPagedSorted = (pageNum, size, sortField, sortDir) => {
-    return fetch(`/api/scenario/list/${pageNum}/${size}/${sortField}/${sortDir}`, {
-      method: "GET"
-    }).then((response) => {
-      if (!response.ok) {
-        throw new Error(`Request failed with status ${response.status}`);
-      }
-      return response.json();
-    });
-  };
-  var startStudySession = (payload2) => {
-    return fetch("/api/scenario/studysession/start", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(payload2)
-    }).then((response) => {
-      if (!response.ok) {
-        throw new Error(`Request failed with status ${response.status}`);
-      }
-      return response.json();
-    });
-  };
-  var sendMessage2 = (payload2) => {
-    return fetch("/api/scenario/studysession/send", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(payload2)
-    }).then((response) => {
-      if (!response.ok) {
-        throw new Error(`Request failed with status ${response.status}`);
-      }
-      return response.json();
-    });
-  };
-
-  // App/Code/Local/Scenarios/Source/web/Pages/Scenarios/CreateScenarioModal.tsx
-  var import_react17 = __toESM(require_react(), 1);
-  var import_jsx_runtime22 = __toESM(require_jsx_runtime(), 1);
-  var emptyForm2 = {
-    title: "",
-    steps: ""
-  };
-  var CreateScenarioModal = ({ onClose, onCreated }) => {
-    const [form, setForm] = (0, import_react17.useState)(emptyForm2);
-    const [isSubmitting, setIsSubmitting] = (0, import_react17.useState)(false);
-    const [error, setError] = (0, import_react17.useState)(null);
-    const updateField = (field, value) => {
-      setForm((prev) => ({ ...prev, [field]: value }));
-    };
-    const handleSubmit = async (e) => {
-      e.preventDefault();
-      if (!form.title.trim() || !form.steps.trim()) {
-        setError("Title and steps are required");
-        return;
-      }
-      setIsSubmitting(true);
-      setError(null);
-      try {
-        const payload2 = {
-          title: form.title,
-          steps: form.steps
-        };
-        const response = await createScenario(payload2);
-        if (!response.success) {
-          setError(response.message ?? "Failed to create scenario");
-          return;
-        }
-        onCreated();
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to create scenario");
-      } finally {
-        setIsSubmitting(false);
-      }
-    };
-    return /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("div", { className: "modal-overlay", onClick: onClose, children: /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("div", { className: "modal", onClick: (e) => e.stopPropagation(), children: [
-      /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("div", { className: "modal-header", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("h2", { children: "Create new scenario" }),
-        /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("button", { className: "modal-close", onClick: onClose, children: "\u2715" })
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("form", { onSubmit: handleSubmit, className: "modal-body", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("label", { children: [
-          "Title",
-          /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(
-            "input",
-            {
-              type: "text",
-              value: form.title,
-              onChange: (e) => updateField("title", e.target.value),
-              required: true
-            }
-          )
-        ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("label", { children: [
-          "Steps",
-          /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(
-            "textarea",
-            {
-              value: form.steps,
-              onChange: (e) => updateField("steps", e.target.value),
-              required: true,
-              placeholder: "Enter each step on a new line..."
-            }
-          )
-        ] }),
-        error && /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("div", { className: "modal-error", children: error }),
-        /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("div", { className: "modal-actions", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("button", { type: "button", onClick: onClose, disabled: isSubmitting, children: "Cancel" }),
-          /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("button", { type: "submit", disabled: isSubmitting, children: isSubmitting ? "Creating..." : "Create" })
-        ] })
-      ] })
-    ] }) });
-  };
-
-  // App/Code/Local/Scenarios/Source/web/Pages/ScenarioSession/index.tsx
-  var import_react18 = __toESM(require_react(), 1);
-  var import_jsx_runtime23 = __toESM(require_jsx_runtime(), 1);
-  var DIFFICULTIES = [
-    { value: 1, label: "Easy", desc: "Simple vocabulary, short sentences" },
-    { value: 2, label: "Medium", desc: "Moderate vocabulary, natural pacing" },
-    { value: 3, label: "Hard", desc: "Complex vocabulary, idiomatic expressions" }
-  ];
-  var ScenarioSession = ({ scenarioId, onClose }) => {
-    const { session } = useSession();
-    const { language } = useLanguage();
-    const [phase, setPhase] = (0, import_react18.useState)("pick-difficulty");
-    const [scenario, setScenario] = (0, import_react18.useState)(null);
-    const [chatEntries, setChatEntries] = (0, import_react18.useState)([]);
-    const [userInput, setUserInput] = (0, import_react18.useState)("");
-    const [isSending, setIsSending] = (0, import_react18.useState)(false);
-    const [error, setError] = (0, import_react18.useState)(null);
-    const [openMenuIndex, setOpenMenuIndex] = (0, import_react18.useState)(null);
-    const [flashcardIndex, setFlashcardIndex] = (0, import_react18.useState)(null);
-    const [correctionIndex, setCorrectionIndex] = (0, import_react18.useState)(null);
-    const messagesEndRef = (0, import_react18.useRef)(null);
-    const inputRef = (0, import_react18.useRef)(null);
-    (0, import_react18.useEffect)(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [chatEntries]);
-    (0, import_react18.useEffect)(() => {
-      if (phase === "chat" && !isSending) {
-        inputRef.current?.focus();
-      }
-    }, [phase, isSending]);
-    (0, import_react18.useEffect)(() => {
-      const handleEsc = (e) => {
-        if (e.key === "Escape") {
-          if (openMenuIndex !== null) {
-            setOpenMenuIndex(null);
-          } else {
-            onClose();
-          }
-        }
-      };
-      window.addEventListener("keydown", handleEsc);
-      return () => window.removeEventListener("keydown", handleEsc);
-    }, [onClose, openMenuIndex]);
-    (0, import_react18.useEffect)(() => {
-      if (openMenuIndex === null) return;
-      const handleClick = () => setOpenMenuIndex(null);
-      window.addEventListener("click", handleClick);
-      return () => window.removeEventListener("click", handleClick);
-    }, [openMenuIndex]);
-    const handleStartSession = async (difficulty) => {
-      setIsSending(true);
-      setError(null);
-      try {
-        const res = await startStudySession({ scenarioId, difficulty });
-        if (!res.success || !res.data) {
-          setError(res.message ?? "Failed to start session");
-          return;
-        }
-        setScenario(res.data);
-        setChatEntries([]);
-        setPhase("chat");
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to start session");
-      } finally {
-        setIsSending(false);
-      }
-    };
-    const handleSend = async () => {
-      if (!userInput.trim() || !scenario || isSending) return;
-      const userLine = {
-        original: userInput,
-        message: userInput,
-        translation: "",
-        pronunciation: "",
-        culturalMeaning: "",
-        hint: "",
-        isUser: true
-      };
-      setChatEntries((prev) => [...prev, { line: userLine }]);
-      const messageText = userInput;
-      setUserInput("");
-      setIsSending(true);
-      setError(null);
-      try {
-        const history = chatEntries.map((entry) => {
-          const base = {
-            role: entry.line.isUser ? "user" : "assistant",
-            content: entry.line.isUser ? entry.line.original : entry.line.message
-          };
-          if (!entry.line.isUser) {
-            const ai = entry.line;
-            base.correct = ai.correct;
-            base.feedback = ai.feedback;
-            base.hint = ai.hint;
-          }
-          return base;
-        });
-        const res = await sendMessage2({
-          message: messageText,
-          scenarioTitle: scenario.title,
-          scenarioSteps: scenario.steps,
-          difficulty: scenario.difficulty,
-          history
-        });
-        if (!res.success || !res.data) {
-          setError(res.message ?? "Failed to get response");
-          return;
-        }
-        setChatEntries((prev) => [...prev, { line: res.data }]);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to send message");
-      } finally {
-        setIsSending(false);
-      }
-    };
-    const handleKeyDown = (e) => {
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        handleSend();
-      }
-    };
-    const getAiField = (entry, field) => {
-      return entry.line[field];
-    };
-    if (phase === "error" && error) {
-      return /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "session-overlay", children: /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "session-error", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "error-text", children: error }),
-        /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("button", { onClick: onClose, children: "Close" })
-      ] }) });
-    }
-    if (phase === "pick-difficulty") {
-      return /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "session-overlay", children: /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "difficulty-picker", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("button", { className: "close-x", onClick: onClose, children: "\u2715" }),
-        /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("h2", { children: "Choose difficulty" }),
-        /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "difficulty-options", children: DIFFICULTIES.map((d) => /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)(
-          "button",
-          {
-            className: "difficulty-btn",
-            onClick: () => handleStartSession(d.value),
-            disabled: isSending,
-            children: [
-              /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("span", { className: "diff-label", children: d.label }),
-              /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("span", { className: "diff-desc", children: d.desc })
-            ]
-          },
-          d.value
-        )) }),
-        isSending && /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(Spinner, {})
-      ] }) });
-    }
-    return /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "session-overlay", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "chat-container", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "chat-header", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("button", { className: "close-btn", onClick: onClose, children: "\u2715" }),
-          /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "chat-title", children: scenario?.title ?? "Scenario" }),
-          /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "chat-difficulty", children: DIFFICULTIES.find((d) => d.value === scenario?.difficulty)?.label ?? "Medium" })
-        ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "chat-messages", children: [
-          chatEntries.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "chat-empty", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "empty-text", children: "Start the conversation. Type something in the learning language." }),
-            /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "scenario-steps", children: [
-              /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("strong", { children: "Scenario steps:" }),
-              scenario?.steps.split("\n").filter(Boolean).map((step, i) => /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "step-line", children: [
-                i + 1,
-                ". ",
-                step
-              ] }, i))
-            ] })
-          ] }),
-          chatEntries.map((entry, i) => /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: `chat-bubble ${entry.line.isUser ? "user" : "assistant"}`, children: [
-            /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "bubble-message", children: entry.line.isUser ? entry.line.original : entry.line.message }),
-            !entry.line.isUser && /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)(import_jsx_runtime23.Fragment, { children: [
-              /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "line-actions", children: [
-                /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(
-                  "button",
-                  {
-                    className: `line-action-btn${openMenuIndex === i ? " active" : ""}`,
-                    onClick: (e) => {
-                      e.stopPropagation();
-                      setOpenMenuIndex((prev) => prev === i ? null : i);
-                    },
-                    "aria-label": "Actions",
-                    children: /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("svg", { width: "14", height: "14", viewBox: "0 0 14 14", fill: "none", children: /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("path", { d: "M7 3V3.01M7 7V7.01M7 11V11.01", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round" }) })
-                  }
-                ),
-                openMenuIndex === i && /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "line-dropdown", children: [
-                  /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)(
-                    "button",
-                    {
-                      className: "line-dropdown-item",
-                      onClick: (e) => {
-                        e.stopPropagation();
-                        setOpenMenuIndex(null);
-                        setFlashcardIndex(i);
-                      },
-                      children: [
-                        /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("svg", { width: "14", height: "14", viewBox: "0 0 14 14", fill: "none", children: [
-                          /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("rect", { x: "1", y: "3", width: "12", height: "10", rx: "1.5", stroke: "currentColor", strokeWidth: "1.3" }),
-                          /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("path", { d: "M4 1V3M10 1V3M1 6H13", stroke: "currentColor", strokeWidth: "1.3", strokeLinecap: "round" })
-                        ] }),
-                        "Create Flash Card"
-                      ]
-                    }
-                  ),
-                  i > 0 && chatEntries[i - 1]?.line.isUser && /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)(
-                    "button",
-                    {
-                      className: "line-dropdown-item",
-                      onClick: (e) => {
-                        e.stopPropagation();
-                        setOpenMenuIndex(null);
-                        setCorrectionIndex(i);
-                      },
-                      children: [
-                        /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("svg", { width: "14", height: "14", viewBox: "0 0 14 14", fill: "none", children: /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("path", { d: "M2 7L5 10L12 3", stroke: "currentColor", strokeWidth: "1.5", strokeLinecap: "round", strokeLinejoin: "round" }) }),
-                        "Create Correction Flash Card"
-                      ]
-                    }
-                  )
-                ] })
-              ] }),
-              getAiField(entry, "correct") !== void 0 && /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: `bubble-evaluation ${getAiField(entry, "correct") ? "correct" : "incorrect"}`, children: /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("span", { className: "eval-badge", children: getAiField(entry, "correct") ? "\u2713 Correct" : "\u2717 Needs improvement" }) }),
-              /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "bubble-details", children: [
-                getAiField(entry, "feedback") && /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "detail-row feedback", children: [
-                  /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("span", { className: "detail-label", children: "Feedback:" }),
-                  /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("span", { children: getAiField(entry, "feedback") })
-                ] }),
-                entry.line.translation && /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "detail-row", children: [
-                  /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("span", { className: "detail-label", children: "Translation:" }),
-                  /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("span", { children: entry.line.translation })
-                ] }),
-                entry.line.pronunciation && /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "detail-row pronunciation", children: [
-                  /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("span", { className: "detail-label", children: "Pronunciation:" }),
-                  /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("span", { children: entry.line.pronunciation })
-                ] }),
-                entry.line.culturalMeaning && /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "detail-row cultural", children: [
-                  /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("span", { className: "detail-label", children: "Culture:" }),
-                  /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("span", { children: entry.line.culturalMeaning })
-                ] }),
-                entry.line.hint && /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "detail-row hint", children: [
-                  /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("span", { className: "detail-label", children: "Tip:" }),
-                  /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("span", { children: entry.line.hint })
-                ] })
-              ] })
-            ] })
-          ] }, i)),
-          isSending && /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "chat-bubble assistant sending", children: /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(Spinner, {}) }),
-          /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { ref: messagesEndRef })
-        ] }),
-        error && /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "chat-error", children: error }),
-        /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "chat-input-area", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(
-            "input",
-            {
-              ref: inputRef,
-              type: "text",
-              value: userInput,
-              onChange: (e) => setUserInput(e.target.value),
-              onKeyDown: handleKeyDown,
-              placeholder: "Type your message...",
-              disabled: isSending
-            }
-          ),
-          /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(
-            "button",
-            {
-              className: "send-btn",
-              onClick: handleSend,
-              disabled: !userInput.trim() || isSending,
-              children: "Send"
-            }
-          )
-        ] })
-      ] }),
-      flashcardIndex !== null && chatEntries[flashcardIndex] && /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(
-        CreateFlashCardModal,
-        {
-          userId: session?.user?.id ?? "",
-          languageId: language?.id ?? "",
-          showLanguageSelector: true,
-          initialValues: {
-            frontStatement: chatEntries[flashcardIndex].line.original,
-            backStatement: chatEntries[flashcardIndex].line.message,
-            pronunciation: chatEntries[flashcardIndex].line.pronunciation,
-            notes: chatEntries[flashcardIndex].line.culturalMeaning || `From scenario: ${scenario?.title ?? "Unknown"}`,
-            category: "Scenario",
-            tags: "scenario"
-          },
-          onClose: () => setFlashcardIndex(null),
-          onCreated: () => setFlashcardIndex(null)
-        }
-      ),
-      correctionIndex !== null && chatEntries[correctionIndex] && (() => {
-        const userEntry = chatEntries[correctionIndex - 1];
-        const aiLine = chatEntries[correctionIndex].line;
-        return /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(
-          CreateFlashCardModal,
-          {
-            userId: session?.user?.id ?? "",
-            languageId: language?.id ?? "",
-            showLanguageSelector: true,
-            initialValues: {
-              frontStatement: userEntry?.line?.original ?? "",
-              backStatement: aiLine.hint || "",
-              pronunciation: "",
-              notes: aiLine.feedback || "",
-              category: "Scenario-Correction",
-              tags: "scenario,correction"
-            },
-            onClose: () => setCorrectionIndex(null),
-            onCreated: () => setCorrectionIndex(null)
-          }
-        );
-      })()
-    ] });
-  };
-
-  // App/Code/Local/Scenarios/Source/web/Pages/Scenarios/index.tsx
-  var import_jsx_runtime24 = __toESM(require_jsx_runtime(), 1);
-  var SORT_OPTIONS2 = [
-    { value: "createTime", label: "Date created" },
-    { value: "title", label: "Title" }
-  ];
-  var ScenariosIndexPage = () => {
-    const { session } = useSession();
-    const [isModalOpen, setIsModalOpen] = (0, import_react19.useState)(false);
-    const [isDeleting, setIsDeleting] = (0, import_react19.useState)(null);
-    const [activeScenarioId, setActiveScenarioId] = (0, import_react19.useState)(null);
-    const {
-      page,
-      size,
-      nextPage,
-      prevPage,
-      results: scenarios,
-      isLoading: scenariosLoading,
-      error: scenariosError,
-      sortField,
-      sortDir,
-      setSortField,
-      setSortDir
-    } = usePagination(listScenarioPagedSorted, [isModalOpen, isDeleting]);
-    const handleDelete = async (scenario, e) => {
-      e.stopPropagation();
-      setIsDeleting(scenario.id);
-      try {
-        await deleteScenario(scenario);
-      } finally {
-        setIsDeleting(null);
-      }
-    };
-    if (scenariosLoading) {
-      return /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("div", { className: "scenarios-status", children: /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(Spinner, {}) });
-    }
-    if (scenariosError) {
-      return /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("div", { className: "scenarios-status", children: /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("div", { className: "error", children: `Couldn't load scenarios: ${scenariosError}` }) });
-    }
-    const cards = scenarios ?? [];
-    const mayHaveNextPage = cards.length === size;
-    const formatTime = (iso) => {
-      if (!iso) return "";
-      const days = Math.floor((Date.now() - new Date(iso).getTime()) / 864e5);
-      if (days <= 0) return "Today";
-      if (days === 1) return "Yesterday";
-      if (days < 30) return `${days}d ago`;
-      return `${Math.floor(days / 30)}mo ago`;
-    };
-    return /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "scenarios", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("div", { className: "scenarios-header", children: /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("h1", { children: "Scenarios" }) }),
-      /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "card-actions", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "pagination", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("button", { onClick: prevPage, disabled: page <= 1, children: "Previous" }),
-          /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("span", { children: `Page ${page}` }),
-          /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("button", { onClick: nextPage, disabled: !mayHaveNextPage, children: "Next" })
-        ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "sort-controls", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("select", { value: sortField ?? "", onChange: (e) => setSortField(e.target.value || void 0), children: SORT_OPTIONS2.map((opt) => /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("option", { value: opt.value, children: opt.label }, opt.value)) }),
-          /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("select", { value: sortDir ?? "desc", onChange: (e) => setSortDir(e.target.value), children: [
-            /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("option", { value: "asc", children: "Asc" }),
-            /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("option", { value: "desc", children: "Desc" })
-          ] })
-        ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("div", { className: "primary-actions", children: /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("button", { className: "create-button", onClick: () => setIsModalOpen(true), children: "Create new" }) })
-      ] }),
-      cards.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "notice", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("div", { className: "notice-title", children: "No scenarios yet" }),
-        /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("div", { className: "notice-body", children: 'Click "Create new" to add your first scenario.' })
-      ] }),
-      cards.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("div", { className: "scenario-grid", children: cards.map((scenario) => /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)(
-        "div",
-        {
-          className: "scenario-card",
-          onClick: () => setActiveScenarioId(scenario.id),
-          role: "button",
-          tabIndex: 0,
-          onKeyDown: (e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault();
-              setActiveScenarioId(scenario.id);
-            }
-          },
-          children: [
-            /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "card-header", children: [
-              /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("h3", { className: "scenario-title", children: scenario.title }),
-              /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(
-                "button",
-                {
-                  className: "delete-button",
-                  onClick: (e) => handleDelete(scenario, e),
-                  disabled: isDeleting === scenario.id,
-                  "aria-label": "Delete scenario",
-                  children: isDeleting === scenario.id ? "..." : "\u2715"
-                }
-              )
-            ] }),
-            /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("div", { className: "card-body", children: /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "steps-preview", children: [
-              scenario.steps.split("\n").filter(Boolean).slice(0, 3).map((step, index) => /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "step-item", children: [
-                /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("span", { className: "step-number", children: [
-                  index + 1,
-                  "."
-                ] }),
-                /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("span", { className: "step-text", children: step })
-              ] }, index)),
-              scenario.steps.split("\n").filter(Boolean).length > 3 && /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "more-steps", children: [
-                "+",
-                scenario.steps.split("\n").filter(Boolean).length - 3,
-                " more steps"
-              ] })
-            ] }) }),
-            /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("div", { className: "card-footer", children: /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("span", { className: "create-time", children: formatTime(scenario.createTime) }) })
-          ]
-        },
-        scenario.id
-      )) }),
-      isModalOpen && /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(
-        CreateScenarioModal,
-        {
-          onClose: () => setIsModalOpen(false),
-          onCreated: () => setIsModalOpen(false)
-        }
-      ),
-      activeScenarioId && /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(
-        ScenarioSession,
-        {
-          scenarioId: activeScenarioId,
-          onClose: () => setActiveScenarioId(null)
-        }
-      )
-    ] });
-  };
-  register("@page/scenarios-page", ScenariosIndexPage);
-
-  // App/Code/Community/LeMessage/Source/web/ChatPage/index.tsx
-  var import_react22 = __toESM(require_react(), 1);
-
   // App/Code/Community/LeMessage/Source/web/ChatPage/ConversationList.tsx
-  var import_react20 = __toESM(require_react(), 1);
+  var import_react17 = __toESM(require_react(), 1);
 
   // App/Api/profile.ts
   var listAllProfile = () => {
@@ -24284,7 +23683,7 @@
   };
 
   // App/Code/Community/LeMessage/Source/web/ChatPage/ConversationList.tsx
-  var import_jsx_runtime25 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime22 = __toESM(require_jsx_runtime(), 1);
   var ConversationList = ({
     activeConversationId,
     onSelectConversation,
@@ -24293,11 +23692,11 @@
   }) => {
     const { session } = useSession();
     const { language } = useLanguage();
-    const [conversations, setConversations] = (0, import_react20.useState)([]);
-    const [isLoading, setIsLoading] = (0, import_react20.useState)(true);
-    const [error, setError] = (0, import_react20.useState)(null);
-    const [showProfilePicker, setShowProfilePicker] = (0, import_react20.useState)(false);
-    (0, import_react20.useEffect)(() => {
+    const [conversations, setConversations] = (0, import_react17.useState)([]);
+    const [isLoading, setIsLoading] = (0, import_react17.useState)(true);
+    const [error, setError] = (0, import_react17.useState)(null);
+    const [showProfilePicker, setShowProfilePicker] = (0, import_react17.useState)(false);
+    (0, import_react17.useEffect)(() => {
       loadConversations();
     }, [session?.user?.id, refreshTrigger]);
     const loadConversations = async () => {
@@ -24334,40 +23733,40 @@
       return date.toLocaleDateString();
     };
     if (isLoading) {
-      return /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)("div", { className: "conv-list", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("div", { className: "conv-list-header", children: /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("h2", { children: "Messages" }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("div", { className: "conv-list-status", children: /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(Spinner, {}) })
+      return /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("div", { className: "conv-list", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("div", { className: "conv-list-header", children: /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("h2", { children: "Messages" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("div", { className: "conv-list-status", children: /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(Spinner, {}) })
       ] });
     }
     if (error) {
-      return /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)("div", { className: "conv-list", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("div", { className: "conv-list-header", children: /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("h2", { children: "Messages" }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)("div", { className: "conv-list-status", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("div", { className: "error-text", children: error }),
-          /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("button", { className: "retry-btn", onClick: loadConversations, children: "Retry" })
+      return /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("div", { className: "conv-list", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("div", { className: "conv-list-header", children: /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("h2", { children: "Messages" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("div", { className: "conv-list-status", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("div", { className: "error-text", children: error }),
+          /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("button", { className: "retry-btn", onClick: loadConversations, children: "Retry" })
         ] })
       ] });
     }
-    return /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)("div", { className: "conv-list", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)("div", { className: "conv-list-header", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("h2", { children: "Messages" }),
-        /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(
+    return /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("div", { className: "conv-list", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("div", { className: "conv-list-header", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("h2", { children: "Messages" }),
+        /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(
           "button",
           {
             className: "new-chat-btn",
             onClick: () => setShowProfilePicker(true),
             title: "New conversation",
-            children: /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("svg", { width: "18", height: "18", viewBox: "0 0 18 18", fill: "none", children: /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("path", { d: "M9 3V15M3 9H15", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round" }) })
+            children: /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("svg", { width: "18", height: "18", viewBox: "0 0 18 18", fill: "none", children: /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("path", { d: "M9 3V15M3 9H15", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round" }) })
           }
         )
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)("div", { className: "conv-list-scroll", children: [
-        conversations.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)("div", { className: "conv-list-empty", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("div", { className: "empty-icon", children: /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("svg", { width: "40", height: "40", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.5", strokeLinecap: "round", children: /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("path", { d: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" }) }) }),
-          /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("div", { className: "empty-text", children: "No conversations yet" }),
-          /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("div", { className: "empty-hint", children: "Start a new chat to begin practising!" })
+      /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("div", { className: "conv-list-scroll", children: [
+        conversations.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("div", { className: "conv-list-empty", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("div", { className: "empty-icon", children: /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("svg", { width: "40", height: "40", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.5", strokeLinecap: "round", children: /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("path", { d: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" }) }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("div", { className: "empty-text", children: "No conversations yet" }),
+          /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("div", { className: "empty-hint", children: "Start a new chat to begin practising!" })
         ] }),
-        conversations.map((conv) => /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)(
+        conversations.map((conv) => /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)(
           "div",
           {
             className: `conv-item ${activeConversationId === conv.id ? "active" : ""}`,
@@ -24378,25 +23777,25 @@
               if (e.key === "Enter") onSelectConversation(conv.id, conv.profileName, conv.profileAvatarUrl);
             },
             children: [
-              /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("div", { className: "conv-avatar", children: conv.profileAvatarUrl ? /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("img", { src: conv.profileAvatarUrl, alt: conv.profileName }) : /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("div", { className: "avatar-placeholder", children: conv.profileName.charAt(0) }) }),
-              /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)("div", { className: "conv-info", children: [
-                /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)("div", { className: "conv-name-row", children: [
-                  /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("span", { className: "conv-name", children: conv.profileName }),
-                  /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("span", { className: "conv-time", children: formatTime(conv.lastMessageTime) })
+              /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("div", { className: "conv-avatar", children: conv.profileAvatarUrl ? /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("img", { src: conv.profileAvatarUrl, alt: conv.profileName }) : /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("div", { className: "avatar-placeholder", children: conv.profileName.charAt(0) }) }),
+              /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("div", { className: "conv-info", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("div", { className: "conv-name-row", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("span", { className: "conv-name", children: conv.profileName }),
+                  /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("span", { className: "conv-time", children: formatTime(conv.lastMessageTime) })
                 ] }),
-                /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("div", { className: "conv-preview", children: conv.lastMessage || "No messages yet" })
+                /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("div", { className: "conv-preview", children: conv.lastMessage || "No messages yet" })
               ] })
             ]
           },
           conv.id
         ))
       ] }),
-      showProfilePicker && /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("div", { className: "profile-picker-overlay", onClick: () => setShowProfilePicker(false), children: /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)("div", { className: "profile-picker", onClick: (e) => e.stopPropagation(), children: [
-        /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)("div", { className: "profile-picker-header", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("h3", { children: "New Conversation" }),
-          /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("button", { className: "modal-close", onClick: () => setShowProfilePicker(false), children: "\u2715" })
+      showProfilePicker && /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("div", { className: "profile-picker-overlay", onClick: () => setShowProfilePicker(false), children: /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("div", { className: "profile-picker", onClick: (e) => e.stopPropagation(), children: [
+        /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("div", { className: "profile-picker-header", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("h3", { children: "New Conversation" }),
+          /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("button", { className: "modal-close", onClick: () => setShowProfilePicker(false), children: "\u2715" })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(
           ProfilePickerContent,
           {
             language,
@@ -24412,11 +23811,11 @@
     ] });
   };
   var ProfilePickerContent = ({ language, userId, languageId, onSelected }) => {
-    const [profiles, setProfiles] = (0, import_react20.useState)([]);
-    const [isLoading, setIsLoading] = (0, import_react20.useState)(true);
-    const [error, setError] = (0, import_react20.useState)(null);
-    const [startingId, setStartingId] = (0, import_react20.useState)(null);
-    (0, import_react20.useEffect)(() => {
+    const [profiles, setProfiles] = (0, import_react17.useState)([]);
+    const [isLoading, setIsLoading] = (0, import_react17.useState)(true);
+    const [error, setError] = (0, import_react17.useState)(null);
+    const [startingId, setStartingId] = (0, import_react17.useState)(null);
+    (0, import_react17.useEffect)(() => {
       loadProfiles();
     }, [language]);
     const loadProfiles = async () => {
@@ -24456,33 +23855,33 @@
       }
     };
     if (isLoading) {
-      return /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("div", { className: "profile-picker-status", children: /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(Spinner, {}) });
+      return /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("div", { className: "profile-picker-status", children: /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(Spinner, {}) });
     }
     if (error) {
-      return /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)("div", { className: "profile-picker-status", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("div", { className: "error-text", children: error }),
-        /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("button", { className: "retry-btn", onClick: loadProfiles, children: "Retry" })
+      return /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("div", { className: "profile-picker-status", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("div", { className: "error-text", children: error }),
+        /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("button", { className: "retry-btn", onClick: loadProfiles, children: "Retry" })
       ] });
     }
     if (profiles.length === 0) {
-      return /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("div", { className: "profile-picker-status", children: /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)("div", { className: "empty-text", children: [
+      return /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("div", { className: "profile-picker-status", children: /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("div", { className: "empty-text", children: [
         "No profiles available",
         language?.name ? ` for ${language.name}` : ""
       ] }) });
     }
-    return /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("div", { className: "profile-grid", children: profiles.map((profile) => /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)(
+    return /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("div", { className: "profile-grid", children: profiles.map((profile) => /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)(
       "button",
       {
         className: "profile-card",
         onClick: () => handleStart(profile.id),
         disabled: startingId === profile.id,
         children: [
-          /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("div", { className: "profile-card-avatar", children: profile.avatarUrl ? /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("img", { src: profile.avatarUrl, alt: profile.name }) : /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("div", { className: "avatar-placeholder", children: profile.name.charAt(0) }) }),
-          /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)("div", { className: "profile-card-info", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("div", { className: "profile-card-name", children: profile.name }),
-            /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("div", { className: "profile-card-desc", children: profile.description })
+          /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("div", { className: "profile-card-avatar", children: profile.avatarUrl ? /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("img", { src: profile.avatarUrl, alt: profile.name }) : /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("div", { className: "avatar-placeholder", children: profile.name.charAt(0) }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("div", { className: "profile-card-info", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("div", { className: "profile-card-name", children: profile.name }),
+            /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("div", { className: "profile-card-desc", children: profile.description })
           ] }),
-          startingId === profile.id && /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(Spinner, { size: "sm" })
+          startingId === profile.id && /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(Spinner, { size: "sm" })
         ]
       },
       profile.id
@@ -24490,8 +23889,8 @@
   };
 
   // App/Code/Community/LeMessage/Source/web/ChatPage/ChatView.tsx
-  var import_react21 = __toESM(require_react(), 1);
-  var import_jsx_runtime26 = __toESM(require_jsx_runtime(), 1);
+  var import_react18 = __toESM(require_react(), 1);
+  var import_jsx_runtime23 = __toESM(require_jsx_runtime(), 1);
   var ChatView = ({
     conversationId,
     profileName,
@@ -24501,35 +23900,35 @@
   }) => {
     const { session } = useSession();
     const { language } = useLanguage();
-    const [messages, setMessages] = (0, import_react21.useState)([]);
-    const [isLoading, setIsLoading] = (0, import_react21.useState)(false);
-    const [isSending, setIsSending] = (0, import_react21.useState)(false);
-    const [error, setError] = (0, import_react21.useState)(null);
-    const [userInput, setUserInput] = (0, import_react21.useState)("");
-    const [correctionData, setCorrectionData] = (0, import_react21.useState)(null);
-    const [contextMenu, setContextMenu] = (0, import_react21.useState)(null);
-    const [isTranslating, setIsTranslating] = (0, import_react21.useState)(false);
-    const [translateQueue, setTranslateQueue] = (0, import_react21.useState)([]);
-    const [translateIndex, setTranslateIndex] = (0, import_react21.useState)(0);
-    const messagesEndRef = (0, import_react21.useRef)(null);
-    const inputRef = (0, import_react21.useRef)(null);
-    const menuRef = (0, import_react21.useRef)(null);
-    (0, import_react21.useEffect)(() => {
+    const [messages, setMessages] = (0, import_react18.useState)([]);
+    const [isLoading, setIsLoading] = (0, import_react18.useState)(false);
+    const [isSending, setIsSending] = (0, import_react18.useState)(false);
+    const [error, setError] = (0, import_react18.useState)(null);
+    const [userInput, setUserInput] = (0, import_react18.useState)("");
+    const [correctionData, setCorrectionData] = (0, import_react18.useState)(null);
+    const [contextMenu, setContextMenu] = (0, import_react18.useState)(null);
+    const [isTranslating, setIsTranslating] = (0, import_react18.useState)(false);
+    const [translateQueue, setTranslateQueue] = (0, import_react18.useState)([]);
+    const [translateIndex, setTranslateIndex] = (0, import_react18.useState)(0);
+    const messagesEndRef = (0, import_react18.useRef)(null);
+    const inputRef = (0, import_react18.useRef)(null);
+    const menuRef = (0, import_react18.useRef)(null);
+    (0, import_react18.useEffect)(() => {
       if (conversationId) {
         loadMessages();
       } else {
         setMessages([]);
       }
     }, [conversationId]);
-    (0, import_react21.useEffect)(() => {
+    (0, import_react18.useEffect)(() => {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
-    (0, import_react21.useEffect)(() => {
+    (0, import_react18.useEffect)(() => {
       if (!isSending && conversationId) {
         inputRef.current?.focus();
       }
     }, [isSending, conversationId]);
-    (0, import_react21.useEffect)(() => {
+    (0, import_react18.useEffect)(() => {
       if (!contextMenu) return;
       const handleClick = (e) => {
         if (menuRef.current && !menuRef.current.contains(e.target)) {
@@ -24611,7 +24010,7 @@
       e.preventDefault();
       setContextMenu({ x: e.clientX, y: e.clientY, message: msg });
     };
-    const handleTranslate = (0, import_react21.useCallback)(async () => {
+    const handleTranslate = (0, import_react18.useCallback)(async () => {
       if (!contextMenu) return;
       const msg = contextMenu.message;
       setContextMenu(null);
@@ -24634,7 +24033,7 @@
         setIsTranslating(false);
       }
     }, [contextMenu]);
-    const handleTranslateCardCreated = (0, import_react21.useCallback)(() => {
+    const handleTranslateCardCreated = (0, import_react18.useCallback)(() => {
       if (translateIndex + 1 < translateQueue.length) {
         setTranslateIndex((prev) => prev + 1);
       } else {
@@ -24642,7 +24041,7 @@
         setTranslateIndex(0);
       }
     }, [translateIndex, translateQueue]);
-    const handleTranslateCardClosed = (0, import_react21.useCallback)(() => {
+    const handleTranslateCardClosed = (0, import_react18.useCallback)(() => {
       if (translateIndex + 1 < translateQueue.length) {
         setTranslateIndex((prev) => prev + 1);
       } else {
@@ -24663,52 +24062,52 @@
       return date.toLocaleDateString();
     };
     if (!conversationId) {
-      return /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("div", { className: "chat-view", children: /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)("div", { className: "chat-view-empty", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("div", { className: "empty-icon", children: /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("svg", { width: "48", height: "48", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.5", strokeLinecap: "round", children: /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("path", { d: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" }) }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("div", { className: "empty-title", children: "Select a conversation" }),
-        /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("div", { className: "empty-hint", children: "Choose a chat from the sidebar or start a new one" })
+      return /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "chat-view", children: /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "chat-view-empty", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "empty-icon", children: /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("svg", { width: "48", height: "48", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.5", strokeLinecap: "round", children: /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("path", { d: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" }) }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "empty-title", children: "Select a conversation" }),
+        /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "empty-hint", children: "Choose a chat from the sidebar or start a new one" })
       ] }) });
     }
     const currentPair = translateQueue[translateIndex];
-    return /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)("div", { className: "chat-view", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)("div", { className: "chat-view-header", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("button", { className: "back-btn", onClick: onBack, "aria-label": "Back", children: /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("svg", { width: "20", height: "20", viewBox: "0 0 20 20", fill: "none", children: /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("path", { d: "M12 4L6 10L12 16", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }) }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)("div", { className: "chat-view-profile", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("div", { className: "header-avatar", children: profileAvatarUrl ? /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("img", { src: profileAvatarUrl, alt: profileName }) : /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("div", { className: "avatar-placeholder", children: profileName.charAt(0) }) }),
-          /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("div", { className: "header-name", children: profileName })
+    return /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "chat-view", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "chat-view-header", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("button", { className: "back-btn", onClick: onBack, "aria-label": "Back", children: /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("svg", { width: "20", height: "20", viewBox: "0 0 20 20", fill: "none", children: /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("path", { d: "M12 4L6 10L12 16", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }) }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "chat-view-profile", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "header-avatar", children: profileAvatarUrl ? /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("img", { src: profileAvatarUrl, alt: profileName }) : /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "avatar-placeholder", children: profileName.charAt(0) }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "header-name", children: profileName })
         ] })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)("div", { className: "chat-view-messages", children: [
-        isLoading && /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("div", { className: "chat-view-status", children: /* @__PURE__ */ (0, import_jsx_runtime26.jsx)(Spinner, {}) }),
-        !isLoading && messages.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)("div", { className: "chat-view-status", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("div", { className: "empty-text", children: "Start the conversation!" }),
-          /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)("div", { className: "empty-hint", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "chat-view-messages", children: [
+        isLoading && /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "chat-view-status", children: /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(Spinner, {}) }),
+        !isLoading && messages.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "chat-view-status", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "empty-text", children: "Start the conversation!" }),
+          /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "empty-hint", children: [
             "Say hello to ",
             profileName
           ] })
         ] }),
-        messages.map((msg) => /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)(
+        messages.map((msg) => /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)(
           "div",
           {
             className: `msg-bubble ${msg.role === "user" ? "user" : "assistant"}`,
             onContextMenu: (e) => handleContextMenu(e, msg),
             children: [
-              /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("div", { className: "msg-content", children: msg.content }),
-              /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("div", { className: "msg-time", children: formatTime(msg.createdAt) })
+              /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "msg-content", children: msg.content }),
+              /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "msg-time", children: formatTime(msg.createdAt) })
             ]
           },
           msg.id
         )),
-        isSending && /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("div", { className: "msg-bubble assistant sending", children: /* @__PURE__ */ (0, import_jsx_runtime26.jsx)(Spinner, { size: "sm" }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("div", { ref: messagesEndRef })
+        isSending && /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "msg-bubble assistant sending", children: /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(Spinner, { size: "sm" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { ref: messagesEndRef })
       ] }),
-      error && /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("div", { className: "chat-view-error", children: error }),
-      isTranslating && /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)("div", { className: "chat-view-translating", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime26.jsx)(Spinner, { size: "sm" }),
+      error && /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "chat-view-error", children: error }),
+      isTranslating && /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "chat-view-translating", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(Spinner, { size: "sm" }),
         " Translating..."
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)("div", { className: "chat-view-input", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime26.jsx)(
+      /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "chat-view-input", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(
           "input",
           {
             ref: inputRef,
@@ -24720,33 +24119,33 @@
             disabled: isSending
           }
         ),
-        /* @__PURE__ */ (0, import_jsx_runtime26.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(
           "button",
           {
             className: "send-btn",
             onClick: handleSend,
             disabled: !userInput.trim() || isSending,
-            children: /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("svg", { width: "18", height: "18", viewBox: "0 0 18 18", fill: "none", children: /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("path", { d: "M2 9L16 2L9 16L7 11L2 9Z", stroke: "currentColor", strokeWidth: "1.5", strokeLinecap: "round", strokeLinejoin: "round" }) })
+            children: /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("svg", { width: "18", height: "18", viewBox: "0 0 18 18", fill: "none", children: /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("path", { d: "M2 9L16 2L9 16L7 11L2 9Z", stroke: "currentColor", strokeWidth: "1.5", strokeLinecap: "round", strokeLinejoin: "round" }) })
           }
         )
       ] }),
-      contextMenu && /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)(import_jsx_runtime26.Fragment, { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("div", { className: "context-menu-backdrop" }),
-        /* @__PURE__ */ (0, import_jsx_runtime26.jsx)(
+      contextMenu && /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)(import_jsx_runtime23.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "context-menu-backdrop" }),
+        /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(
           "div",
           {
             ref: menuRef,
             className: "context-menu",
             style: { left: contextMenu.x, top: contextMenu.y },
-            children: /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)(
+            children: /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)(
               "button",
               {
                 className: "context-menu-item",
                 onClick: handleTranslate,
                 children: [
-                  /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)("svg", { width: "14", height: "14", viewBox: "0 0 14 14", fill: "none", children: [
-                    /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("path", { d: "M1 13L4 4L7 13M2 10H6", stroke: "currentColor", strokeWidth: "1.3", strokeLinecap: "round", strokeLinejoin: "round" }),
-                    /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("path", { d: "M10 3V13M10 3L12 5M10 3L8 5", stroke: "currentColor", strokeWidth: "1.3", strokeLinecap: "round", strokeLinejoin: "round" })
+                  /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("svg", { width: "14", height: "14", viewBox: "0 0 14 14", fill: "none", children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("path", { d: "M1 13L4 4L7 13M2 10H6", stroke: "currentColor", strokeWidth: "1.3", strokeLinecap: "round", strokeLinejoin: "round" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("path", { d: "M10 3V13M10 3L12 5M10 3L8 5", stroke: "currentColor", strokeWidth: "1.3", strokeLinecap: "round", strokeLinejoin: "round" })
                   ] }),
                   "Translate to English & Create Card"
                 ]
@@ -24755,9 +24154,9 @@
           }
         )
       ] }),
-      correctionData && /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("div", { className: "correction-toast", children: /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)("div", { className: "correction-toast-content", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("span", { className: "correction-label", children: "Correction detected!" }),
-        /* @__PURE__ */ (0, import_jsx_runtime26.jsx)(
+      correctionData && /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "correction-toast", children: /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "correction-toast-content", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("span", { className: "correction-label", children: "Correction detected!" }),
+        /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(
           "button",
           {
             className: "correction-card-btn",
@@ -24765,7 +24164,7 @@
             children: "Dismiss"
           }
         ),
-        /* @__PURE__ */ (0, import_jsx_runtime26.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(
           CreateFlashCardButton,
           {
             mistake: correctionData.mistake,
@@ -24777,7 +24176,7 @@
           }
         )
       ] }) }),
-      currentPair && /* @__PURE__ */ (0, import_jsx_runtime26.jsx)(
+      currentPair && /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(
         CreateFlashCardModal,
         {
           userId: session?.user?.id ?? "",
@@ -24798,16 +24197,16 @@
     ] });
   };
   var CreateFlashCardButton = ({ mistake, corrected, explanation, userId, languageId, onCreated }) => {
-    const [show, setShow] = (0, import_react21.useState)(false);
-    return /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)(import_jsx_runtime26.Fragment, { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)("button", { className: "create-card-btn", onClick: () => setShow(true), children: [
-        /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)("svg", { width: "14", height: "14", viewBox: "0 0 14 14", fill: "none", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("rect", { x: "1", y: "3", width: "12", height: "10", rx: "1.5", stroke: "currentColor", strokeWidth: "1.3" }),
-          /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("path", { d: "M4 1V3M10 1V3M1 6H13", stroke: "currentColor", strokeWidth: "1.3", strokeLinecap: "round" })
+    const [show, setShow] = (0, import_react18.useState)(false);
+    return /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)(import_jsx_runtime23.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("button", { className: "create-card-btn", onClick: () => setShow(true), children: [
+        /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("svg", { width: "14", height: "14", viewBox: "0 0 14 14", fill: "none", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("rect", { x: "1", y: "3", width: "12", height: "10", rx: "1.5", stroke: "currentColor", strokeWidth: "1.3" }),
+          /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("path", { d: "M4 1V3M10 1V3M1 6H13", stroke: "currentColor", strokeWidth: "1.3", strokeLinecap: "round" })
         ] }),
         "Create Flash Card"
       ] }),
-      show && /* @__PURE__ */ (0, import_jsx_runtime26.jsx)(
+      show && /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(
         CreateFlashCardModal,
         {
           userId,
@@ -24831,29 +24230,29 @@
   };
 
   // App/Code/Community/LeMessage/Source/web/ChatPage/index.tsx
-  var import_jsx_runtime27 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime24 = __toESM(require_jsx_runtime(), 1);
   var LeMessagePage = () => {
-    const [activeConvId, setActiveConvId] = (0, import_react22.useState)(null);
-    const [activeConvInfo, setActiveConvInfo] = (0, import_react22.useState)({ profileName: "", profileAvatarUrl: "" });
-    const [refreshTrigger, setRefreshTrigger] = (0, import_react22.useState)(0);
-    const handleSelectConversation = (0, import_react22.useCallback)((id, profileName, profileAvatarUrl) => {
+    const [activeConvId, setActiveConvId] = (0, import_react19.useState)(null);
+    const [activeConvInfo, setActiveConvInfo] = (0, import_react19.useState)({ profileName: "", profileAvatarUrl: "" });
+    const [refreshTrigger, setRefreshTrigger] = (0, import_react19.useState)(0);
+    const handleSelectConversation = (0, import_react19.useCallback)((id, profileName, profileAvatarUrl) => {
       setActiveConvId(id);
       setActiveConvInfo({ profileName, profileAvatarUrl });
     }, []);
-    const handleConversationCreated = (0, import_react22.useCallback)((id, profileName, profileAvatarUrl) => {
+    const handleConversationCreated = (0, import_react19.useCallback)((id, profileName, profileAvatarUrl) => {
       setActiveConvId(id);
       setActiveConvInfo({ profileName, profileAvatarUrl });
       setRefreshTrigger((prev) => prev + 1);
     }, []);
-    const handleMessageSent = (0, import_react22.useCallback)(() => {
+    const handleMessageSent = (0, import_react19.useCallback)(() => {
       setRefreshTrigger((prev) => prev + 1);
     }, []);
-    const handleBack = (0, import_react22.useCallback)(() => {
+    const handleBack = (0, import_react19.useCallback)(() => {
       setActiveConvId(null);
       setActiveConvInfo({ profileName: "", profileAvatarUrl: "" });
     }, []);
-    return /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "lemessage-page", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(
+    return /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "lemessage-page", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(
         ConversationList,
         {
           activeConversationId: activeConvId,
@@ -24862,7 +24261,7 @@
           refreshTrigger
         }
       ),
-      /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(
+      /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(
         ChatView,
         {
           conversationId: activeConvId,
@@ -24877,7 +24276,7 @@
   register("@page/lemessage-chat", LeMessagePage);
 
   // App/Code/Community/MusicTranslation/Source/web/TranslationPage/index.tsx
-  var import_react25 = __toESM(require_react(), 1);
+  var import_react22 = __toESM(require_react(), 1);
 
   // App/Api/track.ts
   var listTrackPagedSorted = (pageNum, size, sortField, sortDir) => {
@@ -24946,7 +24345,7 @@
   };
 
   // App/Code/Community/MusicTranslation/Source/web/TranslationPage/CreateSongModal.tsx
-  var import_react23 = __toESM(require_react(), 1);
+  var import_react20 = __toESM(require_react(), 1);
 
   // App/Api/musicTranslation.ts
   var translateSong = (payload2) => {
@@ -24965,17 +24364,17 @@
   };
 
   // App/Code/Community/MusicTranslation/Source/web/TranslationPage/CreateSongModal.tsx
-  var import_jsx_runtime28 = __toESM(require_jsx_runtime(), 1);
-  var emptyForm3 = {
+  var import_jsx_runtime25 = __toESM(require_jsx_runtime(), 1);
+  var emptyForm2 = {
     lyrics: "",
     title: "",
     artist: "",
     album: ""
   };
   var CreateSongModal = ({ onClose, onCreated }) => {
-    const [form, setForm] = (0, import_react23.useState)(emptyForm3);
-    const [isSubmitting, setIsSubmitting] = (0, import_react23.useState)(false);
-    const [error, setError] = (0, import_react23.useState)(null);
+    const [form, setForm] = (0, import_react20.useState)(emptyForm2);
+    const [isSubmitting, setIsSubmitting] = (0, import_react20.useState)(false);
+    const [error, setError] = (0, import_react20.useState)(null);
     const updateField = (field, value) => {
       setForm((prev) => ({ ...prev, [field]: value }));
     };
@@ -25005,15 +24404,15 @@
         setIsSubmitting(false);
       }
     };
-    return /* @__PURE__ */ (0, import_jsx_runtime28.jsx)("div", { className: "modal-overlay", onClick: onClose, children: /* @__PURE__ */ (0, import_jsx_runtime28.jsxs)("div", { className: "modal", onClick: (e) => e.stopPropagation(), children: [
-      /* @__PURE__ */ (0, import_jsx_runtime28.jsxs)("div", { className: "modal-header", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime28.jsx)("h2", { children: "Translate a song" }),
-        /* @__PURE__ */ (0, import_jsx_runtime28.jsx)("button", { className: "modal-close", onClick: onClose, children: "\u2715" })
+    return /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("div", { className: "modal-overlay", onClick: onClose, children: /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)("div", { className: "modal", onClick: (e) => e.stopPropagation(), children: [
+      /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)("div", { className: "modal-header", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("h2", { children: "Translate a song" }),
+        /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("button", { className: "modal-close", onClick: onClose, children: "\u2715" })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime28.jsxs)("form", { onSubmit: handleSubmit, className: "modal-body", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime28.jsxs)("label", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)("form", { onSubmit: handleSubmit, className: "modal-body", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)("label", { children: [
           "Song lyrics",
-          /* @__PURE__ */ (0, import_jsx_runtime28.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(
             "textarea",
             {
               value: form.lyrics,
@@ -25023,9 +24422,9 @@
             }
           )
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime28.jsxs)("label", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)("label", { children: [
           "Title",
-          /* @__PURE__ */ (0, import_jsx_runtime28.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(
             "input",
             {
               type: "text",
@@ -25036,9 +24435,9 @@
             }
           )
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime28.jsxs)("label", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)("label", { children: [
           "Artist",
-          /* @__PURE__ */ (0, import_jsx_runtime28.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(
             "input",
             {
               type: "text",
@@ -25049,9 +24448,9 @@
             }
           )
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime28.jsxs)("label", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)("label", { children: [
           "Album",
-          /* @__PURE__ */ (0, import_jsx_runtime28.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(
             "input",
             {
               type: "text",
@@ -25062,31 +24461,31 @@
             }
           )
         ] }),
-        error && /* @__PURE__ */ (0, import_jsx_runtime28.jsx)("div", { className: "modal-error", children: error }),
-        /* @__PURE__ */ (0, import_jsx_runtime28.jsxs)("div", { className: "modal-actions", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime28.jsx)("button", { type: "button", onClick: onClose, disabled: isSubmitting, children: "Cancel" }),
-          /* @__PURE__ */ (0, import_jsx_runtime28.jsx)("button", { type: "submit", disabled: isSubmitting, children: isSubmitting ? "Translating..." : "Translate" })
+        error && /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("div", { className: "modal-error", children: error }),
+        /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)("div", { className: "modal-actions", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("button", { type: "button", onClick: onClose, disabled: isSubmitting, children: "Cancel" }),
+          /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("button", { type: "submit", disabled: isSubmitting, children: isSubmitting ? "Translating..." : "Translate" })
         ] })
       ] })
     ] }) });
   };
 
   // App/Code/Community/MusicTranslation/Source/web/TranslationPage/SongDetailDialog.tsx
-  var import_react24 = __toESM(require_react(), 1);
-  var import_jsx_runtime29 = __toESM(require_jsx_runtime(), 1);
+  var import_react21 = __toESM(require_react(), 1);
+  var import_jsx_runtime26 = __toESM(require_jsx_runtime(), 1);
   var SongDetailDialog = ({ trackId, onClose }) => {
     const { session } = useSession();
     const { language } = useLanguage();
-    const [track, setTrack] = (0, import_react24.useState)(null);
-    const [artist, setArtist] = (0, import_react24.useState)(null);
-    const [album, setAlbum] = (0, import_react24.useState)(null);
-    const [lines, setLines] = (0, import_react24.useState)([]);
-    const [expandedIndex, setExpandedIndex] = (0, import_react24.useState)(null);
-    const [isLoading, setIsLoading] = (0, import_react24.useState)(false);
-    const [error, setError] = (0, import_react24.useState)(null);
-    const [openMenuIndex, setOpenMenuIndex] = (0, import_react24.useState)(null);
-    const [flashcardLineIndex, setFlashcardLineIndex] = (0, import_react24.useState)(null);
-    (0, import_react24.useEffect)(() => {
+    const [track, setTrack] = (0, import_react21.useState)(null);
+    const [artist, setArtist] = (0, import_react21.useState)(null);
+    const [album, setAlbum] = (0, import_react21.useState)(null);
+    const [lines, setLines] = (0, import_react21.useState)([]);
+    const [expandedIndex, setExpandedIndex] = (0, import_react21.useState)(null);
+    const [isLoading, setIsLoading] = (0, import_react21.useState)(false);
+    const [error, setError] = (0, import_react21.useState)(null);
+    const [openMenuIndex, setOpenMenuIndex] = (0, import_react21.useState)(null);
+    const [flashcardLineIndex, setFlashcardLineIndex] = (0, import_react21.useState)(null);
+    (0, import_react21.useEffect)(() => {
       if (!trackId) return;
       setIsLoading(true);
       setError(null);
@@ -25124,28 +24523,28 @@
       setOpenMenuIndex(null);
     };
     const flashcardLine = flashcardLineIndex !== null ? lines[flashcardLineIndex] : null;
-    return /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("div", { className: "detail-overlay", onClick: onClose, children: /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "detail-dialog", onClick: (e) => {
+    return /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("div", { className: "detail-overlay", onClick: onClose, children: /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)("div", { className: "detail-dialog", onClick: (e) => {
       e.stopPropagation();
       setOpenMenuIndex(null);
     }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "detail-header", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "detail-meta", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("h2", { children: track?.title ?? "Loading..." }),
-          /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("div", { className: "detail-artist", children: artist?.name ?? "..." }),
-          /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("div", { className: "detail-album", children: album?.title ?? "..." })
+      /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)("div", { className: "detail-header", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)("div", { className: "detail-meta", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("h2", { children: track?.title ?? "Loading..." }),
+          /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("div", { className: "detail-artist", children: artist?.name ?? "..." }),
+          /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("div", { className: "detail-album", children: album?.title ?? "..." })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("button", { className: "detail-close", onClick: onClose, children: "\u2715" })
+        /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("button", { className: "detail-close", onClick: onClose, children: "\u2715" })
       ] }),
-      isLoading && /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("div", { className: "detail-loading", children: /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Spinner, {}) }),
-      error && /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("div", { className: "detail-loading", children: /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("div", { className: "error", children: error }) }),
-      !isLoading && !error && lines.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("div", { className: "detail-loading", children: /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("div", { className: "notice-body", children: "No lyrics available" }) }),
-      !isLoading && !error && lines.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("div", { className: "detail-lyrics", children: lines.map((line, i) => /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)(
+      isLoading && /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("div", { className: "detail-loading", children: /* @__PURE__ */ (0, import_jsx_runtime26.jsx)(Spinner, {}) }),
+      error && /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("div", { className: "detail-loading", children: /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("div", { className: "error", children: error }) }),
+      !isLoading && !error && lines.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("div", { className: "detail-loading", children: /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("div", { className: "notice-body", children: "No lyrics available" }) }),
+      !isLoading && !error && lines.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("div", { className: "detail-lyrics", children: lines.map((line, i) => /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)(
         "div",
         {
           className: `lyric-line ${expandedIndex === i ? "expanded" : ""}`,
           children: [
-            /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "line-header", children: [
-              /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(
+            /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)("div", { className: "line-header", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime26.jsx)(
                 "div",
                 {
                   className: "line-original",
@@ -25161,8 +24560,8 @@
                   children: line.lineContents
                 }
               ),
-              /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "line-actions", children: [
-                /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(
+              /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)("div", { className: "line-actions", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime26.jsx)(
                   "button",
                   {
                     className: `line-action-btn${openMenuIndex === i ? " active" : ""}`,
@@ -25171,10 +24570,10 @@
                       setOpenMenuIndex((prev) => prev === i ? null : i);
                     },
                     "aria-label": "Actions",
-                    children: /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("svg", { width: "14", height: "14", viewBox: "0 0 14 14", fill: "none", children: /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("path", { d: "M7 3V3.01M7 7V7.01M7 11V11.01", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round" }) })
+                    children: /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("svg", { width: "14", height: "14", viewBox: "0 0 14 14", fill: "none", children: /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("path", { d: "M7 3V3.01M7 7V7.01M7 11V11.01", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round" }) })
                   }
                 ),
-                openMenuIndex === i && /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("div", { className: "line-dropdown", children: /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)(
+                openMenuIndex === i && /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("div", { className: "line-dropdown", children: /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)(
                   "button",
                   {
                     className: "line-dropdown-item",
@@ -25184,9 +24583,9 @@
                       setFlashcardLineIndex(i);
                     },
                     children: [
-                      /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("svg", { width: "14", height: "14", viewBox: "0 0 14 14", fill: "none", children: [
-                        /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("rect", { x: "1", y: "3", width: "12", height: "10", rx: "1.5", stroke: "currentColor", strokeWidth: "1.3" }),
-                        /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("path", { d: "M4 1V3M10 1V3M1 6H13", stroke: "currentColor", strokeWidth: "1.3", strokeLinecap: "round" })
+                      /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)("svg", { width: "14", height: "14", viewBox: "0 0 14 14", fill: "none", children: [
+                        /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("rect", { x: "1", y: "3", width: "12", height: "10", rx: "1.5", stroke: "currentColor", strokeWidth: "1.3" }),
+                        /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("path", { d: "M4 1V3M10 1V3M1 6H13", stroke: "currentColor", strokeWidth: "1.3", strokeLinecap: "round" })
                       ] }),
                       "Create Flash Card"
                     ]
@@ -25194,25 +24593,25 @@
                 ) })
               ] })
             ] }),
-            expandedIndex === i && /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "line-details", children: [
-              /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "detail-row translation", children: [
-                /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("span", { className: "detail-label", children: "Translation:" }),
-                /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("span", { className: "detail-value", children: line.translationToUserLanguage })
+            expandedIndex === i && /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)("div", { className: "line-details", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)("div", { className: "detail-row translation", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("span", { className: "detail-label", children: "Translation:" }),
+                /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("span", { className: "detail-value", children: line.translationToUserLanguage })
               ] }),
-              line.pronunciations.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "detail-row", children: [
-                /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("span", { className: "detail-label", children: "Pronunciation:" }),
-                /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("span", { className: "detail-value", children: line.pronunciations.join(", ") })
+              line.pronunciations.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)("div", { className: "detail-row", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("span", { className: "detail-label", children: "Pronunciation:" }),
+                /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("span", { className: "detail-value", children: line.pronunciations.join(", ") })
               ] }),
-              line.culturalMeaning && /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "detail-row", children: [
-                /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("span", { className: "detail-label", children: "Cultural meaning:" }),
-                /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("span", { className: "detail-value", children: line.culturalMeaning })
+              line.culturalMeaning && /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)("div", { className: "detail-row", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("span", { className: "detail-label", children: "Cultural meaning:" }),
+                /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("span", { className: "detail-value", children: line.culturalMeaning })
               ] })
             ] })
           ]
         },
         i
       )) }),
-      flashcardLine && /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(
+      flashcardLine && /* @__PURE__ */ (0, import_jsx_runtime26.jsx)(
         CreateFlashCardModal,
         {
           userId: session?.user?.id ?? "",
@@ -25234,37 +24633,37 @@
   };
 
   // App/Code/Community/MusicTranslation/Source/web/TranslationPage/index.tsx
-  var import_jsx_runtime30 = __toESM(require_jsx_runtime(), 1);
-  var SORT_OPTIONS3 = [
+  var import_jsx_runtime27 = __toESM(require_jsx_runtime(), 1);
+  var SORT_OPTIONS2 = [
     { value: "createTime", label: "Date added" },
     { value: "title", label: "Title" }
   ];
   var MusicTranslationIndexPage = () => {
-    const [isCreateOpen, setIsCreateOpen] = (0, import_react25.useState)(false);
-    const [detailTrackId, setDetailTrackId] = (0, import_react25.useState)(null);
-    const [refreshKey, setRefreshKey] = (0, import_react25.useState)(0);
-    const [selectedArtist, setSelectedArtist] = (0, import_react25.useState)("");
-    const [selectedAlbum, setSelectedAlbum] = (0, import_react25.useState)("");
-    const [searchQuery, setSearchQuery] = (0, import_react25.useState)("");
+    const [isCreateOpen, setIsCreateOpen] = (0, import_react22.useState)(false);
+    const [detailTrackId, setDetailTrackId] = (0, import_react22.useState)(null);
+    const [refreshKey, setRefreshKey] = (0, import_react22.useState)(0);
+    const [selectedArtist, setSelectedArtist] = (0, import_react22.useState)("");
+    const [selectedAlbum, setSelectedAlbum] = (0, import_react22.useState)("");
+    const [searchQuery, setSearchQuery] = (0, import_react22.useState)("");
     const [allArtists] = usePromise(() => listAllArtist(), []);
     const [allAlbums] = usePromise(() => listAllAlbum(), []);
-    const artistMap = (0, import_react25.useMemo)(() => {
+    const artistMap = (0, import_react22.useMemo)(() => {
       const map = /* @__PURE__ */ new Map();
       const data = allArtists?.data ?? [];
       for (const a of data) map.set(a.id, a.name);
       return map;
     }, [allArtists]);
-    const albumMap = (0, import_react25.useMemo)(() => {
+    const albumMap = (0, import_react22.useMemo)(() => {
       const map = /* @__PURE__ */ new Map();
       const data = allAlbums?.data ?? [];
       for (const a of data) map.set(a.id, a.title);
       return map;
     }, [allAlbums]);
-    const artistNames = (0, import_react25.useMemo)(() => {
+    const artistNames = (0, import_react22.useMemo)(() => {
       const names = new Set(artistMap.values());
       return Array.from(names).sort();
     }, [artistMap]);
-    const albumNames = (0, import_react25.useMemo)(() => {
+    const albumNames = (0, import_react22.useMemo)(() => {
       const names = new Set(albumMap.values());
       return Array.from(names).sort();
     }, [albumMap]);
@@ -25281,7 +24680,7 @@
       setSortField,
       setSortDir
     } = usePagination(listTrackPagedSorted, [refreshKey]);
-    const filteredTracks = (0, import_react25.useMemo)(() => {
+    const filteredTracks = (0, import_react22.useMemo)(() => {
       let list = tracks ?? [];
       if (selectedArtist) {
         list = list.filter((t) => artistMap.get(t.artistId) === selectedArtist);
@@ -25302,36 +24701,36 @@
       setDetailTrackId(trackId);
     };
     if (tracksLoading) {
-      return /* @__PURE__ */ (0, import_jsx_runtime30.jsx)("div", { className: "music-translation-status", children: /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(Spinner, {}) });
+      return /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("div", { className: "music-translation-status", children: /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(Spinner, {}) });
     }
     if (tracksError) {
-      return /* @__PURE__ */ (0, import_jsx_runtime30.jsx)("div", { className: "music-translation-status", children: /* @__PURE__ */ (0, import_jsx_runtime30.jsx)("div", { className: "error", children: `Couldn't load songs: ${tracksError}` }) });
+      return /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("div", { className: "music-translation-status", children: /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("div", { className: "error", children: `Couldn't load songs: ${tracksError}` }) });
     }
     const trackList = filteredTracks;
-    return /* @__PURE__ */ (0, import_jsx_runtime30.jsxs)("div", { className: "music-translation", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime30.jsxs)("div", { className: "library-actions", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime30.jsxs)("div", { className: "pagination", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime30.jsx)("button", { onClick: prevPage, disabled: page <= 1, children: "Previous" }),
-          /* @__PURE__ */ (0, import_jsx_runtime30.jsx)("span", { children: `Page ${page}` }),
-          /* @__PURE__ */ (0, import_jsx_runtime30.jsx)("button", { onClick: nextPage, disabled: !mayHaveNextPage, children: "Next" })
+    return /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "music-translation", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "library-actions", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "pagination", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("button", { onClick: prevPage, disabled: page <= 1, children: "Previous" }),
+          /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("span", { children: `Page ${page}` }),
+          /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("button", { onClick: nextPage, disabled: !mayHaveNextPage, children: "Next" })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime30.jsxs)("div", { className: "sort-controls", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime30.jsx)("select", { value: sortField ?? "", onChange: (e) => setSortField(e.target.value || void 0), children: SORT_OPTIONS3.map((opt) => /* @__PURE__ */ (0, import_jsx_runtime30.jsx)("option", { value: opt.value, children: opt.label }, opt.value)) }),
-          /* @__PURE__ */ (0, import_jsx_runtime30.jsxs)("select", { value: sortDir ?? "desc", onChange: (e) => setSortDir(e.target.value), children: [
-            /* @__PURE__ */ (0, import_jsx_runtime30.jsx)("option", { value: "asc", children: "Asc" }),
-            /* @__PURE__ */ (0, import_jsx_runtime30.jsx)("option", { value: "desc", children: "Desc" })
+        /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "sort-controls", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("select", { value: sortField ?? "", onChange: (e) => setSortField(e.target.value || void 0), children: SORT_OPTIONS2.map((opt) => /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("option", { value: opt.value, children: opt.label }, opt.value)) }),
+          /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("select", { value: sortDir ?? "desc", onChange: (e) => setSortDir(e.target.value), children: [
+            /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("option", { value: "asc", children: "Asc" }),
+            /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("option", { value: "desc", children: "Desc" })
           ] })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime30.jsxs)("div", { className: "filter-controls", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime30.jsxs)("select", { value: selectedArtist, onChange: (e) => setSelectedArtist(e.target.value), children: [
-            /* @__PURE__ */ (0, import_jsx_runtime30.jsx)("option", { value: "", children: "All artists" }),
-            artistNames.map((name) => /* @__PURE__ */ (0, import_jsx_runtime30.jsx)("option", { value: name, children: name }, name))
+        /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "filter-controls", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("select", { value: selectedArtist, onChange: (e) => setSelectedArtist(e.target.value), children: [
+            /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("option", { value: "", children: "All artists" }),
+            artistNames.map((name) => /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("option", { value: name, children: name }, name))
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime30.jsxs)("select", { value: selectedAlbum, onChange: (e) => setSelectedAlbum(e.target.value), children: [
-            /* @__PURE__ */ (0, import_jsx_runtime30.jsx)("option", { value: "", children: "All albums" }),
-            albumNames.map((name) => /* @__PURE__ */ (0, import_jsx_runtime30.jsx)("option", { value: name, children: name }, name))
+          /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("select", { value: selectedAlbum, onChange: (e) => setSelectedAlbum(e.target.value), children: [
+            /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("option", { value: "", children: "All albums" }),
+            albumNames.map((name) => /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("option", { value: name, children: name }, name))
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(
             "input",
             {
               type: "text",
@@ -25341,7 +24740,7 @@
             }
           )
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(
           "button",
           {
             className: "create-button",
@@ -25350,17 +24749,17 @@
           }
         )
       ] }),
-      trackList.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime30.jsxs)("div", { className: "notice", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime30.jsx)("div", { className: "notice-title", children: "No songs yet" }),
-        /* @__PURE__ */ (0, import_jsx_runtime30.jsx)("div", { className: "notice-body", children: 'Click "Add song" to translate your first track.' })
+      trackList.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "notice", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("div", { className: "notice-title", children: "No songs yet" }),
+        /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("div", { className: "notice-body", children: 'Click "Add song" to translate your first track.' })
       ] }),
-      trackList.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime30.jsxs)("table", { className: "song-table", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime30.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime30.jsxs)("tr", { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime30.jsx)("th", { children: "Title" }),
-          /* @__PURE__ */ (0, import_jsx_runtime30.jsx)("th", { children: "Artist" }),
-          /* @__PURE__ */ (0, import_jsx_runtime30.jsx)("th", { children: "Album" })
+      trackList.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("table", { className: "song-table", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("tr", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("th", { children: "Title" }),
+          /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("th", { children: "Artist" }),
+          /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("th", { children: "Album" })
         ] }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime30.jsx)("tbody", { children: trackList.map((track) => /* @__PURE__ */ (0, import_jsx_runtime30.jsxs)(
+        /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("tbody", { children: trackList.map((track) => /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)(
           "tr",
           {
             className: "song-row",
@@ -25374,22 +24773,22 @@
               }
             },
             children: [
-              /* @__PURE__ */ (0, import_jsx_runtime30.jsx)("td", { className: "song-title", children: track.title }),
-              /* @__PURE__ */ (0, import_jsx_runtime30.jsx)("td", { className: "song-artist", children: artistMap.get(track.artistId) ?? "..." }),
-              /* @__PURE__ */ (0, import_jsx_runtime30.jsx)("td", { className: "song-album", children: albumMap.get(track.albumId) ?? "..." })
+              /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("td", { className: "song-title", children: track.title }),
+              /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("td", { className: "song-artist", children: artistMap.get(track.artistId) ?? "..." }),
+              /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("td", { className: "song-album", children: albumMap.get(track.albumId) ?? "..." })
             ]
           },
           track.id
         )) })
       ] }),
-      isCreateOpen && /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(
+      isCreateOpen && /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(
         CreateSongModal,
         {
           onClose: () => setIsCreateOpen(false),
           onCreated: handleCreated
         }
       ),
-      detailTrackId && /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(
+      detailTrackId && /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(
         SongDetailDialog,
         {
           trackId: detailTrackId,
@@ -25401,7 +24800,7 @@
   register("@page/music-translation-index", MusicTranslationIndexPage);
 
   // App/Code/Community/LLMProviders/ChatGPT/Source/web/configuration/model-selector/index.tsx
-  var import_react26 = __toESM(require_react(), 1);
+  var import_react23 = __toESM(require_react(), 1);
 
   // App/Api/chatgpt.ts
   var listChatGptModels = () => {
@@ -25416,26 +24815,26 @@
   };
 
   // App/Code/Community/LLMProviders/ChatGPT/Source/web/configuration/model-selector/index.tsx
-  var import_jsx_runtime31 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime28 = __toESM(require_jsx_runtime(), 1);
   var ChatGPTModelSelector = ({ value, onChange }) => {
-    const [models, setModels] = (0, import_react26.useState)([]);
-    const [loading, setLoading] = (0, import_react26.useState)(true);
-    (0, import_react26.useEffect)(() => {
+    const [models, setModels] = (0, import_react23.useState)([]);
+    const [loading, setLoading] = (0, import_react23.useState)(true);
+    (0, import_react23.useEffect)(() => {
       listChatGptModels().then((res) => {
         if (res.success && res.data) {
           setModels(res.data);
         }
       }).finally(() => setLoading(false));
     }, []);
-    return /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)(
+    return /* @__PURE__ */ (0, import_jsx_runtime28.jsxs)(
       "select",
       {
         value: String(value ?? ""),
         onChange: (e) => onChange(e.target.value),
         disabled: loading,
         children: [
-          loading && /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("option", { children: "Loading models..." }),
-          models.map((model) => /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("option", { value: model, children: model }, model))
+          loading && /* @__PURE__ */ (0, import_jsx_runtime28.jsx)("option", { children: "Loading models..." }),
+          models.map((model) => /* @__PURE__ */ (0, import_jsx_runtime28.jsx)("option", { value: model, children: model }, model))
         ]
       }
     );
@@ -25443,8 +24842,8 @@
   register("@config/chatgpt/model-selector", ChatGPTModelSelector);
 
   // App/Code/Community/LLMProviders/ChatGPT/Source/web/help/connecting-chatgpt/index.tsx
-  var import_react27 = __toESM(require_react(), 1);
-  var import_jsx_runtime32 = __toESM(require_jsx_runtime(), 1);
+  var import_react24 = __toESM(require_react(), 1);
+  var import_jsx_runtime29 = __toESM(require_jsx_runtime(), 1);
   var steps = [
     {
       number: "01",
@@ -25483,66 +24882,66 @@
       imageAlt: "Pasting the API key into the connector settings"
     }
   ];
-  var StepImage = ({ src, alt, onOpen }) => /* @__PURE__ */ (0, import_jsx_runtime32.jsxs)("div", { className: "step-image-wrap", onClick: () => onOpen({ src, alt }), title: "Click to enlarge", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("img", { src, alt, className: "step-image" }),
-    /* @__PURE__ */ (0, import_jsx_runtime32.jsxs)("span", { className: "zoom-hint", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime32.jsxs)("svg", { width: "16", height: "16", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("circle", { cx: "11", cy: "11", r: "8" }),
-        /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("line", { x1: "21", y1: "21", x2: "16.65", y2: "16.65" }),
-        /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("line", { x1: "11", y1: "8", x2: "11", y2: "14" }),
-        /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("line", { x1: "8", y1: "11", x2: "14", y2: "11" })
+  var StepImage = ({ src, alt, onOpen }) => /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "step-image-wrap", onClick: () => onOpen({ src, alt }), title: "Click to enlarge", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("img", { src, alt, className: "step-image" }),
+    /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("span", { className: "zoom-hint", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("svg", { width: "16", height: "16", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("circle", { cx: "11", cy: "11", r: "8" }),
+        /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("line", { x1: "21", y1: "21", x2: "16.65", y2: "16.65" }),
+        /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("line", { x1: "11", y1: "8", x2: "11", y2: "14" }),
+        /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("line", { x1: "8", y1: "11", x2: "14", y2: "11" })
       ] }),
       "Enlarge"
     ] })
   ] });
   var ZoomOverlay = ({ image, onClose }) => {
     if (!image) return null;
-    return /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("div", { className: "zoom-overlay", onClick: onClose, children: /* @__PURE__ */ (0, import_jsx_runtime32.jsxs)("div", { className: "zoom-overlay__inner", onClick: (e) => e.stopPropagation(), children: [
-      /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("button", { className: "zoom-close", onClick: onClose, "aria-label": "Close", children: /* @__PURE__ */ (0, import_jsx_runtime32.jsxs)("svg", { width: "20", height: "20", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2.5", strokeLinecap: "round", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("line", { x1: "18", y1: "6", x2: "6", y2: "18" }),
-        /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("line", { x1: "6", y1: "6", x2: "18", y2: "18" })
+    return /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("div", { className: "zoom-overlay", onClick: onClose, children: /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "zoom-overlay__inner", onClick: (e) => e.stopPropagation(), children: [
+      /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("button", { className: "zoom-close", onClick: onClose, "aria-label": "Close", children: /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("svg", { width: "20", height: "20", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2.5", strokeLinecap: "round", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("line", { x1: "18", y1: "6", x2: "6", y2: "18" }),
+        /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("line", { x1: "6", y1: "6", x2: "18", y2: "18" })
       ] }) }),
-      /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("img", { src: image.src, alt: image.alt, className: "zoom-image" })
+      /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("img", { src: image.src, alt: image.alt, className: "zoom-image" })
     ] }) });
   };
   var ConnectingChatGptHelp = () => {
-    const [zoomedImage, setZoomedImage] = (0, import_react27.useState)(null);
-    return /* @__PURE__ */ (0, import_jsx_runtime32.jsxs)("div", { className: "chatgpt-help-connection-guide", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime32.jsxs)("div", { className: "guide-header", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("span", { className: "guide-eyebrow", children: "Integration Guide" }),
-        /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("h2", { className: "guide-title", children: "Connecting to OpenAI" }),
-        /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("p", { className: "guide-subtitle", children: "Follow these five steps to generate an API key and link your OpenAI account. The whole process takes under two minutes." })
+    const [zoomedImage, setZoomedImage] = (0, import_react24.useState)(null);
+    return /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "chatgpt-help-connection-guide", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "guide-header", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("span", { className: "guide-eyebrow", children: "Integration Guide" }),
+        /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("h2", { className: "guide-title", children: "Connecting to OpenAI" }),
+        /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("p", { className: "guide-subtitle", children: "Follow these five steps to generate an API key and link your OpenAI account. The whole process takes under two minutes." })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("ol", { className: "steps-list", children: steps.map((step) => /* @__PURE__ */ (0, import_jsx_runtime32.jsxs)("li", { className: "step-card", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("span", { className: "step-number", "aria-hidden": "true", children: step.number }),
-        /* @__PURE__ */ (0, import_jsx_runtime32.jsxs)("div", { className: "step-content", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("h3", { className: "step-heading", children: step.heading }),
-          /* @__PURE__ */ (0, import_jsx_runtime32.jsxs)("p", { className: "step-body", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("ol", { className: "steps-list", children: steps.map((step) => /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("li", { className: "step-card", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("span", { className: "step-number", "aria-hidden": "true", children: step.number }),
+        /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "step-content", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("h3", { className: "step-heading", children: step.heading }),
+          /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("p", { className: "step-body", children: [
             step.body,
-            step.link && /* @__PURE__ */ (0, import_jsx_runtime32.jsxs)(import_jsx_runtime32.Fragment, { children: [
+            step.link && /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)(import_jsx_runtime29.Fragment, { children: [
               " Visit ",
-              /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("a", { href: step.link.href, target: "_blank", rel: "noopener noreferrer", children: step.link.label }),
+              /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("a", { href: step.link.href, target: "_blank", rel: "noopener noreferrer", children: step.link.label }),
               "."
             ] })
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(StepImage, { src: step.image, alt: step.imageAlt, onOpen: setZoomedImage })
+          /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(StepImage, { src: step.image, alt: step.imageAlt, onOpen: setZoomedImage })
         ] })
       ] }, step.number)) }),
-      /* @__PURE__ */ (0, import_jsx_runtime32.jsxs)("div", { className: "guide-footer", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime32.jsxs)("svg", { width: "16", height: "16", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("circle", { cx: "12", cy: "12", r: "10" }),
-          /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("line", { x1: "12", y1: "8", x2: "12", y2: "12" }),
-          /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("line", { x1: "12", y1: "16", x2: "12.01", y2: "16" })
+      /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "guide-footer", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("svg", { width: "16", height: "16", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("circle", { cx: "12", cy: "12", r: "10" }),
+          /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("line", { x1: "12", y1: "8", x2: "12", y2: "12" }),
+          /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("line", { x1: "12", y1: "16", x2: "12.01", y2: "16" })
         ] }),
         "Keep your API key private \u2014 never commit it to source control or share it publicly."
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(ZoomOverlay, { image: zoomedImage, onClose: () => setZoomedImage(null) })
+      /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(ZoomOverlay, { image: zoomedImage, onClose: () => setZoomedImage(null) })
     ] });
   };
   register("@help/chatgpt/connection-guide", ConnectingChatGptHelp);
 
   // App/Code/Community/LLMProviders/MistralChat/Source/web/configuration/model-selector/index.tsx
-  var import_react28 = __toESM(require_react(), 1);
+  var import_react25 = __toESM(require_react(), 1);
 
   // App/Api/mistral.ts
   var listMistralModels = () => {
@@ -25557,26 +24956,26 @@
   };
 
   // App/Code/Community/LLMProviders/MistralChat/Source/web/configuration/model-selector/index.tsx
-  var import_jsx_runtime33 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime30 = __toESM(require_jsx_runtime(), 1);
   var MistralModelSelector = ({ value, onChange }) => {
-    const [models, setModels] = (0, import_react28.useState)([]);
-    const [loading, setLoading] = (0, import_react28.useState)(true);
-    (0, import_react28.useEffect)(() => {
+    const [models, setModels] = (0, import_react25.useState)([]);
+    const [loading, setLoading] = (0, import_react25.useState)(true);
+    (0, import_react25.useEffect)(() => {
       listMistralModels().then((res) => {
         if (res.success && res.data) {
           setModels([...new Set(res.data)]);
         }
       }).finally(() => setLoading(false));
     }, []);
-    return /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)(
+    return /* @__PURE__ */ (0, import_jsx_runtime30.jsxs)(
       "select",
       {
         value: String(value ?? ""),
         onChange: (e) => onChange(e.target.value),
         disabled: loading,
         children: [
-          loading && /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("option", { children: "Loading models..." }),
-          models.map((model) => /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("option", { value: model, children: model }, model))
+          loading && /* @__PURE__ */ (0, import_jsx_runtime30.jsx)("option", { children: "Loading models..." }),
+          models.map((model) => /* @__PURE__ */ (0, import_jsx_runtime30.jsx)("option", { value: model, children: model }, model))
         ]
       }
     );
@@ -25584,8 +24983,8 @@
   register("@config/mistral/model-selector", MistralModelSelector);
 
   // App/Code/Community/LLMProviders/MistralChat/Source/web/help/connecting-mistral/index.tsx
-  var import_react29 = __toESM(require_react(), 1);
-  var import_jsx_runtime34 = __toESM(require_jsx_runtime(), 1);
+  var import_react26 = __toESM(require_react(), 1);
+  var import_jsx_runtime31 = __toESM(require_jsx_runtime(), 1);
   var steps2 = [
     {
       number: "01",
@@ -25624,66 +25023,66 @@
       imageAlt: "Pasting the API key into the connector settings"
     }
   ];
-  var StepImage2 = ({ src, alt, onOpen }) => /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)("div", { className: "step-image-wrap", onClick: () => onOpen({ src, alt }), title: "Click to enlarge", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("img", { src, alt, className: "step-image" }),
-    /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)("span", { className: "zoom-hint", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)("svg", { width: "16", height: "16", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("circle", { cx: "11", cy: "11", r: "8" }),
-        /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("line", { x1: "21", y1: "21", x2: "16.65", y2: "16.65" }),
-        /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("line", { x1: "11", y1: "8", x2: "11", y2: "14" }),
-        /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("line", { x1: "8", y1: "11", x2: "14", y2: "11" })
+  var StepImage2 = ({ src, alt, onOpen }) => /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)("div", { className: "step-image-wrap", onClick: () => onOpen({ src, alt }), title: "Click to enlarge", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("img", { src, alt, className: "step-image" }),
+    /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)("span", { className: "zoom-hint", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)("svg", { width: "16", height: "16", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("circle", { cx: "11", cy: "11", r: "8" }),
+        /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("line", { x1: "21", y1: "21", x2: "16.65", y2: "16.65" }),
+        /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("line", { x1: "11", y1: "8", x2: "11", y2: "14" }),
+        /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("line", { x1: "8", y1: "11", x2: "14", y2: "11" })
       ] }),
       "Enlarge"
     ] })
   ] });
   var ZoomOverlay2 = ({ image, onClose }) => {
     if (!image) return null;
-    return /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("div", { className: "zoom-overlay", onClick: onClose, children: /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)("div", { className: "zoom-overlay__inner", onClick: (e) => e.stopPropagation(), children: [
-      /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("button", { className: "zoom-close", onClick: onClose, "aria-label": "Close", children: /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)("svg", { width: "20", height: "20", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2.5", strokeLinecap: "round", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("line", { x1: "18", y1: "6", x2: "6", y2: "18" }),
-        /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("line", { x1: "6", y1: "6", x2: "18", y2: "18" })
+    return /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("div", { className: "zoom-overlay", onClick: onClose, children: /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)("div", { className: "zoom-overlay__inner", onClick: (e) => e.stopPropagation(), children: [
+      /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("button", { className: "zoom-close", onClick: onClose, "aria-label": "Close", children: /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)("svg", { width: "20", height: "20", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2.5", strokeLinecap: "round", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("line", { x1: "18", y1: "6", x2: "6", y2: "18" }),
+        /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("line", { x1: "6", y1: "6", x2: "18", y2: "18" })
       ] }) }),
-      /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("img", { src: image.src, alt: image.alt, className: "zoom-image" })
+      /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("img", { src: image.src, alt: image.alt, className: "zoom-image" })
     ] }) });
   };
   var ConnectingMistralHelp = () => {
-    const [zoomedImage, setZoomedImage] = (0, import_react29.useState)(null);
-    return /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)("div", { className: "mistral-help-connection-guide", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)("div", { className: "guide-header", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("span", { className: "guide-eyebrow", children: "Integration Guide" }),
-        /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("h2", { className: "guide-title", children: "Connecting to Mistral AI" }),
-        /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("p", { className: "guide-subtitle", children: "Follow these five steps to generate an API key and link your Mistral account. The whole process takes under two minutes." })
+    const [zoomedImage, setZoomedImage] = (0, import_react26.useState)(null);
+    return /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)("div", { className: "mistral-help-connection-guide", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)("div", { className: "guide-header", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("span", { className: "guide-eyebrow", children: "Integration Guide" }),
+        /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("h2", { className: "guide-title", children: "Connecting to Mistral AI" }),
+        /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("p", { className: "guide-subtitle", children: "Follow these five steps to generate an API key and link your Mistral account. The whole process takes under two minutes." })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("ol", { className: "steps-list", children: steps2.map((step) => /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)("li", { className: "step-card", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("span", { className: "step-number", "aria-hidden": "true", children: step.number }),
-        /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)("div", { className: "step-content", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("h3", { className: "step-heading", children: step.heading }),
-          /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)("p", { className: "step-body", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("ol", { className: "steps-list", children: steps2.map((step) => /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)("li", { className: "step-card", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("span", { className: "step-number", "aria-hidden": "true", children: step.number }),
+        /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)("div", { className: "step-content", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("h3", { className: "step-heading", children: step.heading }),
+          /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)("p", { className: "step-body", children: [
             step.body,
-            step.link && /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)(import_jsx_runtime34.Fragment, { children: [
+            step.link && /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)(import_jsx_runtime31.Fragment, { children: [
               " Visit ",
-              /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("a", { href: step.link.href, target: "_blank", rel: "noopener noreferrer", children: step.link.label }),
+              /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("a", { href: step.link.href, target: "_blank", rel: "noopener noreferrer", children: step.link.label }),
               "."
             ] })
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(StepImage2, { src: step.image, alt: step.imageAlt, onOpen: setZoomedImage })
+          /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(StepImage2, { src: step.image, alt: step.imageAlt, onOpen: setZoomedImage })
         ] })
       ] }, step.number)) }),
-      /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)("div", { className: "guide-footer", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)("svg", { width: "16", height: "16", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("circle", { cx: "12", cy: "12", r: "10" }),
-          /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("line", { x1: "12", y1: "8", x2: "12", y2: "12" }),
-          /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("line", { x1: "12", y1: "16", x2: "12.01", y2: "16" })
+      /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)("div", { className: "guide-footer", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)("svg", { width: "16", height: "16", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("circle", { cx: "12", cy: "12", r: "10" }),
+          /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("line", { x1: "12", y1: "8", x2: "12", y2: "12" }),
+          /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("line", { x1: "12", y1: "16", x2: "12.01", y2: "16" })
         ] }),
         "Keep your API key private \u2014 never commit it to source control or share it publicly."
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(ZoomOverlay2, { image: zoomedImage, onClose: () => setZoomedImage(null) })
+      /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(ZoomOverlay2, { image: zoomedImage, onClose: () => setZoomedImage(null) })
     ] });
   };
   register("@help/mistral/connection-guide", ConnectingMistralHelp);
 
   // App/Code/Community/LLMProviders/Ollama/Source/web/configuration/model-selector/index.tsx
-  var import_react30 = __toESM(require_react(), 1);
+  var import_react27 = __toESM(require_react(), 1);
 
   // App/Api/ollama.ts
   var listOllamaModels = () => {
@@ -25698,26 +25097,26 @@
   };
 
   // App/Code/Community/LLMProviders/Ollama/Source/web/configuration/model-selector/index.tsx
-  var import_jsx_runtime35 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime32 = __toESM(require_jsx_runtime(), 1);
   var OllamaModelSelector = ({ value, onChange }) => {
-    const [models, setModels] = (0, import_react30.useState)([]);
-    const [loading, setLoading] = (0, import_react30.useState)(true);
-    (0, import_react30.useEffect)(() => {
+    const [models, setModels] = (0, import_react27.useState)([]);
+    const [loading, setLoading] = (0, import_react27.useState)(true);
+    (0, import_react27.useEffect)(() => {
       listOllamaModels().then((res) => {
         if (res.success && res.data) {
           setModels(res.data);
         }
       }).finally(() => setLoading(false));
     }, []);
-    return /* @__PURE__ */ (0, import_jsx_runtime35.jsxs)(
+    return /* @__PURE__ */ (0, import_jsx_runtime32.jsxs)(
       "select",
       {
         value: String(value ?? ""),
         onChange: (e) => onChange(e.target.value),
         disabled: loading,
         children: [
-          loading && /* @__PURE__ */ (0, import_jsx_runtime35.jsx)("option", { children: "Loading models..." }),
-          models.map((model) => /* @__PURE__ */ (0, import_jsx_runtime35.jsx)("option", { value: model, children: model }, model))
+          loading && /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("option", { children: "Loading models..." }),
+          models.map((model) => /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("option", { value: model, children: model }, model))
         ]
       }
     );
@@ -25725,12 +25124,12 @@
   register("@config/ollama/model-selector", OllamaModelSelector);
 
   // App/Code/Community/LLMFramework/Source/web/configuration/provider-selector/index.tsx
-  var import_react31 = __toESM(require_react(), 1);
-  var import_jsx_runtime36 = __toESM(require_jsx_runtime(), 1);
+  var import_react28 = __toESM(require_react(), 1);
+  var import_jsx_runtime33 = __toESM(require_jsx_runtime(), 1);
   var ProviderSelector = ({ value, onChange }) => {
-    const [providers, setProviders] = (0, import_react31.useState)({});
-    const [loading, setLoading] = (0, import_react31.useState)(true);
-    (0, import_react31.useEffect)(() => {
+    const [providers, setProviders] = (0, import_react28.useState)({});
+    const [loading, setLoading] = (0, import_react28.useState)(true);
+    (0, import_react28.useEffect)(() => {
       llmStatus().then((res) => {
         if (res.success && res.data?.providers) {
           setProviders(res.data.providers);
@@ -25739,18 +25138,18 @@
     }, []);
     const providerNames = Object.keys(providers);
     const noProviders = providerNames.length === 0 && !loading;
-    return /* @__PURE__ */ (0, import_jsx_runtime36.jsxs)(
+    return /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)(
       "select",
       {
         value: String(value ?? ""),
         onChange: (e) => onChange(e.target.value),
         disabled: loading,
         children: [
-          loading && /* @__PURE__ */ (0, import_jsx_runtime36.jsx)("option", { children: "Loading providers..." }),
-          noProviders && /* @__PURE__ */ (0, import_jsx_runtime36.jsx)("option", { value: "", children: "No providers available" }),
+          loading && /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("option", { children: "Loading providers..." }),
+          noProviders && /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("option", { value: "", children: "No providers available" }),
           providerNames.map((name) => {
             const enabled = providers[name];
-            return /* @__PURE__ */ (0, import_jsx_runtime36.jsxs)(
+            return /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)(
               "option",
               {
                 value: name,
@@ -25772,7 +25171,7 @@
   register("@config/llm/provider-selector", ProviderSelector);
 
   // App/Code/Core/AppAdmin/Source/web/config-editor/index.tsx
-  var import_react32 = __toESM(require_react(), 1);
+  var import_react29 = __toESM(require_react(), 1);
 
   // App/Api/admin.ts
   var listConfigs = () => {
@@ -25801,19 +25200,19 @@
   };
 
   // App/Code/Core/AppAdmin/Source/web/config-editor/index.tsx
-  var import_jsx_runtime37 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime34 = __toESM(require_jsx_runtime(), 1);
   var ConfigEditor = () => {
     const { isAdmin } = useSession();
-    const [configs, setConfigs] = (0, import_react32.useState)({});
-    const [loading, setLoading] = (0, import_react32.useState)(true);
-    const [error, setError] = (0, import_react32.useState)(null);
-    const [selectedConfig, setSelectedConfig] = (0, import_react32.useState)(null);
-    const [formValues, setFormValues] = (0, import_react32.useState)({});
-    const [saving, setSaving] = (0, import_react32.useState)(false);
-    const [saveMessage, setSaveMessage] = (0, import_react32.useState)(null);
-    const [expandedModules, setExpandedModules] = (0, import_react32.useState)(/* @__PURE__ */ new Set());
-    const [activeTab, setActiveTab] = (0, import_react32.useState)("fields");
-    (0, import_react32.useEffect)(() => {
+    const [configs, setConfigs] = (0, import_react29.useState)({});
+    const [loading, setLoading] = (0, import_react29.useState)(true);
+    const [error, setError] = (0, import_react29.useState)(null);
+    const [selectedConfig, setSelectedConfig] = (0, import_react29.useState)(null);
+    const [formValues, setFormValues] = (0, import_react29.useState)({});
+    const [saving, setSaving] = (0, import_react29.useState)(false);
+    const [saveMessage, setSaveMessage] = (0, import_react29.useState)(null);
+    const [expandedModules, setExpandedModules] = (0, import_react29.useState)(/* @__PURE__ */ new Set());
+    const [activeTab, setActiveTab] = (0, import_react29.useState)("fields");
+    (0, import_react29.useEffect)(() => {
       listConfigs().then((res) => {
         if (res.success && res.data) {
           setConfigs(res.data);
@@ -25909,20 +25308,20 @@
       return result;
     };
     if (loading) {
-      return /* @__PURE__ */ (0, import_jsx_runtime37.jsx)("div", { className: "config-editor", children: /* @__PURE__ */ (0, import_jsx_runtime37.jsx)("div", { className: "config-editor__centered", children: "Loading configurations..." }) });
+      return /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("div", { className: "config-editor", children: /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("div", { className: "config-editor__centered", children: "Loading configurations..." }) });
     }
     if (!isAdmin) {
-      return /* @__PURE__ */ (0, import_jsx_runtime37.jsx)("div", { className: "config-editor", children: /* @__PURE__ */ (0, import_jsx_runtime37.jsx)("div", { className: "config-editor__centered config-editor__error", children: "You do not have permission to access this page." }) });
+      return /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("div", { className: "config-editor", children: /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("div", { className: "config-editor__centered config-editor__error", children: "You do not have permission to access this page." }) });
     }
     if (error) {
-      return /* @__PURE__ */ (0, import_jsx_runtime37.jsx)("div", { className: "config-editor", children: /* @__PURE__ */ (0, import_jsx_runtime37.jsx)("div", { className: "config-editor__centered config-editor__error", children: error }) });
+      return /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("div", { className: "config-editor", children: /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("div", { className: "config-editor__centered config-editor__error", children: error }) });
     }
     const groups = groupedConfigs();
-    return /* @__PURE__ */ (0, import_jsx_runtime37.jsxs)("div", { className: "config-editor", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime37.jsxs)("aside", { className: "config-editor__sidebar", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime37.jsx)("h2", { className: "config-editor__sidebar-title", children: "Groups" }),
-        Object.entries(groups).map(([module, configNames]) => /* @__PURE__ */ (0, import_jsx_runtime37.jsxs)("div", { className: "config-editor__group", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime37.jsxs)(
+    return /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)("div", { className: "config-editor", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)("aside", { className: "config-editor__sidebar", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("h2", { className: "config-editor__sidebar-title", children: "Groups" }),
+        Object.entries(groups).map(([module, configNames]) => /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)("div", { className: "config-editor__group", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)(
             "button",
             {
               className: "config-editor__group-toggle",
@@ -25935,14 +25334,14 @@
                 });
               },
               children: [
-                /* @__PURE__ */ (0, import_jsx_runtime37.jsx)("span", { className: "config-editor__group-arrow", children: expandedModules.has(module) ? "\u25BC" : "\u25B6" }),
+                /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("span", { className: "config-editor__group-arrow", children: expandedModules.has(module) ? "\u25BC" : "\u25B6" }),
                 module
               ]
             }
           ),
-          expandedModules.has(module) && /* @__PURE__ */ (0, import_jsx_runtime37.jsx)("div", { className: "config-editor__group-items", children: configNames.map((originalName) => {
+          expandedModules.has(module) && /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("div", { className: "config-editor__group-items", children: configNames.map((originalName) => {
             const displayName = configs[originalName]?.alias ?? originalName.replaceAll("Configuration", "");
-            return /* @__PURE__ */ (0, import_jsx_runtime37.jsx)(
+            return /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(
               "button",
               {
                 className: `config-editor__config-btn ${selectedConfig === originalName ? "config-editor__config-btn--active" : ""}`,
@@ -25954,8 +25353,8 @@
           }) })
         ] }, module))
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime37.jsx)("main", { className: "config-editor__content", children: selectedConfig ? /* @__PURE__ */ (0, import_jsx_runtime37.jsxs)(import_jsx_runtime37.Fragment, { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime37.jsx)("h2", { className: "config-editor__config-title", children: selectedConfig }),
+      /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("main", { className: "config-editor__content", children: selectedConfig ? /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)(import_jsx_runtime34.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("h2", { className: "config-editor__config-title", children: selectedConfig }),
         (() => {
           const configType = configs[selectedConfig];
           const classHelp = configType?.help ?? [];
@@ -25966,8 +25365,8 @@
             tabMap.get(key).push(h);
           }
           const tabs = ["fields", ...tabMap.keys()];
-          return /* @__PURE__ */ (0, import_jsx_runtime37.jsxs)(import_jsx_runtime37.Fragment, { children: [
-            tabs.length > 1 && /* @__PURE__ */ (0, import_jsx_runtime37.jsx)("div", { className: "config-editor__tabs", children: tabs.map((tab) => /* @__PURE__ */ (0, import_jsx_runtime37.jsx)(
+          return /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)(import_jsx_runtime34.Fragment, { children: [
+            tabs.length > 1 && /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("div", { className: "config-editor__tabs", children: tabs.map((tab) => /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(
               "button",
               {
                 className: `config-editor__tab ${activeTab === tab ? "config-editor__tab--active" : ""}`,
@@ -25976,19 +25375,19 @@
               },
               tab
             )) }),
-            activeTab === "fields" ? /* @__PURE__ */ (0, import_jsx_runtime37.jsx)("div", { className: "config-editor__fields", children: Object.entries(formValues).map(([key, value]) => {
+            activeTab === "fields" ? /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("div", { className: "config-editor__fields", children: Object.entries(formValues).map(([key, value]) => {
               const fieldInfo = configType?.fields[key];
               const componentName = fieldInfo?.component;
               const fieldInput = componentName ? (() => {
                 const FieldComponent = mod(componentName);
-                return /* @__PURE__ */ (0, import_jsx_runtime37.jsx)("div", { className: "config-editor__field-component", children: /* @__PURE__ */ (0, import_jsx_runtime37.jsx)(
+                return /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("div", { className: "config-editor__field-component", children: /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(
                   FieldComponent,
                   {
                     value,
                     onChange: (newVal) => handleFieldChange(key, newVal)
                   }
                 ) });
-              })() : fieldInfo?.type === "boolean" || typeof value === "boolean" ? /* @__PURE__ */ (0, import_jsx_runtime37.jsx)(
+              })() : fieldInfo?.type === "boolean" || typeof value === "boolean" ? /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(
                 "input",
                 {
                   type: "checkbox",
@@ -25996,7 +25395,7 @@
                   checked: !!value,
                   onChange: (e) => handleFieldChange(key, e.target.checked)
                 }
-              ) : fieldInfo?.type === "number" || typeof value === "number" ? /* @__PURE__ */ (0, import_jsx_runtime37.jsx)(
+              ) : fieldInfo?.type === "number" || typeof value === "number" ? /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(
                 "input",
                 {
                   type: "number",
@@ -26004,7 +25403,7 @@
                   value: Number(value ?? 0),
                   onChange: (e) => handleFieldChange(key, Number(e.target.value))
                 }
-              ) : /* @__PURE__ */ (0, import_jsx_runtime37.jsx)(
+              ) : /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(
                 "input",
                 {
                   type: "text",
@@ -26014,22 +25413,22 @@
                 }
               );
               const fieldHelp = fieldInfo?.help;
-              return /* @__PURE__ */ (0, import_jsx_runtime37.jsxs)("div", { className: "config-editor__field", children: [
-                /* @__PURE__ */ (0, import_jsx_runtime37.jsx)("label", { className: "config-editor__field-label", children: key }),
-                /* @__PURE__ */ (0, import_jsx_runtime37.jsxs)("div", { className: "config-editor__field-control", children: [
+              return /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)("div", { className: "config-editor__field", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("label", { className: "config-editor__field-label", children: key }),
+                /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)("div", { className: "config-editor__field-control", children: [
                   fieldInput,
-                  fieldHelp && fieldHelp.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime37.jsx)("div", { className: "config-editor__field-help", children: fieldHelp.map((helpItem, i) => {
+                  fieldHelp && fieldHelp.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("div", { className: "config-editor__field-help", children: fieldHelp.map((helpItem, i) => {
                     const HelpComponent = mod(helpItem.component);
-                    return /* @__PURE__ */ (0, import_jsx_runtime37.jsx)(HelpComponent, {}, i);
+                    return /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(HelpComponent, {}, i);
                   }) })
                 ] })
               ] }, key);
-            }) }) : /* @__PURE__ */ (0, import_jsx_runtime37.jsx)("div", { className: "config-editor__tab-panel", children: (tabMap.get(activeTab) ?? []).map((helpItem, i) => {
+            }) }) : /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("div", { className: "config-editor__tab-panel", children: (tabMap.get(activeTab) ?? []).map((helpItem, i) => {
               const HelpComponent = mod(helpItem.component);
-              return /* @__PURE__ */ (0, import_jsx_runtime37.jsx)(HelpComponent, {}, i);
+              return /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(HelpComponent, {}, i);
             }) }),
-            activeTab === "fields" && /* @__PURE__ */ (0, import_jsx_runtime37.jsxs)("div", { className: "config-editor__actions", children: [
-              /* @__PURE__ */ (0, import_jsx_runtime37.jsx)(
+            activeTab === "fields" && /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)("div", { className: "config-editor__actions", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(
                 "button",
                 {
                   className: "config-editor__save-btn",
@@ -26038,7 +25437,7 @@
                   children: saving ? "Saving..." : "Save"
                 }
               ),
-              saveMessage && /* @__PURE__ */ (0, import_jsx_runtime37.jsx)(
+              saveMessage && /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(
                 "span",
                 {
                   className: `config-editor__message config-editor__message--${saveMessage.type}`,
@@ -26048,7 +25447,7 @@
             ] })
           ] });
         })()
-      ] }) : /* @__PURE__ */ (0, import_jsx_runtime37.jsx)("div", { className: "config-editor__centered", children: "Select a configuration to edit" }) })
+      ] }) : /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("div", { className: "config-editor__centered", children: "Select a configuration to edit" }) })
     ] });
   };
   register("@admin/configuration", ConfigEditor);
@@ -26063,10 +25462,10 @@
   register("@component/Spinner", Spinner);
 
   // App/Code/Community/ReactFrontend/Source/web/index.tsx
-  var import_jsx_runtime38 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime35 = __toESM(require_jsx_runtime(), 1);
   var root = (0, import_client.createRoot)(document.getElementById("app"));
   root.render(
-    /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(Default_default, { children: /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(Canvas, { children: window.canvasState }) })
+    /* @__PURE__ */ (0, import_jsx_runtime35.jsx)(Default_default, { children: /* @__PURE__ */ (0, import_jsx_runtime35.jsx)(Canvas, { children: window.canvasState }) })
   );
 })();
 /*! Bundled license information:
