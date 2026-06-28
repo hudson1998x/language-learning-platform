@@ -1011,7 +1011,7 @@ body {
   padding: 48px 24px;
 }
 .llm-needed__content {
-  max-width: 640px;
+  max-width: 720px;
   width: 100%;
   text-align: center;
 }
@@ -1057,6 +1057,11 @@ body {
   font-size: 14px;
   font-weight: 500;
   color: #e5e5e5;
+}
+.llm-needed__card-desc {
+  font-size: 12px;
+  color: #777;
+  line-height: 1.4;
 }
 
 /* App/Design/React/Components/Local/Pages/Homepage/style.scss */

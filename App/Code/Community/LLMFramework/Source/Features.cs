@@ -24,7 +24,8 @@ public static class Features
                     Available = llmService.IsLlmAvailable(),
                     DefaultProvider = llmService.GetDefaultProvider()?.GetType().Name,
                     Providers = llmService.GetProviderStatus(),
-                    ProviderLogos = llmService.GetProviderLogos()
+                    ProviderLogos = llmService.GetProviderLogos(),
+                    ProviderDescriptions = llmService.GetProviderDescriptions()
                 };
 
                 return new ApiResponse<LlmStatusResponse>

@@ -34,6 +34,7 @@ public class ChatGPTProvider : ILLMProvider
 
     public bool IsEnabled => _config.Enabled && _isAvailable;
     public string? LogoUrl => "/media/chatgpt/logo.png";
+    public string? Description => "Powerful cloud AI with excellent language understanding and natural conversations.";
 
     private HttpClient CreateClient()
     {

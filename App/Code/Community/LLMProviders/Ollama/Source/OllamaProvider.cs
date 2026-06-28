@@ -33,6 +33,7 @@ public class OllamaProvider : ILLMProvider
 
     public bool IsEnabled => _config.Enabled && _isAvailable;
     public string? LogoUrl => "/media/ollama/logo.png";
+    public string? Description => "Run AI models locally for maximum privacy, control, and offline learning.";
 
     private async Task CheckAvailabilityAsync()
     {

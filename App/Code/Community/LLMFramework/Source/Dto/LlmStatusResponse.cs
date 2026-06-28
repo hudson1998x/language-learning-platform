@@ -6,4 +6,5 @@ public class LlmStatusResponse
     public string? DefaultProvider { get; set; }
     public Dictionary<string, bool> Providers { get; set; } = new();
     public Dictionary<string, string?> ProviderLogos { get; set; } = new();
+    public Dictionary<string, string?> ProviderDescriptions { get; set; } = new();
 }

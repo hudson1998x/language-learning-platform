@@ -22797,7 +22797,8 @@
           const entries = Object.entries(res.data.providers).map(([name, enabled]) => ({
             name,
             enabled,
-            logoUrl: res.data?.providerLogos?.[name] ?? null
+            logoUrl: res.data?.providerLogos?.[name] ?? null,
+            description: res.data?.providerDescriptions?.[name] ?? null
           }));
           setProviders(entries);
         }
@@ -22822,7 +22823,8 @@
                   alt: `${provider.name} logo`
                 }
               ),
-              /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("span", { className: "llm-needed__card-name", children: provider.name })
+              /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("span", { className: "llm-needed__card-name", children: provider.name }),
+              provider.description && /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("span", { className: "llm-needed__card-desc", children: provider.description })
             ]
           },
           provider.name

@@ -46,6 +46,11 @@ public class LLMService
         return _providers.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.LogoUrl);
     }
 
+    public Dictionary<string, string?> GetProviderDescriptions()
+    {
+        return _providers.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Description);
+    }
+
     public async Task<LLMResponse> SendMessageAsync(
         string providerName,
         string prompt,

@@ -6,6 +6,7 @@ interface ProviderInfo {
     name: string;
     enabled: boolean;
     logoUrl: string | null;
+    description: string | null;
 }
 
 const PROVIDER_TAB: Record<string, string> = {
@@ -24,6 +25,7 @@ export const LlmNeededWall = () => {
                     name,
                     enabled,
                     logoUrl: res.data?.providerLogos?.[name] ?? null,
+                    description: res.data?.providerDescriptions?.[name] ?? null,
                 }));
                 setProviders(entries);
             }
@@ -54,6 +56,9 @@ export const LlmNeededWall = () => {
                                     />
                                 )}
                                 <span className="llm-needed__card-name">{provider.name}</span>
+                                {provider.description && (
+                                    <span className="llm-needed__card-desc">{provider.description}</span>
+                                )}
                             </a>
                         );
                     })}

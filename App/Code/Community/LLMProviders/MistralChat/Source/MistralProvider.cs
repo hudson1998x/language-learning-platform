@@ -34,6 +34,7 @@ public class MistralProvider : ILLMProvider
 
     public bool IsEnabled => _config.Enabled && _isAvailable;
     public string? LogoUrl => "/media/mistral/logo.png";
+    public string? Description => "Fast, affordable AI with excellent multilingual performance and flexible models.";
 
     private HttpClient CreateClient()
     {
